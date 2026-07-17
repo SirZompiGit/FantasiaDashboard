@@ -14,6 +14,7 @@ interface DiceRollerProps {
   selectedDice: string;
   onSelectedDiceChange: (dice: string) => void;
   theme?: CampaignTheme;
+  hideHistory?: boolean;
   diceLabels?: string[];
   onAddDiceLabel?: (label: string) => void;
   onRenameDiceLabel?: (oldLabel: string, newLabel: string) => void;
@@ -29,6 +30,7 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({
   onClearHistory,
   selectedDice,
   onSelectedDiceChange,
+  hideHistory = false,
   theme = 'crimson',
   diceLabels = ['Tiro salvezza', 'Tiro attacco', 'Prova di abilità', 'Percezione', 'Danno'],
   onAddDiceLabel,
@@ -399,6 +401,7 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({
       </button>
 
       {/* History of Rolls */}
+      {!hideHistory && (
       <div className="mt-6 border-t border-bento-border pt-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-display">
@@ -451,6 +454,7 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

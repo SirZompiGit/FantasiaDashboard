@@ -129,6 +129,7 @@ export const ParticipantView: React.FC<ParticipantViewProps> = ({ roomId, userId
                 onSelectedDiceChange={setSelectedDice}
                 lastRoll={myLastRoll}
                 rollHistory={myRollHistory}
+                hideHistory={true}
                 onRoll={(diceType, result, label) => {
                   const finalLabel = label ? `${userId}|${user.name}|${label}` : `${userId}|${user.name}`;
                   pushParticipantRoll(roomId, {
