@@ -40,11 +40,14 @@ export const ParticipantView: React.FC<ParticipantViewProps> = ({ roomId, userId
   };
 
   const myRollHistory = (roomState.participantRolls || [])
-    .filter(r => r.label && r.label.startsWith(user.name))
-    .map(r => ({
-      ...r,
-      label: r.label?.includes('|') ? r.label.split('|')[1] : undefined
-    }))
+    .filter(r => r.label && r.label.startsWith(`${userId}|`))
+    .map(r => {
+      const parts = r.label!.split('|');
+      return {
+        ...r,
+        label: parts.length > 2 ? parts.slice(2).join('|') : undefined
+      };
+    })
     .reverse();
     
   const myLastRoll = myRollHistory.length > 0 ? myRollHistory[0] : null;
@@ -127,8 +130,9 @@ export const ParticipantView: React.FC<ParticipantViewProps> = ({ roomId, userId
               onSelectedDiceChange={setSelectedDice}
               lastRoll={myLastRoll}
               rollHistory={myRollHistory}
+              diceLabels={roomState.campaign.diceLabels || []}
               onRoll={(diceType, result, label) => {
-                const finalLabel = label ? `${user.name}|${label}` : user.name;
+                const finalLabel = label ? `${userId}|${user.name}|${label}` : `${userId}|${user.name}`;
                 pushParticipantRoll(roomId, {
                   diceType,
                   result,
@@ -137,7 +141,6 @@ export const ParticipantView: React.FC<ParticipantViewProps> = ({ roomId, userId
                 });
               }}
               theme={roomState.campaign.theme}
-              diceLabels={roomState.campaign.diceLabels}
             />
           ) : (
             <div className="bg-bento-panel border border-bento-border rounded-xl p-5 shadow-lg flex flex-col h-full flex-1 items-center justify-center text-center opacity-50">

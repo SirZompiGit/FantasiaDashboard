@@ -157,15 +157,17 @@ export const DiceRoller: React.FC<DiceRollerProps> = ({
             <Tag className="w-3.5 h-3.5 text-slate-500" />
             Associa Etichetta
           </label>
-          <button
-            type="button"
-            onClick={() => setIsManagingLabels(!isManagingLabels)}
-            className={`text-[10px] font-semibold text-slate-500 hover:${colors.textActive} transition-colors cursor-pointer ${
-              isManagingLabels ? '${colors.textActive} underline' : ''
-            }`}
-          >
-            Gestisci Etichette
-          </button>
+          {(onAddDiceLabel || onRenameDiceLabel || onDeleteDiceLabel) && (
+            <button
+              type="button"
+              onClick={() => setIsManagingLabels(!isManagingLabels)}
+              className={`text-[10px] font-semibold text-slate-500 hover:${colors.textActive} transition-colors cursor-pointer ${
+                isManagingLabels ? '${colors.textActive} underline' : ''
+              }`}
+            >
+              Gestisci Etichette
+            </button>
+          )}
         </div>
         
         <select

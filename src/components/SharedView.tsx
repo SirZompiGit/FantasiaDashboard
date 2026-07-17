@@ -396,34 +396,39 @@ export const SharedView: React.FC<SharedViewProps> = ({ state, participantRolls 
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-display block mb-3">
                 Lanci dei Giocatori
               </span>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
                 {participantRolls.slice().reverse().map((roll, idx) => {
                   let playerLabel = roll.label || 'Sconosciuto';
                   let rollLabel = '';
                   if (playerLabel.includes('|')) {
                      const parts = playerLabel.split('|');
-                     playerLabel = parts[0];
-                     rollLabel = parts[1];
+                     if (parts.length >= 2) {
+                        playerLabel = parts[1] || parts[0];
+                        rollLabel = parts.slice(2).join('|');
+                     } else {
+                        playerLabel = parts[0];
+                     }
                   }
-                  // We could map playerLabel to name if we had users, but participantRolls should maybe have the name? 
-                  // Wait, participant roll.label currently has userId. Let's show just the first part or something.
                   
                   return (
-                    <div key={roll.timestamp + idx} className="bg-[#0c0d10] border border-bento-border rounded-lg p-2 flex flex-col min-w-[80px] shrink-0 relative overflow-hidden group">
-                      <div className={`absolute inset-0 bg-radial-gradient ${colors.glow} opacity-0 group-hover:opacity-20 transition-opacity`} />
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] text-slate-400 font-mono truncate max-w-[50px]" title={playerLabel}>{playerLabel}</span>
-                        <span className="text-[9px] text-slate-600 font-bold">{roll.diceType}</span>
+                    <div key={roll.timestamp + idx} className="bg-[#0c0d10] border border-bento-border rounded-lg p-3 flex flex-col min-w-[150px] shrink-0 relative overflow-hidden group shadow-md hover:border-slate-700 transition-colors">
+                      <div className={`absolute inset-0 bg-radial-gradient ${colors.glow} opacity-0 group-hover:opacity-10 transition-opacity`} />
+                      <div className="flex justify-between items-center mb-2 border-b border-bento-border pb-1 gap-2">
+                        <span className="text-[11px] text-slate-300 font-mono truncate font-bold" title={playerLabel}>{playerLabel}</span>
+                        <span className="text-[10px] text-slate-500 font-bold bg-slate-900 px-1.5 py-0.5 rounded">{roll.diceType}</span>
                       </div>
-                      <div className="flex items-center justify-center py-1">
-                        <span className={`text-xl font-display font-black ${
+                      <div className="flex items-center justify-center py-2 relative">
+                        <span className={`text-4xl font-display font-black drop-shadow-sm ${
                           roll.result === parseInt(roll.diceType.substring(1)) ? colors.textActive : roll.result === 1 ? colors.text : 'text-white'
                         }`}>
                           {roll.result}
                         </span>
+                        {roll.result === parseInt(roll.diceType.substring(1)) && (
+                          <Sparkles className={`w-3 h-3 absolute top-0 right-2 opacity-50 ${colors.textActive}`} />
+                        )}
                       </div>
                       {rollLabel && (
-                        <span className="text-[8px] uppercase tracking-wider text-slate-500 text-center truncate w-full block mt-1" title={rollLabel}>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center truncate w-full block mt-2 bg-slate-800/50 rounded py-1 px-2" title={rollLabel}>
                           {rollLabel}
                         </span>
                       )}

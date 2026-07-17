@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { doc, setDoc, onSnapshot, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
+import { ref, set, onValue, update, get, remove } from 'firebase/database';
 import { CampaignState, RollResult } from './types';
 
 export interface RoomUser {
@@ -20,16 +20,19 @@ export const generatePin = () => Math.floor(100000 + Math.random() * 900000).toS
 
 export const createRoom = async (initialState: CampaignState): Promise<string> => {
   const pin = generatePin();
-  const roomRef = doc(db, 'rooms', pin);
+  const roomRef = ref(db, `rooms/${pin}`);
   
   // Make sure it doesn't exist
-  const existing = await getDoc(roomRef);
+  const existing = await get(roomRef);
   if (existing.exists()) {
     return createRoom(initialState); // retry
   }
 
-  await setDoc(roomRef, {
-    campaign: initialState,
+  // Remove undefined values
+  const cleanState = JSON.parse(JSON.stringify(initialState));
+
+  await set(roomRef, {
+    campaign: cleanState,
     users: {}
   });
   
@@ -37,65 +40,60 @@ export const createRoom = async (initialState: CampaignState): Promise<string> =
 };
 
 export const updateRoomCampaign = async (pin: string, campaign: CampaignState) => {
-  const roomRef = doc(db, 'rooms', pin);
-  await updateDoc(roomRef, {
-    campaign
+  const roomRef = ref(db, `rooms/${pin}`);
+  const cleanCampaign = JSON.parse(JSON.stringify(campaign));
+  await update(roomRef, {
+    campaign: cleanCampaign
   });
 };
 
 export const joinRoom = async (pin: string, userId: string, userName: string) => {
-  const roomRef = doc(db, 'rooms', pin);
-  const snap = await getDoc(roomRef);
+  const roomRef = ref(db, `rooms/${pin}`);
+  const snap = await get(roomRef);
   if (!snap.exists()) {
     throw new Error('Stanza non trovata');
   }
   
-  // Use updateDoc to add the user safely
-  await updateDoc(roomRef, {
-    [`users.${userId}`]: {
-      id: userId,
-      name: userName,
-      assignedPlayerId: null,
-      notes: ''
-    }
+  const userRef = ref(db, `rooms/${pin}/users/${userId}`);
+  await set(userRef, {
+    id: userId,
+    name: userName,
+    assignedPlayerId: null,
+    notes: ''
   });
 };
 
 export const subscribeToRoom = (pin: string, callback: (data: RoomState | null) => void) => {
-  const roomRef = doc(db, 'rooms', pin);
-  return onSnapshot(roomRef, (snap) => {
+  const roomRef = ref(db, `rooms/${pin}`);
+  const unsubscribe = onValue(roomRef, (snap) => {
     if (snap.exists()) {
-      callback(snap.data() as RoomState);
+      callback(snap.val() as RoomState);
     } else {
       callback(null);
     }
   });
+  return () => unsubscribe();
 };
 
 export const updateUser = async (pin: string, userId: string, updates: Partial<RoomUser>) => {
-  const roomRef = doc(db, 'rooms', pin);
-  
-  const updateObj: Record<string, any> = {};
-  for (const [key, val] of Object.entries(updates)) {
-    updateObj[`users.${userId}.${key}`] = val;
-  }
-  
-  await updateDoc(roomRef, updateObj);
+  const userRef = ref(db, `rooms/${pin}/users/${userId}`);
+  await update(userRef, updates);
 };
 
 export const pushParticipantRoll = async (pin: string, roll: RollResult) => {
-  const roomRef = doc(db, 'rooms', pin);
-  const snap = await getDoc(roomRef);
+  const roomRef = ref(db, `rooms/${pin}`);
+  const snap = await get(roomRef);
   if (snap.exists()) {
-    const currentRolls = snap.data().participantRolls || [];
-    await updateDoc(roomRef, {
-      participantRolls: [roll, ...currentRolls].slice(0, 10) // keep last 10
+    const data = snap.val() as RoomState;
+    const currentRolls = data.participantRolls || [];
+    await update(roomRef, {
+      participantRolls: [roll, ...currentRolls].slice(0, 10)
     });
   }
 };
 
-
 export const deleteRoom = async (pin: string) => {
-  const roomRef = doc(db, 'rooms', pin);
-  await deleteDoc(roomRef);
+  const roomRef = ref(db, `rooms/${pin}`);
+  await remove(roomRef);
 };
+

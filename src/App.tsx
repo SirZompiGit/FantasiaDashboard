@@ -260,6 +260,8 @@ export default function App() {
   const handleResetAll = () => {
     setState({
       title: 'Nuova Campagna',
+      scheduleDay: '',
+      scheduleTime: '',
       players: [],
       healthBars: [],
       notes: '',
@@ -341,7 +343,7 @@ export default function App() {
       diceType,
       result,
       timestamp: Date.now(),
-      label
+      label: label || ''
     };
     
     setState((prev) => {
@@ -933,24 +935,46 @@ export default function App() {
           
           {/* Master View of Participant Rolls */}
           {roomState.participantRolls && roomState.participantRolls.length > 0 && (
-             <div className="bg-bento-panel border border-bento-border rounded-xl p-4 flex gap-4 overflow-x-auto scrollbar-thin">
-                {roomState.participantRolls.map((roll, i) => {
-                   const labelParts = roll.label ? roll.label.split('|') : [];
-                   const rollerId = labelParts[0];
-                   const rollLabel = labelParts[1] || '';
-                   const roller = (Object.values(roomState.users || {}) as RoomUser[]).find(u => u.id === rollerId) || { name: 'Sconosciuto', assignedPlayerId: null };
-                   const assignedPlayer = state.players.find(p => p.id === roller.assignedPlayerId);
-                   const displayName = assignedPlayer ? assignedPlayer.name : roller.name;
-                   
-                   return (
-                     <div key={i} className="bg-[#0c0d10] border border-slate-700/50 rounded-lg p-3 min-w-[140px] shrink-0 flex flex-col items-center relative">
-                        <span className="text-[9px] uppercase font-mono tracking-widest text-blue-400 mb-1 truncate w-full text-center">{displayName}</span>
-                        <span className="text-xl font-display font-black text-white">{roll.result}</span>
-                        <span className="text-[10px] font-mono text-slate-500 mt-1">{roll.diceType}</span>
-                        {rollLabel && <span className="absolute -top-2 bg-emerald-500 text-slate-900 text-[8px] font-bold px-1.5 py-0.5 rounded shadow">{rollLabel}</span>}
-                     </div>
-                   );
-                })}
+             <div className="bg-bento-panel border border-bento-border rounded-xl p-4 flex flex-col gap-3">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-display block">Lanci dei Giocatori</span>
+                <div className="flex gap-4 overflow-x-auto scrollbar-thin pb-2">
+                  {roomState.participantRolls.slice().reverse().map((roll, i) => {
+                     const labelParts = roll.label ? roll.label.split('|') : [];
+                     let displayName = 'Sconosciuto';
+                     let rollLabel = '';
+                     if (labelParts.length >= 2) {
+                       const rollerId = labelParts[0];
+                       const rollUserName = labelParts[1];
+                       rollLabel = labelParts.slice(2).join('|');
+                       const roller = (Object.values(roomState.users || {}) as RoomUser[]).find(u => u.id === rollerId);
+                       if (roller) {
+                          const assignedPlayer = state.players.find(p => p.id === roller.assignedPlayerId);
+                          displayName = assignedPlayer ? assignedPlayer.name : roller.name;
+                       } else {
+                          displayName = rollUserName;
+                       }
+                     } else if (labelParts.length === 1) {
+                       rollLabel = labelParts[0];
+                     }
+                     
+                     return (
+                       <div key={i} className="bg-[#0c0d10] border border-slate-700/50 rounded-lg p-3 min-w-[150px] shrink-0 flex flex-col relative overflow-hidden group hover:border-slate-600 transition-colors">
+                          <div className="flex justify-between items-center mb-2 border-b border-slate-800 pb-1 gap-2">
+                            <span className="text-[11px] font-mono font-bold text-slate-300 truncate" title={displayName}>{displayName}</span>
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">{roll.diceType}</span>
+                          </div>
+                          <div className="flex justify-center py-2">
+                            <span className="text-4xl font-display font-black text-white">{roll.result}</span>
+                          </div>
+                          {rollLabel && (
+                            <div className="mt-1 flex justify-center">
+                              <span className="text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full truncate max-w-full" title={rollLabel}>{rollLabel}</span>
+                            </div>
+                          )}
+                       </div>
+                     );
+                  })}
+                </div>
              </div>
           )}
         </div>
