@@ -5,21 +5,12 @@ import { getFirestore } from 'firebase/firestore';
 const env = (import.meta as any).env;
 
 const firebaseConfig = {
-
-  apiKey: "",
-
-  authDomain: "fantasia-dashboard.firebaseapp.com",
-
-  databaseURL: "https://fantasia-dashboard-default-rtdb.firebaseio.com",
-
-  projectId: "fantasia-dashboard",
-
-  storageBucket: "fantasia-dashboard.firebasestorage.app",
-
-  messagingSenderId: "563070641410",
-
-  appId: "1:563070641410:web:4ad79ecfa8f15431e38e1b"
-
+  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyDummyKey-InserisciLaTuaVeraKey",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "tuo-progetto.firebaseapp.com",
+  projectId: env.VITE_FIREBASE_PROJECT_ID || "tuo-progetto",
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "tuo-progetto.appspot.com",
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+  appId: env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef12345"
 };
 
 
