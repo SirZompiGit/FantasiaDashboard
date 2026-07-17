@@ -267,16 +267,18 @@ export const SharedView: React.FC<SharedViewProps> = ({ state, participantRolls 
             {/* Right Column: Dice Roll & Schedule (3 cols) */}
             <div className="col-span-3 flex flex-col gap-4 h-full min-h-0">
               
+              
+              {diceRollerSlot && (
+                <div className="bg-[#0c0d10] border border-bento-border rounded-xl flex flex-col shadow-lg shrink-0 overflow-hidden relative z-20 h-auto">
+                  {diceRollerSlot}
+                </div>
+              )}
               {/* Dice Roll Box (approx 80%) */}
               <div className="bg-bento-panel border border-bento-border rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center relative overflow-hidden flex-1 shadow-lg min-h-0">
                 <div className={`absolute inset-0 bg-radial-gradient ${colors.glow} via-transparent to-transparent opacity-50 pointer-events-none`} />
                 
                 
-                  {diceRollerSlot && (
-                    <div className="mb-4 z-10 relative bg-[#0c0d10]/90 border border-slate-700/50 rounded-xl shadow-inner transform scale-90 origin-top flex flex-col -mt-2">
-                      {diceRollerSlot}
-                    </div>
-                  )}
+
                   <div className="border-b border-bento-border pb-2 mb-2 w-full">
                     <span className="text-xs uppercase font-mono tracking-widest text-slate-500">Ultimo Lancio</span>
 
