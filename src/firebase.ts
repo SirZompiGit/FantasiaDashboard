@@ -6,7 +6,7 @@ const env = (import.meta as any).env;
 
 const firebaseConfig = {
 
-  apiKey: "AIzaSyDBVlObR6xVB6T-6pjUqftn03xICyMbaOw",
+  apiKey: "",
 
   authDomain: "fantasia-dashboard.firebaseapp.com",
 
