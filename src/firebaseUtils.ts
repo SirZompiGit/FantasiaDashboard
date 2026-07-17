@@ -50,17 +50,15 @@ export const joinRoom = async (pin: string, userId: string, userName: string) =>
     throw new Error('Stanza non trovata');
   }
   
-  const data = snap.data();
-  if (!data.users || !data.users[userId]) {
-    await setDoc(roomRef, {
-      [`users.${userId}`]: {
-        id: userId,
-        name: userName,
-        assignedPlayerId: null,
-        notes: ''
-      }
-    }, { merge: true });
-  }
+  // Use updateDoc to add the user safely
+  await updateDoc(roomRef, {
+    [`users.${userId}`]: {
+      id: userId,
+      name: userName,
+      assignedPlayerId: null,
+      notes: ''
+    }
+  });
 };
 
 export const subscribeToRoom = (pin: string, callback: (data: RoomState | null) => void) => {
@@ -96,3 +94,8 @@ export const pushParticipantRoll = async (pin: string, roll: RollResult) => {
   }
 };
 
+
+export const deleteRoom = async (pin: string) => {
+  const roomRef = doc(db, 'rooms', pin);
+  await deleteDoc(roomRef);
+};

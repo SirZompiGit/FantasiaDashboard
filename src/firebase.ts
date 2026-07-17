@@ -13,6 +13,5 @@ const firebaseConfig = {
   appId: env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef12345"
 };
 
-
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);

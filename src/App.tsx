@@ -7,7 +7,7 @@ import { PlayerCards } from './components/PlayerCards';
 import { SharedView } from './components/SharedView';
 
 import { db } from './firebase';
-import { createRoom, updateRoomCampaign, joinRoom, subscribeToRoom, RoomState, RoomUser, updateUser } from './firebaseUtils';
+import { createRoom, updateRoomCampaign, joinRoom, subscribeToRoom, RoomState, RoomUser, updateUser, deleteRoom } from './firebaseUtils';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { ParticipantView } from './components/ParticipantView';
 
@@ -157,6 +157,7 @@ export default function App() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [roomState, setRoomState] = useState<RoomState | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const [isSharedMode, setIsSharedMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -552,6 +553,19 @@ export default function App() {
     }
   }, [state, appMode, roomId]);
 
+  useEffect(() => {
+    if (appMode === 'master_x' && roomId) {
+      const handleBeforeUnload = () => {
+         // Fire and forget delete
+         deleteRoom(roomId).catch(console.error);
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => {
+         window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [appMode, roomId]);
+
   // Entirely render the Shared view if we are on the dedicated player URL
   if (isUrlShared) {
     if (appMode === 'participant_x') {
@@ -563,8 +577,10 @@ export default function App() {
   if (appMode === 'welcome') {
     return (
       <WelcomeScreen 
+        isLoading={isConnecting}
         onSelectLite={() => setAppMode('lite')}
         onSelectMaster={async () => {
+          setIsConnecting(true);
           try {
             const newPin = await createRoom(state);
             setRoomId(newPin);
@@ -575,10 +591,13 @@ export default function App() {
             });
           } catch (e) {
             console.error('Error creating room', e);
-            alert('Errore Firebase: Assicurati di aver configurato il file firebase.ts con le API Keys giuste.');
+            alert('Errore Firebase: Assicurati di aver configurato il file firebase.ts con le API Keys giuste o controlla la tua connessione.');
+          } finally {
+            setIsConnecting(false);
           }
         }}
         onSelectParticipant={async (pin) => {
+          setIsConnecting(true);
           try {
             const newUserId = 'user_' + Math.random().toString(36).substr(2, 9);
             const userName = 'Utente ' + Math.floor(100 + Math.random() * 900);
@@ -588,6 +607,8 @@ export default function App() {
             setAppMode('participant_x');
           } catch (e) {
             alert('Errore Firebase o stanza non trovata. Controlla il PIN e firebase.ts');
+          } finally {
+            setIsConnecting(false);
           }
         }}
       />
@@ -845,9 +866,24 @@ export default function App() {
         <div className="max-w-7xl mx-auto w-full mb-8 relative z-10 flex flex-col gap-4">
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg">
             <div className="flex flex-col items-start gap-2">
-              <div className="bg-slate-900 border border-blue-500/40 rounded-xl p-4 text-center min-w-[140px] shadow-inner">
-                <span className="text-[10px] uppercase font-mono tracking-widest text-blue-400 font-bold block mb-1">PIN STANZA</span>
-                <span className="text-4xl font-display font-black tracking-widest text-white">{roomId}</span>
+              <div className="flex flex-col gap-2 min-w-[140px]">
+                <div className="bg-slate-900 border border-blue-500/40 rounded-xl p-4 text-center shadow-inner">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-blue-400 font-bold block mb-1">PIN STANZA</span>
+                  <span className="text-4xl font-display font-black tracking-widest text-white">{roomId}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    if (confirm('Vuoi davvero chiudere questa stanza? Tutti i giocatori verranno disconnessi.')) {
+                      deleteRoom(roomId!).catch(console.error);
+                      setAppMode('welcome');
+                      setRoomId(null);
+                      setRoomState(null);
+                    }
+                  }}
+                  className="w-full py-2 bg-red-950/30 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                >
+                  Chiudi Stanza
+                </button>
               </div>
               <p className="text-slate-300 text-sm max-w-sm mt-2">
                 Comunica questo PIN ai giocatori per farli accedere alla stanza.

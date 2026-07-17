@@ -32,7 +32,12 @@ export const ParticipantView: React.FC<ParticipantViewProps> = ({ roomId, userId
 
   const user = roomState.users[userId];
   if (!user) {
-    return <div className="min-h-screen bg-[#0c0d10] text-slate-400 flex items-center justify-center">Accesso negato.</div>;
+    return (
+      <div className="min-h-screen bg-[#0c0d10] text-slate-400 flex flex-col gap-4 items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p>Accesso in corso...</p>
+      </div>
+    );
   }
 
   const assignedPlayer = roomState.campaign.players.find(p => p.id === user.assignedPlayerId);

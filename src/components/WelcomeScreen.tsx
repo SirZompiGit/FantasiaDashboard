@@ -5,12 +5,14 @@ interface WelcomeScreenProps {
   onSelectLite: () => void;
   onSelectMaster: () => void;
   onSelectParticipant: (roomId: string) => void;
+  isLoading?: boolean;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSelectLite,
   onSelectMaster,
   onSelectParticipant,
+  isLoading = false
 }) => {
   const [roomIdInput, setRoomIdInput] = useState('');
 
@@ -49,9 +51,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div className="space-y-4 w-full mt-auto">
             <button
               onClick={onSelectMaster}
-              className="w-full py-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-slate-900 border border-blue-500/20 rounded-xl font-bold uppercase tracking-wider text-sm transition-all flex items-center justify-center gap-2"
+              disabled={isLoading}
+              className="w-full py-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed border border-blue-500/20 rounded-xl font-bold uppercase tracking-wider text-sm transition-all flex items-center justify-center gap-2"
             >
-              <Shield className="w-4 h-4" /> Crea come Master
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Shield className="w-4 h-4" />
+              )}
+              {isLoading ? 'Connessione...' : 'Crea come Master'}
             </button>
 
             <div className="relative flex items-center gap-2">
@@ -69,10 +77,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                     onSelectParticipant(roomIdInput.trim());
                   }
                 }}
-                disabled={!roomIdInput.trim()}
-                className="px-6 py-3 bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700 rounded-xl font-bold uppercase tracking-wider text-sm transition-all"
+                disabled={!roomIdInput.trim() || isLoading}
+                className="px-6 py-3 bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-700 rounded-xl font-bold uppercase tracking-wider text-sm transition-all flex items-center justify-center"
               >
-                Entra
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-slate-200 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  'Entra'
+                )}
               </button>
             </div>
           </div>
