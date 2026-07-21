@@ -28,16 +28,27 @@ interface ModalProps {
   toolbar?: ReactNode;
   children: ReactNode;
   /** Larghezza massima del pannello. */
-  size?: 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Altezza sul contenuto invece che a tutto schermo: per le conferme brevi. */
+  fitContent?: boolean;
 }
 
 const SIZES = {
+  sm: 'max-w-md',
   md: 'max-w-2xl',
   lg: 'max-w-4xl',
   xl: 'max-w-5xl',
 } as const;
 
-export function Modal({ open, onClose, title, toolbar, children, size = 'xl' }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  toolbar,
+  children,
+  size = 'xl',
+  fitContent = false,
+}: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
@@ -112,7 +123,9 @@ export function Modal({ open, onClose, title, toolbar, children, size = 'xl' }: 
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        className={`relative flex h-full max-h-[92vh] w-full ${SIZES[size]} flex-col overflow-hidden rounded-2xl border border-bento-border bg-bento-panel p-4 shadow-overlay animate-slide-up sm:p-6`}
+        className={`relative flex w-full ${SIZES[size]} ${
+          fitContent ? 'max-h-[92vh]' : 'h-full max-h-[92vh]'
+        } flex-col overflow-hidden rounded-2xl border border-bento-border bg-bento-panel p-4 shadow-overlay animate-slide-up sm:p-6`}
       >
         <div className="mb-4 flex shrink-0 flex-col gap-3 border-b border-bento-border pb-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="flex shrink-0 items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider text-slate-200">

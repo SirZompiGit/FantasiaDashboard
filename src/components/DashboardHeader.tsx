@@ -12,8 +12,7 @@
  *    automatico" stava in un componente mai importato da nessuna parte.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   Check,
@@ -21,6 +20,7 @@ import {
   Download,
   ExternalLink,
   History,
+  Home,
   MoreHorizontal,
   Palette,
   Settings,
@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { THEMES, type CampaignTheme } from '../theme';
 import { ConfirmInline } from './ui/ConfirmInline';
+import { Modal } from './ui/Modal';
 import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
 
 interface DashboardHeaderProps {
@@ -48,6 +49,10 @@ interface DashboardHeaderProps {
   saveError: string | null;
   backups: CampaignBackup[];
   onRestoreBackup: (backup: CampaignBackup) => void;
+  /** Torna alla schermata di scelta della modalità. */
+  onBackToWelcome: () => void;
+  /** Con una stanza aperta, uscire la chiude: va confermato. */
+  roomOpen: boolean;
 }
 
 const TOOL_BUTTON =
@@ -67,12 +72,20 @@ export function DashboardHeader({
   saveError,
   backups,
   onRestoreBackup,
+  onBackToWelcome,
+  roomOpen,
 }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [confirmingExit, setConfirmingExit] = useState(false);
   const [showBackups, setShowBackups] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  /** Senza stanza aperta non c'è nulla da perdere: si esce direttamente. */
+  const handleBack = () => {
+    if (roomOpen) setConfirmingExit(true);
+    else onBackToWelcome();
+  };
 
   // La conferma non deve restare armata dopo la chiusura del pannello.
   useEffect(() => {
@@ -176,6 +189,7 @@ export function DashboardHeader({
           >
             <MoreHorizontal className="h-4 w-4" />
           </button>
+          <HomeButton onClick={handleBack} />
           <SettingsButton open={settingsOpen} onToggle={() => setSettingsOpen((v) => !v)} />
         </div>
       </div>
@@ -186,21 +200,22 @@ export function DashboardHeader({
         </div>
       )}
 
-      <div ref={containerRef} className="hidden flex-wrap items-center gap-2 md:flex">
+      <div className="hidden flex-wrap items-center gap-2 md:flex">
         {tools}
         <SettingsButton open={settingsOpen} onToggle={() => setSettingsOpen((v) => !v)} />
       </div>
 
       {settingsOpen && (
         <>
-          {createPortal(
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setSettingsOpen(false)}
-              aria-hidden
-            />,
-            document.body,
-          )}
+          {/* Lo sfondo che chiude al click deve stare nello STESSO contesto di
+              impilamento del pannello. L'<header> è `relative z-30`, quindi crea
+              un contesto proprio: portando lo sfondo su document.body finiva
+              sopra il pannello, e ogni click chiudeva invece di premere. */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setSettingsOpen(false)}
+            aria-hidden
+          />
 
           <div
             role="dialog"
@@ -337,7 +352,62 @@ export function DashboardHeader({
           </div>
         </>
       )}
+
+      <Modal
+        open={confirmingExit}
+        onClose={() => setConfirmingExit(false)}
+        size="sm"
+        fitContent
+        title={
+          <>
+            <AlertTriangle className="h-4 w-4 text-amber-400" /> Uscire dalla sessione?
+          </>
+        }
+      >
+        <p className="text-sm leading-relaxed text-slate-300">
+          Hai una stanza aperta. Tornando alla schermata iniziale la stanza verrà{' '}
+          <strong className="text-slate-100">chiusa</strong> e tutti i giocatori collegati
+          verranno rimandati alla scelta della modalità.
+        </p>
+        <p className="mt-2 text-xs text-slate-500">
+          La campagna resta salvata: la ritrovi identica al prossimo avvio.
+        </p>
+
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={() => setConfirmingExit(false)}
+            className="rounded-lg border border-bento-border bg-bento-button px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 transition-colors duration-200 hover:bg-bento-border"
+          >
+            Annulla
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmingExit(false);
+              onBackToWelcome();
+            }}
+            className="rounded-lg border border-red-500/40 bg-red-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-red-500"
+          >
+            Chiudi ed esci
+          </button>
+        </div>
+      </Modal>
     </header>
+  );
+}
+
+function HomeButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Torna alla schermata iniziale"
+      title="Torna alla schermata iniziale"
+      className="rounded-xl border border-bento-border bg-bento-panel p-2 text-slate-300 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400"
+    >
+      <Home className="h-4 w-4" />
+    </button>
   );
 }
 

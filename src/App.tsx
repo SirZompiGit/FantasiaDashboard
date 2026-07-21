@@ -91,6 +91,20 @@ export default function App() {
     if (sharedUrl.shared && sharedUrl.pin) watchAsViewer(sharedUrl.pin);
   }, [sharedUrl, watchAsViewer]);
 
+  /**
+   * Quando il master chiude la stanza, i giocatori vengono riportati alla
+   * schermata iniziale invece di restare bloccati su un avviso senza uscita.
+   * La finestra dello schermo condiviso è esclusa: è una proiezione, e
+   * rimandarla alla scelta della modalità non avrebbe senso.
+   */
+  const { roomClosed, exitRoom } = room;
+  const participantKicked = roomClosed && room.session?.role === 'participant';
+  useEffect(() => {
+    if (!participantKicked) return;
+    notify('Il master ha chiuso la stanza.', { kind: 'info' });
+    exitRoom();
+  }, [participantKicked, exitRoom, notify]);
+
   const handleExport = useCallback(() => {
     try {
       const slug =
@@ -231,20 +245,15 @@ export default function App() {
   // --- Giocatore collegato a una stanza ------------------------------------
 
   if (room.session?.role === 'participant' && room.session.userId) {
+    // L'effetto qui sopra sta già riportando il giocatore alla scelta della
+    // modalità: questa schermata dura una frazione di secondo.
     if (room.roomClosed) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bento-bg p-6 text-center text-slate-400">
+        <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bento-bg p-6 text-center text-slate-400">
           <p className="font-display text-lg font-bold uppercase tracking-wider text-slate-200">
             Stanza chiusa
           </p>
           <p className="text-sm">Il master ha terminato la sessione.</p>
-          <button
-            type="button"
-            onClick={room.exitRoom}
-            className="rounded-lg border border-theme-500 bg-theme-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-theme-500"
-          >
-            Torna alla scelta
-          </button>
         </div>
       );
     }
@@ -346,6 +355,14 @@ export default function App() {
         onRestoreBackup={(backup) => {
           handleRestoreBackup(backup);
           refreshBackups();
+        }}
+        roomOpen={isMaster}
+        onBackToWelcome={() => {
+          // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
+          // sul database, con i giocatori collegati a un master che non c'è più.
+          if (isMaster) room.closeRoom();
+          setPreviewShared(false);
+          setLocalMode('welcome');
         }}
       />
 

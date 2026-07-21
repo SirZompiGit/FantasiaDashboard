@@ -510,7 +510,11 @@ export function SharedView({
           {hasNotes && (
             <div className="flex shrink-0 flex-col gap-4 md:flex-row">
               {state.campaignNotes.trim() && (
-                <div className={`${PANEL} min-h-[10rem] flex-[3]`}>
+                // `resize-y` è la maniglia in basso a destra per allungare o
+                // restringere il riquadro: c'era nella versione originale e va
+                // conservata. `overflow-hidden` (in PANEL) è ciò che la rende
+                // attiva.
+                <div className={`${PANEL} h-48 max-h-[80vh] min-h-[10rem] flex-[3] resize-y`}>
                   <div className="mb-3 flex shrink-0 items-center justify-between border-b border-bento-border pb-3">
                     <h2 className={PANEL_TITLE}>
                       <BookOpen className="h-4 w-4 text-theme-500" /> Appunti Campagna
@@ -530,7 +534,7 @@ export function SharedView({
               )}
 
               {personalNotesSlot && (
-                <div className={`${PANEL} min-h-[10rem] flex-[2]`}>
+                <div className={`${PANEL} h-48 max-h-[80vh] min-h-[10rem] flex-[2] resize-y`}>
                   <div className="mb-3 flex shrink-0 items-center justify-between border-b border-bento-border pb-3">
                     <h2 className={PANEL_TITLE}>
                       <BookOpen className="h-4 w-4 text-emerald-400" /> Appunti Personali
