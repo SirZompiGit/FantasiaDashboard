@@ -278,7 +278,7 @@ export function SharedView({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
             {/* Ordine di turno */}
             <section
-              className={`${PANEL} order-3 md:order-2 lg:order-1 lg:col-span-3 lg:h-full`}
+              className={`${PANEL} @container order-3 md:order-2 lg:order-1 lg:col-span-3 lg:h-full`}
             >
               <div className="mb-3 shrink-0 border-b border-bento-border pb-3">
                 <h2 className={PANEL_TITLE}>
@@ -304,8 +304,11 @@ export function SharedView({
                             : 'border-bento-border bg-bento-bg'
                         }`}
                       >
-                        <div className="flex w-full items-center justify-between gap-2">
-                          <div className="flex min-w-0 items-center gap-2.5">
+                        {/* `flex-wrap`: in monospace il badge "Attivo" è largo e
+                            comprimeva il nome fino a una lettera sola. Quando
+                            non c'è spazio, il badge va a capo. */}
+                        <div className="flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                          <div className="flex min-w-0 flex-1 items-center gap-2.5">
                             <span
                               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border font-mono text-[10px] font-bold ${
                                 isActive
@@ -332,7 +335,10 @@ export function SharedView({
                         </div>
 
                         {isActive && (player.inventory.length > 0 || player.bonus.length > 0) && (
-                          <div className="mt-3 grid grid-cols-1 gap-3 border-t border-bento-border/50 pt-3 animate-fade-in sm:grid-cols-2">
+                          // `@sm` guarda la larghezza del CONTENITORE, non del
+                          // viewport: `sm:` imponeva due colonne dentro una
+                          // colonna da ~310px, e gli oggetti uscivano dal riquadro.
+                          <div className="mt-3 grid grid-cols-1 gap-3 border-t border-bento-border/50 pt-3 animate-fade-in @sm:grid-cols-2">
                             {(
                               [
                                 { label: 'Inventario', items: player.inventory },
@@ -340,15 +346,18 @@ export function SharedView({
                               ] as const
                             ).map(({ label, items }) =>
                               items.length > 0 ? (
-                                <div key={label}>
+                                <div key={label} className="min-w-0">
                                   <span className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     {label}
                                   </span>
-                                  <div className="flex flex-wrap gap-1.5">
+                                  <div className="flex min-w-0 flex-wrap gap-1.5">
                                     {items.map((item) => (
                                       <span
                                         key={item.id}
-                                        className="rounded-md border border-bento-border/60 bg-bento-item px-2 py-1 text-[11px] leading-none font-medium text-slate-300"
+                                        // `break-words` + `max-w-full`: un nome
+                                        // lungo senza spazi non poteva andare a
+                                        // capo e sfondava il riquadro.
+                                        className="max-w-full rounded-md border border-bento-border/60 bg-bento-item px-2 py-1 text-[11px] leading-tight font-medium break-words text-slate-300"
                                       >
                                         {item.name}
                                       </span>

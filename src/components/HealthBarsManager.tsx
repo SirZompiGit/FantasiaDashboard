@@ -63,7 +63,7 @@ interface FormValues {
   name: string;
   maxValue: string;
   currentValue: string;
-  colorMode: 'static' | 'gradient';
+  colorMode: HealthBar['colorMode'];
   staticColor: string;
   low: string;
   mid: string;
@@ -466,27 +466,30 @@ export function HealthBarsManager({
             <legend className="mb-1 block text-xs font-medium text-slate-400">
               Modalità Colore
             </legend>
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300 select-none">
-                <input
-                  type="radio"
-                  name="colorMode"
-                  checked={form.colorMode === 'static'}
-                  onChange={() => setField('colorMode', 'static')}
-                  className="accent-theme-500"
-                />
-                Colore singolo statico
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300 select-none">
-                <input
-                  type="radio"
-                  name="colorMode"
-                  checked={form.colorMode === 'gradient'}
-                  onChange={() => setField('colorMode', 'gradient')}
-                  className="accent-theme-500"
-                />
-                Gradiente a 3 livelli
-              </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4">
+              {(
+                [
+                  { id: 'static', label: 'Colore singolo', hint: 'Sempre lo stesso' },
+                  { id: 'gradient', label: 'A 3 livelli', hint: 'Scatti netti alle soglie' },
+                  { id: 'smooth', label: 'Sfumato', hint: 'Passaggio graduale' },
+                ] as const
+              ).map(({ id, label, hint }) => (
+                <label
+                  key={id}
+                  className="flex cursor-pointer items-center gap-2 text-xs text-slate-300 select-none"
+                  title={hint}
+                >
+                  <input
+                    type="radio"
+                    name="colorMode"
+                    checked={form.colorMode === id}
+                    onChange={() => setField('colorMode', id)}
+                    className="accent-theme-500"
+                  />
+                  {label}
+                  <span className="text-slate-600">— {hint}</span>
+                </label>
+              ))}
             </div>
           </fieldset>
 
@@ -525,15 +528,41 @@ export function HealthBarsManager({
             </div>
           ) : (
             <div className="space-y-3 rounded-lg border border-bento-border bg-bento-panel p-3">
-              <span className="block font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
-                Colori della salute
-              </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Colori della salute
+                </span>
+
+                {/* Anteprima: mostra subito la differenza fra gradini e sfumatura. */}
+                <span
+                  className="h-2.5 w-32 rounded-full border border-bento-border"
+                  style={{
+                    background:
+                      form.colorMode === 'smooth'
+                        ? `linear-gradient(to right, ${form.low}, ${form.mid}, ${form.high})`
+                        : `linear-gradient(to right, ${form.low} 0 33%, ${form.mid} 33% 66%, ${form.high} 66% 100%)`,
+                  }}
+                />
+              </div>
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {(
                   [
-                    { key: 'low', label: 'Basso (≤ 33%)', tone: 'text-red-400' },
-                    { key: 'mid', label: 'Medio (34-66%)', tone: 'text-amber-400' },
-                    { key: 'high', label: 'Alto (≥ 67%)', tone: 'text-emerald-400' },
+                    {
+                      key: 'low',
+                      label: form.colorMode === 'smooth' ? 'A 0%' : 'Basso (≤ 33%)',
+                      tone: 'text-red-400',
+                    },
+                    {
+                      key: 'mid',
+                      label: form.colorMode === 'smooth' ? 'A 50%' : 'Medio (34-66%)',
+                      tone: 'text-amber-400',
+                    },
+                    {
+                      key: 'high',
+                      label: form.colorMode === 'smooth' ? 'A 100%' : 'Alto (≥ 67%)',
+                      tone: 'text-emerald-400',
+                    },
                   ] as const
                 ).map(({ key, label, tone }) => (
                   <label key={key} className="space-y-1">

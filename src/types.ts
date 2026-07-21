@@ -31,7 +31,12 @@ export interface HealthBar {
   name: string;
   currentValue: number;
   maxValue: number;
-  colorMode: 'static' | 'gradient';
+  /**
+   * `static`   — un colore fisso
+   * `gradient` — tre colori a soglie nette (≤33%, ≤66%, oltre)
+   * `smooth`   — gli stessi tre colori, ma attraversati con continuità
+   */
+  colorMode: 'static' | 'gradient' | 'smooth';
   staticColor: string;
   gradientColors: GradientColors;
   /** Gruppo di appartenenza. Assente = "Senza Gruppo". */

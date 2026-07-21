@@ -123,7 +123,10 @@ function normalizeHealthBar(value: unknown): HealthBar | null {
     name: name.slice(0, 60),
     maxValue,
     currentValue: clampHp(asNumber(value.currentValue, 0), maxValue),
-    colorMode: value.colorMode === 'gradient' ? 'gradient' : 'static',
+    colorMode:
+      value.colorMode === 'gradient' || value.colorMode === 'smooth'
+        ? value.colorMode
+        : 'static',
     staticColor: asColor(value.staticColor, '#10b981'),
     gradientColors: normalizeGradient(value.gradientColors),
     zeroHpText: zeroHpText ? zeroHpText.slice(0, 30) : DEFAULT_ZERO_HP_TEXT,

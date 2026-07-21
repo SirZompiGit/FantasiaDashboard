@@ -40,14 +40,50 @@ export function healthRatio(bar: Pick<HealthBar, 'currentValue' | 'maxValue'>): 
   return bar.maxValue > 0 ? bar.currentValue / bar.maxValue : 0;
 }
 
+/** Espande #rgb in #rrggbb e restituisce le tre componenti. */
+function hexToRgb(hex: string): [number, number, number] {
+  let value = hex.replace('#', '').trim();
+  if (value.length === 3) {
+    value = value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
+  }
+  const int = Number.parseInt(value.slice(0, 6), 16);
+  return Number.isFinite(int)
+    ? [(int >> 16) & 255, (int >> 8) & 255, int & 255]
+    : [255, 255, 255];
+}
+
+const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+
+/** Fonde due colori esadecimali. `t` va da 0 (primo) a 1 (secondo). */
+function mixHex(from: string, to: string, t: number): string {
+  const clamped = Math.max(0, Math.min(1, t));
+  const [r1, g1, b1] = hexToRgb(from);
+  const [r2, g2, b2] = hexToRgb(to);
+  return `#${toHex(r1 + (r2 - r1) * clamped)}${toHex(g1 + (g2 - g1) * clamped)}${toHex(
+    b1 + (b2 - b1) * clamped,
+  )}`;
+}
+
 /** Colore attivo della barra secondo la modalità e la percentuale di salute. */
 export function getBarColor(bar: HealthBar): string {
   if (bar.colorMode === 'static') return bar.staticColor;
 
   const ratio = healthRatio(bar);
-  if (ratio <= 0.33) return bar.gradientColors.low;
-  if (ratio <= 0.66) return bar.gradientColors.mid;
-  return bar.gradientColors.high;
+  const { low, mid, high } = bar.gradientColors;
+
+  /**
+   * Sfumato: il colore attraversa i tre valori con continuità, invece di
+   * scattare da uno all'altro a soglie fisse. La metà bassa interpola
+   * basso → medio, quella alta medio → alto.
+   */
+  if (bar.colorMode === 'smooth') {
+    return ratio <= 0.5 ? mixHex(low, mid, ratio / 0.5) : mixHex(mid, high, (ratio - 0.5) / 0.5);
+  }
+
+  // A soglie: tre gradini netti.
+  if (ratio <= 0.33) return low;
+  if (ratio <= 0.66) return mid;
+  return high;
 }
 
 export interface GroupedBars {
