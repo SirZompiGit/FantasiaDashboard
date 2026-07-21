@@ -291,6 +291,32 @@ html.theme-transitions {
   letter-spacing: 0.14em;
 }
 
+/* Barre della vita: capsule di vetro incassate da cui la salute filtra come
+   luce. Prima la barra era l'unico elemento con colori fissi, e restava una
+   lastra scura opaca in mezzo a pannelli trasparenti. */
+[data-style='arcano'] .hp-track {
+  background-color: color-mix(in oklab, var(--color-bento-void) 55%, transparent);
+  border-color: color-mix(in oklab, var(--theme-400) 24%, transparent);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.55),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06),
+    0 0 16px color-mix(in oklab, var(--theme-500) 12%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  gap: 3px;
+  padding: 4px;
+}
+
+/* I segmenti diventano perle luminose: bordi morbidi e un velo di luce sopra. */
+[data-style='arcano'] .hp-segment {
+  border-radius: 999px;
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.25),
+    rgb(255 255 255 / 0) 60%
+  );
+}
+
 /* ==========================================================================
    RUNICO — pietra e terminale.
    Zero raggi, nessuna ombra, superfici piatte, bordi chiari ad alto contrasto
@@ -340,6 +366,19 @@ html.theme-transitions {
 [data-style='runico'] .font-display {
   letter-spacing: 0.16em;
   font-weight: 700;
+}
+
+/* Barre della vita: tacche incise, nessuna morbidezza. */
+[data-style='runico'] .hp-track {
+  background-color: #0f1116;
+  border-color: var(--color-bento-border);
+  box-shadow: none;
+  gap: 2px;
+  padding: 2px;
+}
+
+[data-style='runico'] .hp-segment {
+  border-radius: 0;
 }
 
 /* Il fondo dei pannelli non sfuma mai. */

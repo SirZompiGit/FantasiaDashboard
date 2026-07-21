@@ -243,7 +243,10 @@ export function HealthBarItem({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      className={`relative z-10 flex overflow-hidden rounded-lg border border-[#2d333d] bg-[#1a1d23] p-[3px] select-none transition-shadow duration-200 ${
+      // `hp-track` è l'aggancio con cui ogni design ridefinisce l'aspetto della
+      // barra. I colori sono token, non più esadecimali scritti a mano: era
+      // l'ultimo punto che ignorava il design scelto.
+      className={`hp-track relative z-10 flex overflow-hidden rounded-lg border border-bento-border bg-bento-item p-[3px] select-none transition-shadow duration-200 ${
         isVertical ? 'h-full w-full flex-col-reverse' : 'h-8 w-full'
       } ${bar.maxValue > 30 ? 'gap-[1px]' : 'gap-[2px]'} ${
         readOnly ? '' : 'cursor-pointer touch-none'
@@ -255,7 +258,7 @@ export function HealthBarItem({
           return (
             <div
               key={index}
-              className={`flex-grow rounded-[2px] transition-all duration-200 ${
+              className={`hp-segment flex-grow rounded-sm transition-all duration-200 ${
                 isVertical ? 'w-full' : 'h-full'
               }`}
               style={{
@@ -273,14 +276,14 @@ export function HealthBarItem({
         // Fondo spento e riempimento sono elementi separati: annidandoli,
         // l'opacità del fondo si moltiplicherebbe a quella del riempimento.
         <div
-          className={`relative flex-1 overflow-hidden rounded-[2px] ${isVertical ? 'w-full' : 'h-full'}`}
+          className={`relative flex-1 overflow-hidden rounded-sm ${isVertical ? 'w-full' : 'h-full'}`}
         >
           <div
-            className="absolute inset-0 rounded-[2px]"
+            className="absolute inset-0 rounded-sm"
             style={{ backgroundColor: activeColor, opacity: 0.08 }}
           />
           <div
-            className="absolute inset-0 rounded-[2px] transition-transform duration-200"
+            className="hp-segment absolute inset-0 rounded-sm transition-transform duration-200"
             style={{
               backgroundColor: activeColor,
               boxShadow: `0 0 15px ${activeColor}70`,
