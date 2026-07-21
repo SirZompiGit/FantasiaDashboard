@@ -21,6 +21,7 @@ import {
   ExternalLink,
   History,
   Home,
+  LayoutTemplate,
   MoreHorizontal,
   Palette,
   Settings,
@@ -30,7 +31,7 @@ import {
   VolumeX,
   Wand2,
 } from 'lucide-react';
-import { THEMES, type CampaignTheme } from '../theme';
+import { STYLES, THEMES, type CampaignStyle, type CampaignTheme } from '../theme';
 import { ConfirmInline } from './ui/ConfirmInline';
 import { Modal } from './ui/Modal';
 import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
@@ -38,6 +39,8 @@ import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
 interface DashboardHeaderProps {
   theme: CampaignTheme;
   onThemeChange: (theme: CampaignTheme) => void;
+  style: CampaignStyle;
+  onStyleChange: (style: CampaignStyle) => void;
   isMuted: boolean;
   onMutedChange: (muted: boolean) => void;
   onImport: () => void;
@@ -61,6 +64,8 @@ const TOOL_BUTTON =
 export function DashboardHeader({
   theme,
   onThemeChange,
+  style,
+  onStyleChange,
   isMuted,
   onMutedChange,
   onImport,
@@ -202,6 +207,7 @@ export function DashboardHeader({
 
       <div className="hidden flex-wrap items-center gap-2 md:flex">
         {tools}
+        <HomeButton onClick={handleBack} />
         <SettingsButton open={settingsOpen} onToggle={() => setSettingsOpen((v) => !v)} />
       </div>
 
@@ -229,34 +235,60 @@ export function DashboardHeader({
               <span className="font-mono text-[10px] text-slate-500">v3.0</span>
             </div>
 
-            <div className="space-y-2">
-              <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                <Palette className="h-3.5 w-3.5 text-theme-500" /> Tema Interfaccia
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {THEMES.map((definition) => {
-                  const isActive = theme === definition.id;
-                  return (
-                    <button
-                      key={definition.id}
-                      type="button"
-                      onClick={() => onThemeChange(definition.id)}
-                      aria-pressed={isActive}
-                      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-xs uppercase tracking-tight transition-colors duration-200 ${
-                        isActive
-                          ? 'border-theme-500/50 bg-bento-item font-bold text-slate-100'
-                          : 'border-transparent bg-bento-panel/40 text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: definition.swatch }}
-                      />
-                      <span className="truncate">{definition.label}</span>
-                    </button>
-                  );
-                })}
+            {/* Colore e design sono due assi indipendenti: 8 × 3 combinazioni. */}
+            <div className="space-y-3">
+              <label className="block space-y-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <Palette className="h-3.5 w-3.5 text-theme-500" /> Colore
+                </span>
+                <select
+                  value={theme}
+                  onChange={(event) => onThemeChange(event.target.value as CampaignTheme)}
+                  className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                >
+                  {THEMES.map((definition) => (
+                    <option key={definition.id} value={definition.id}>
+                      {definition.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex flex-wrap gap-1.5">
+                {THEMES.map((definition) => (
+                  <button
+                    key={definition.id}
+                    type="button"
+                    onClick={() => onThemeChange(definition.id)}
+                    aria-label={definition.label}
+                    aria-pressed={theme === definition.id}
+                    title={definition.label}
+                    style={{ backgroundColor: definition.swatch }}
+                    className={`h-5 w-5 rounded-full border-2 transition-transform duration-200 ${
+                      theme === definition.id
+                        ? 'scale-110 border-white'
+                        : 'border-transparent hover:scale-105'
+                    }`}
+                  />
+                ))}
               </div>
+
+              <label className="block space-y-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <LayoutTemplate className="h-3.5 w-3.5 text-theme-500" /> Design
+                </span>
+                <select
+                  value={style}
+                  onChange={(event) => onStyleChange(event.target.value as CampaignStyle)}
+                  className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                >
+                  {STYLES.map((definition) => (
+                    <option key={definition.id} value={definition.id}>
+                      {definition.label} — {definition.hint}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             <div className="flex items-center justify-between gap-4 border-t border-bento-border pt-3">
@@ -397,16 +429,21 @@ export function DashboardHeader({
   );
 }
 
+/**
+ * Uscita verso la scelta della modalità.
+ * L'etichetta resta visibile da `sm` in su: come sola icona era di fatto
+ * introvabile, ed è il motivo per cui sembrava mancare del tutto.
+ */
 function HomeButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Torna alla schermata iniziale"
-      title="Torna alla schermata iniziale"
-      className="rounded-xl border border-bento-border bg-bento-panel p-2 text-slate-300 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400"
+      aria-label="Esci e torna alla schermata iniziale"
+      className="flex items-center gap-1.5 rounded-xl border border-bento-border bg-bento-panel px-3 py-2 text-xs font-semibold text-slate-300 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400"
     >
-      <Home className="h-4 w-4" />
+      <Home className="h-3.5 w-3.5" />
+      <span className="hidden sm:inline">Esci</span>
     </button>
   );
 }

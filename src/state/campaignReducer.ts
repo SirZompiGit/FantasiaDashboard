@@ -12,7 +12,7 @@
  */
 
 import type { CampaignState, HealthBar, Player, RollResult } from '../types';
-import type { CampaignTheme } from '../theme';
+import type { CampaignStyle, CampaignTheme } from '../theme';
 import { MAX_ROLL_HISTORY, normalizeCampaign } from './migrations';
 import { createEmptyCampaign } from './defaults';
 import { clampHp, clampMaxHp } from '../lib/healthBars';
@@ -26,6 +26,7 @@ export type CampaignAction =
   | { type: 'SET_NOTES'; text: string }
   | { type: 'SET_CAMPAIGN_NOTES'; text: string }
   | { type: 'SET_THEME'; theme: CampaignTheme }
+  | { type: 'SET_STYLE'; style: CampaignStyle }
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'INSERT_PLAYER'; player: Player; index: number }
   | { type: 'REMOVE_PLAYER'; id: string }
@@ -85,6 +86,9 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
     case 'SET_THEME':
       return { ...state, theme: action.theme };
+
+    case 'SET_STYLE':
+      return { ...state, style: action.style };
 
     case 'ADD_PLAYER': {
       const name = action.name.trim();

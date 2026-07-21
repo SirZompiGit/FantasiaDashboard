@@ -23,6 +23,13 @@ interface WelcomeScreenProps {
   onDismissError: () => void;
 }
 
+/** PIN passato via link d'invito (`?room=123456`). */
+function readInvitedPin(): string {
+  if (typeof window === 'undefined') return '';
+  const value = new URLSearchParams(window.location.search).get('room') ?? '';
+  return /^\d{6}$/.test(value) ? value : '';
+}
+
 export function WelcomeScreen({
   onSelectLite,
   onCreateRoom,
@@ -32,8 +39,9 @@ export function WelcomeScreen({
   error,
   onDismissError,
 }: WelcomeScreenProps) {
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState(readInvitedPin);
   const [displayName, setDisplayName] = useState('');
+  const invited = pin.length === 6;
 
   const submitJoin = (event: FormEvent) => {
     event.preventDefault();
@@ -142,6 +150,13 @@ export function WelcomeScreen({
               </div>
 
               <form onSubmit={submitJoin} className="space-y-2">
+                {invited && (
+                  <p className="rounded-lg border border-theme-500/30 bg-theme-600/10 px-3 py-2 text-center text-xs text-theme-400 animate-fade-in">
+                    Sei stato invitato alla stanza <strong>{pin}</strong>. Scrivi il tuo nome ed
+                    entra.
+                  </p>
+                )}
+
                 <input
                   type="text"
                   placeholder="Il tuo nome"
@@ -149,6 +164,7 @@ export function WelcomeScreen({
                   onChange={(event) => setDisplayName(event.target.value)}
                   maxLength={24}
                   aria-label="Il tuo nome"
+                  autoFocus={invited}
                   className="w-full rounded-xl border border-bento-border bg-bento-item px-4 py-3 text-slate-200 transition-colors duration-200 placeholder:text-slate-600 focus:border-theme-500 focus:outline-none"
                 />
 

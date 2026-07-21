@@ -26,7 +26,7 @@ import type {
 import { newId } from '../lib/ids';
 import { DEFAULT_DICE, isDiceType } from '../lib/dice';
 import { DEFAULT_ZERO_HP_TEXT, clampHp, clampMaxHp } from '../lib/healthBars';
-import { normalizeTheme } from '../theme';
+import { normalizeStyle, normalizeTheme } from '../theme';
 import { DEFAULT_DICE_LABELS, createEmptyCampaign } from './defaults';
 
 export const SCHEMA_VERSION = 2;
@@ -200,6 +200,7 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     // Un giocatore cancellato non deve restare "attivo".
     activePlayerId: players.some((p) => p.id === activePlayerId) ? activePlayerId : null,
     theme: normalizeTheme(raw.theme),
+    style: normalizeStyle(raw.style),
     healthGroups,
     diceLabels: asStringList(raw.diceLabels, DEFAULT_DICE_LABELS),
   };

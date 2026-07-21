@@ -58,6 +58,18 @@ const SOUND_THROTTLE = 70;
 /** Finestra entro cui le variazioni confluiscono in un'unica particella. */
 const PARTICLE_MERGE_WINDOW = 450;
 
+/**
+ * Dimensioni della barra verticale.
+ *
+ * Prima erano `h-full max-h-[300px] min-h-[160px]`, ma il contenitore che la
+ * ospita non ha altezza definita: `height: 100%` si risolveva in `auto` e sia
+ * `h-full` sia `max-h` erano inerti. Ogni barra era alta esattamente 160px su
+ * qualunque schermo — sprecando spazio sul proiettore e occupandone troppo sul
+ * telefono. Ora l'altezza è esplicita e cresce con il breakpoint.
+ */
+const VERTICAL_SIZE =
+  'h-[150px] w-[50px] sm:h-[190px] sm:w-[54px] lg:h-[230px] lg:w-[58px] xl:h-[270px]';
+
 export function HealthBarItem({
   bar,
   getBarColor,
@@ -303,30 +315,36 @@ export function HealthBarItem({
   if (isVertical) {
     return (
       <div
-        className={`relative flex h-full max-h-[300px] min-h-[160px] min-w-[52px] shrink-0 flex-row items-center justify-center gap-1.5 rounded-xl border border-bento-border bg-bento-bg p-2 pr-3 transition-colors duration-200 ${
+        className={`relative flex ${VERTICAL_SIZE} shrink-0 flex-row items-stretch gap-1 rounded-xl border border-bento-border bg-bento-bg p-1.5 transition-colors duration-200 ${
           readOnly ? '' : 'hover:border-slate-600'
         } ${shaking ? 'health-shake' : ''}`}
       >
-        <div className="flex h-full items-center justify-center">
-          <span className="max-h-[140px] truncate font-display text-[13px] leading-none font-bold tracking-wider text-slate-200 uppercase [writing-mode:vertical-rl] rotate-180">
+        {/* Il nome occupa lo spazio che avanza e si adatta all'altezza reale.
+            Prima era bloccato a `max-h-[140px]`, quindi su barre più alte
+            restava troncato senza motivo. */}
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <span
+            className="max-h-full truncate font-display text-[11px] leading-none font-bold uppercase tracking-wider text-slate-200 [writing-mode:vertical-rl] rotate-180 sm:text-[12px] lg:text-[13px]"
+            title={bar.name}
+          >
             {bar.name}
           </span>
         </div>
 
-        <div className="flex h-full w-[28px] flex-col items-center justify-between">
-          <div className="relative mb-1 flex w-full flex-grow justify-center">
+        <div className="flex w-[24px] shrink-0 flex-col items-center sm:w-[26px]">
+          <div className="relative flex min-h-0 w-full flex-1 justify-center">
             {track}
             {particleNodes}
           </div>
 
-          <div className="flex shrink-0 flex-col items-center font-mono text-[10px] leading-none text-slate-400">
+          <div className="mt-1 flex shrink-0 flex-col items-center font-mono text-[10px] leading-none text-slate-400">
             <div className="flex items-center whitespace-nowrap">
               <span className="text-[11px] font-bold text-slate-100">{bar.currentValue}</span>
               <span className="mx-[1px] text-slate-600">/</span>
               <span>{bar.maxValue}</span>
             </div>
             <span className="mt-0.5 text-[9px] font-bold text-slate-500">
-              ({Math.round(percentage)}%)
+              {Math.round(percentage)}%
             </span>
           </div>
         </div>

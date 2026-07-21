@@ -1,4 +1,4 @@
-import type { CampaignTheme } from './theme';
+import type { CampaignStyle, CampaignTheme } from './theme';
 
 export interface InventoryItem {
   id: string;
@@ -80,6 +80,12 @@ export interface CampaignState {
   selectedDice: string;
   activePlayerId: string | null;
   theme: CampaignTheme;
+  /**
+   * Variante di design (forme e densità), indipendente dal colore.
+   * Campo additivo: le campagne salvate prima non ce l'hanno e ricadono su
+   * 'bento' tramite la normalizzazione, quindi il database resta compatibile.
+   */
+  style: CampaignStyle;
   healthGroups: string[];
   diceLabels: string[];
 }

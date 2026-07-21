@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import type { Player, RollResult } from '../types';
 import { type RoomUser, updateUser } from '../firebaseUtils';
-import { Check, Copy, Users, Wifi, WifiOff } from 'lucide-react';
+import { Check, Copy, Link as LinkIcon, Users, Wifi, WifiOff } from 'lucide-react';
 import { ConfirmInline } from './ui/ConfirmInline';
 import { decodeRollLabel, resolveRollerName } from '../lib/participantRolls';
 
@@ -28,18 +28,21 @@ export function RoomPanel({
   online,
   onCloseRoom,
 }: RoomPanelProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<'pin' | 'link' | null>(null);
   const [confirmingClose, setConfirmingClose] = useState(false);
 
   const userList = Object.values(users ?? {});
 
-  const copyPin = async () => {
+  /** Link che apre Fantasia con il PIN già compilato. */
+  const inviteLink = `${window.location.origin}${window.location.pathname}?room=${pin}`;
+
+  const copy = async (what: 'pin' | 'link') => {
     try {
-      await navigator.clipboard.writeText(pin);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(what === 'pin' ? pin : inviteLink);
+      setCopied(what);
+      window.setTimeout(() => setCopied(null), 2000);
     } catch (error) {
-      console.warn('[fantasia] copia del PIN non riuscita:', error);
+      console.warn('[fantasia] copia non riuscita:', error);
     }
   };
 
@@ -61,21 +64,41 @@ export function RoomPanel({
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={copyPin}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-bento-border bg-bento-button py-2 text-xs font-bold uppercase tracking-wider text-slate-200 transition-colors duration-200 hover:bg-bento-border"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3.5 w-3.5 text-emerald-400" /> Copiato
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" /> Copia PIN
-              </>
-            )}
-          </button>
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => copy('pin')}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-bento-border bg-bento-button py-2 text-xs font-bold uppercase tracking-wider text-slate-200 transition-colors duration-200 hover:bg-bento-border"
+            >
+              {copied === 'pin' ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-400" /> Copiato
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" /> PIN
+                </>
+              )}
+            </button>
+
+            {/* Il PIN resta il modo principale: il link è un'aggiunta, per chi
+                preferisce mandare qualcosa su cui cliccare. */}
+            <button
+              type="button"
+              onClick={() => copy('link')}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-theme-500/40 bg-theme-600/15 py-2 text-xs font-bold uppercase tracking-wider text-theme-400 transition-colors duration-200 hover:bg-theme-600/30"
+            >
+              {copied === 'link' ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-400" /> Copiato
+                </>
+              ) : (
+                <>
+                  <LinkIcon className="h-3.5 w-3.5" /> Invito
+                </>
+              )}
+            </button>
+          </div>
 
           {confirmingClose ? (
             <ConfirmInline

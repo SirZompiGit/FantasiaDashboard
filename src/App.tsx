@@ -64,9 +64,28 @@ export default function App() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Campagna letta dalla stanza. Firebase omette le chiavi con array vuoti,
+   * quindi va sempre normalizzata prima dell'uso.
+   */
+  const roomCampaign = useMemo(
+    () => (room.roomState ? normalizeCampaign(room.roomState.campaign) : null),
+    [room.roomState],
+  );
+
+  /**
+   * Il master comanda sul proprio tema; chi osserva una stanza — giocatore o
+   * finestra di proiezione — adotta quello del master, altrimenti ognuno
+   * vedrebbe la sessione con colori e design diversi.
+   */
+  const displayed = room.session?.role === 'master' || !roomCampaign ? state : roomCampaign;
+
   // Il tema è un attributo su <html>: le classi `bg-theme-*` dei componenti
   // si ricolorano da sole, con una dissolvenza.
-  useEffect(() => applyTheme(state.theme), [state.theme]);
+  useEffect(
+    () => applyTheme(displayed.theme, displayed.style),
+    [displayed.theme, displayed.style],
+  );
 
   useEffect(() => {
     setMuted(isMuted);
@@ -224,7 +243,7 @@ export default function App() {
       );
     }
 
-    if (!room.roomState) {
+    if (!room.roomState || !roomCampaign) {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bento-bg p-6 text-slate-400">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-theme-500 border-t-transparent" />
@@ -235,7 +254,7 @@ export default function App() {
 
     return (
       <SharedView
-        state={normalizeCampaign(room.roomState.campaign)}
+        state={roomCampaign}
         roomUsers={room.roomState.users}
         participantRolls={room.roomState.participantRolls}
       />
@@ -342,6 +361,8 @@ export default function App() {
       <DashboardHeader
         theme={state.theme}
         onThemeChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
+        style={state.style}
+        onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
         isMuted={isMuted}
         onMutedChange={setIsMuted}
         onImport={() => fileInputRef.current?.click()}

@@ -1,7 +1,7 @@
 import type { CampaignState } from '../types';
 import { DEFAULT_DICE } from '../lib/dice';
 import { DEFAULT_HEALTH_GROUPS } from '../lib/healthBars';
-import { DEFAULT_THEME } from '../theme';
+import { DEFAULT_STYLE, DEFAULT_THEME } from '../theme';
 
 export const DEFAULT_DICE_LABELS = [
   'Tiro salvezza',
@@ -27,6 +27,7 @@ export function createEmptyCampaign(): CampaignState {
     selectedDice: DEFAULT_DICE,
     activePlayerId: null,
     theme: DEFAULT_THEME,
+    style: DEFAULT_STYLE,
     healthGroups: [...DEFAULT_HEALTH_GROUPS],
     diceLabels: [...DEFAULT_DICE_LABELS],
   };

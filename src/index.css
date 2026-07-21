@@ -154,6 +154,97 @@ html.theme-transitions {
 }
 
 /* --------------------------------------------------------------------------
+   3-bis. Varianti di design
+   Asse indipendente dal colore: <html data-theme="..." data-style="...">.
+
+   Tailwind v4 costruisce le utility di spaziatura, raggio e tipografia a
+   partire da variabili (`--spacing`, `--radius-*`, `--text-*`). Ridefinendo
+   quelle variabili si cambia l'intero aspetto dell'app SENZA toccare una
+   sola classe nei componenti: `p-4`, `rounded-xl` e `text-sm` continuano a
+   funzionare, ma valgono altro.
+   -------------------------------------------------------------------------- */
+
+/* BENTO — l'aspetto storico. Pannelli distinti, angoli morbidi. */
+:root,
+[data-style='bento'] {
+  --panel-border-width: 1px;
+  --panel-accent-width: 0px;
+  --display-letter-spacing: 0.025em;
+}
+
+/*
+ * GRIMORIO — angoli quasi vivi, filetti al posto dei riquadri, titoli più
+ * presenti. L'aria di un manuale di gioco, senza cambiare i colori.
+ */
+[data-style='grimorio'] {
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
+  --radius-3xl: 6px;
+
+  --panel-border-width: 2px;
+  --panel-accent-width: 3px;
+  --display-letter-spacing: 0.08em;
+
+  --shadow-panel: 0 1px 0 rgb(255 255 255 / 0.04), 0 2px 10px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 1px 0 rgb(255 255 255 / 0.06), 0 6px 20px rgb(0 0 0 / 0.5);
+  --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 0.05), 0 24px 64px rgb(0 0 0 / 0.6);
+}
+
+/* Nel Grimorio i pannelli hanno un filetto d'accento sul bordo superiore. */
+[data-style='grimorio'] .shadow-panel,
+[data-style='grimorio'] .shadow-raised {
+  border-top-color: color-mix(in oklab, var(--theme-500) 35%, transparent);
+}
+
+[data-style='grimorio'] .font-display {
+  letter-spacing: var(--display-letter-spacing);
+}
+
+/*
+ * COMPATTO — densità alta. `--spacing` è la base di TUTTA la scala di
+ * spaziatura di Tailwind: ridurla comprime margini, padding e gap ovunque
+ * in un colpo solo.
+ */
+[data-style='compatto'] {
+  --spacing: 0.185rem;
+
+  --radius-lg: 0.3rem;
+  --radius-xl: 0.4rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.75rem;
+
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.15rem;
+  --text-2xl: 1.4rem;
+  --text-3xl: 1.7rem;
+  --text-4xl: 2rem;
+
+  --panel-border-width: 1px;
+  --panel-accent-width: 0px;
+  --display-letter-spacing: 0.02em;
+
+  --shadow-panel: 0 1px 3px rgb(0 0 0 / 0.3);
+  --shadow-raised: 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-overlay: 0 12px 40px rgb(0 0 0 / 0.5);
+}
+
+/* La transizione fra design tocca misure, non solo colori. */
+html.theme-transitions [class*='rounded'],
+html.theme-transitions .shadow-panel,
+html.theme-transitions .shadow-raised {
+  transition:
+    border-radius 300ms ease,
+    box-shadow 300ms ease,
+    border-color 300ms ease;
+}
+
+/* --------------------------------------------------------------------------
    4. Base
    -------------------------------------------------------------------------- */
 

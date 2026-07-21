@@ -171,9 +171,16 @@ export function ParticipantView({
 
           <span className="h-8 w-px bg-slate-700" />
 
-          <IconButton label="Esci dalla stanza" tone="danger" onClick={onExit} tip="bottom">
-            <LogOut className="h-4 w-4" />
-          </IconButton>
+          {/* Etichettato, non solo icona: è la via d'uscita e deve vedersi. */}
+          <button
+            type="button"
+            onClick={onExit}
+            aria-label="Esci dalla stanza e torna alla schermata iniziale"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-950/20 px-3 py-2 text-xs font-semibold text-red-400 transition-colors duration-200 hover:bg-red-500/20 hover:text-red-300"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Esci</span>
+          </button>
         </div>
       </header>
 

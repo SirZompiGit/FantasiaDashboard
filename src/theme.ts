@@ -49,7 +49,34 @@ export const THEMES: ThemeDefinition[] = [
   { id: 'obsidian', label: 'Ladro', swatch: '#94a3b8', accent: '#94a3b8' },
 ];
 
+/**
+ * Asse indipendente dal colore: cambia forme, densità e tipografia, non la
+ * palette. I due assi si combinano liberamente (8 colori × 3 design).
+ */
+export type CampaignStyle = 'bento' | 'grimorio' | 'compatto';
+
+export const DEFAULT_STYLE: CampaignStyle = 'bento';
+
+export interface StyleDefinition {
+  id: CampaignStyle;
+  label: string;
+  hint: string;
+}
+
+export const STYLES: StyleDefinition[] = [
+  { id: 'bento', label: 'Bento', hint: 'Pannelli distinti, angoli morbidi' },
+  { id: 'grimorio', label: 'Grimorio', hint: 'Angoli vivi, filetti, aria da manuale' },
+  { id: 'compatto', label: 'Compatto', hint: 'Densità alta, più contenuto a schermo' },
+];
+
 const THEME_IDS = new Set<string>(THEMES.map((t) => t.id));
+const STYLE_IDS = new Set<string>(STYLES.map((s) => s.id));
+
+export function normalizeStyle(value: unknown): CampaignStyle {
+  return typeof value === 'string' && STYLE_IDS.has(value)
+    ? (value as CampaignStyle)
+    : DEFAULT_STYLE;
+}
 
 /** Normalizza un valore arrivato da localStorage o dal database. */
 export function normalizeTheme(value: unknown): CampaignTheme {
@@ -75,11 +102,12 @@ export function getThemeAccent(theme: CampaignTheme): string {
  * accortezza al primo caricamento si vedrebbe una dissolvenza dal colore
  * iniziale a quello salvato.
  */
-export function applyTheme(theme: CampaignTheme): void {
+export function applyTheme(theme: CampaignTheme, style: CampaignStyle = DEFAULT_STYLE): void {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
   root.dataset.theme = normalizeTheme(theme);
+  root.dataset.style = normalizeStyle(style);
 
   if (!root.classList.contains('theme-transitions')) {
     requestAnimationFrame(() => {

@@ -21,10 +21,14 @@ import {
   GripHorizontal,
   GripVertical,
   Heart,
+  Maximize,
   Maximize2,
+  Minimize,
   Shield,
   Sparkles,
   Star,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { HealthBarItem } from './HealthBarItem';
 import { Modal } from './ui/Modal';
@@ -33,6 +37,8 @@ import { getBarColor, groupBars } from '../lib/healthBars';
 import { isCritical, isFumble, parseSides } from '../lib/dice';
 import { decodeRollLabel, latestPerRoller, resolveRollerName } from '../lib/participantRolls';
 import { getThemeAccent } from '../theme';
+import { NARROW_SCREEN, useMediaQuery } from '../hooks/useMediaQuery';
+import { useSharedViewControls } from '../hooks/useSharedViewControls';
 import { playCritFailSound, playCritSuccessSound, playRollSound } from '../utils/audio';
 
 const LAYOUT_KEY = 'fantasia_shared_health_layout';
@@ -79,6 +85,23 @@ export function SharedView({
   const prevTimestampRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
   const accent = getThemeAccent(theme);
+
+  const controls = useSharedViewControls();
+
+  /**
+   * Lo zoom agisce sulla dimensione di base del documento.
+   * Tutte le misure di Tailwind (testo, spaziature, raggi) sono in `rem`,
+   * quindi si scalano insieme in modo proporzionale: il risultato è un
+   * ingrandimento vero dell'interfaccia, non solo del testo.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.fontSize;
+    root.style.fontSize = `${16 * controls.zoom}px`;
+    return () => {
+      root.style.fontSize = previous;
+    };
+  }, [controls.zoom]);
 
   // La preferenza di layout si perdeva a ogni ricaricamento della pagina.
   useEffect(() => {
@@ -137,6 +160,16 @@ export function SharedView({
 
   const visibleRolls = useMemo(() => latestPerRoller(participantRolls), [participantRolls]);
 
+  /**
+   * Sotto i 640px la vista verticale non è leggibile: nomi ruotati in colonne
+   * da 50px su uno schermo stretto sono illeggibili, e lo scorrimento
+   * orizzontale nasconde metà delle barre. Si ricade su orizzontale a
+   * prescindere dalla preferenza salvata, che resta intatta per gli schermi
+   * più larghi.
+   */
+  const isNarrow = useMediaQuery(NARROW_SCREEN);
+  const effectiveLayout: HealthLayout = isNarrow ? 'horizontal' : healthLayout;
+
   const renderBar = (bar: HealthBar) => (
     <HealthBarItem
       key={bar.id}
@@ -144,13 +177,15 @@ export function SharedView({
       getBarColor={getBarColor}
       onChangeValue={() => {}}
       readOnly
-      layout={healthLayout}
+      layout={effectiveLayout}
     />
   );
 
+  // In verticale le barre vanno a capo su più righe invece di allungarsi in
+  // uno scorrimento orizzontale senza fine.
   const barsContainer =
-    healthLayout === 'vertical'
-      ? 'flex flex-row gap-3 overflow-x-auto pb-2 pt-1 scrollbar-thin'
+    effectiveLayout === 'vertical'
+      ? 'flex flex-row flex-wrap items-start gap-2 pt-1 sm:gap-3'
       : 'flex flex-col gap-3';
 
   const hasNotes = Boolean(state.campaignNotes.trim()) || Boolean(personalNotesSlot);
@@ -160,6 +195,56 @@ export function SharedView({
       {/* Aure di sfondo */}
       <div className="pointer-events-none fixed -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-theme-500/5 blur-[120px]" />
       <div className="pointer-events-none fixed -right-[10%] -bottom-[10%] h-[50%] w-[50%] rounded-full bg-slate-900/50 blur-[120px]" />
+
+      {/* Controlli di presentazione. In alto a sinistra per non finire sotto al
+          pulsante di chiusura dell'anteprima, che sta a destra. */}
+      <div className="fixed top-2 left-2 z-40 flex items-center gap-1 rounded-full border border-bento-border bg-bento-void/85 px-1.5 py-1 opacity-40 shadow-raised backdrop-blur-md transition-opacity duration-200 hover:opacity-100 focus-within:opacity-100 sm:top-3 sm:left-3">
+        <IconButton
+          label="Riduci dimensione"
+          onClick={controls.zoomOut}
+          disabled={!controls.canZoomOut}
+          tip="bottom"
+          className="disabled:opacity-30"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </IconButton>
+
+        <button
+          type="button"
+          onClick={controls.resetZoom}
+          aria-label="Ripristina dimensione originale"
+          className="min-w-[3ch] rounded px-1 font-mono text-[10px] font-bold text-slate-400 transition-colors duration-200 hover:text-slate-100"
+        >
+          {Math.round(controls.zoom * 100)}%
+        </button>
+
+        <IconButton
+          label="Aumenta dimensione"
+          onClick={controls.zoomIn}
+          disabled={!controls.canZoomIn}
+          tip="bottom"
+          className="disabled:opacity-30"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </IconButton>
+
+        {controls.fullscreenAvailable && (
+          <>
+            <span className="mx-0.5 h-4 w-px bg-bento-border" />
+            <IconButton
+              label={controls.isFullscreen ? 'Esci da schermo intero' : 'Schermo intero'}
+              onClick={controls.toggleFullscreen}
+              tip="bottom"
+            >
+              {controls.isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </IconButton>
+          </>
+        )}
+      </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1600px] flex-col rounded-2xl border border-bento-border/50 bg-bento-panel p-3 shadow-overlay sm:p-5 lg:p-8">
         <header className="mb-5 shrink-0 text-center">
@@ -268,25 +353,29 @@ export function SharedView({
                 <h2 className={PANEL_TITLE}>
                   <Heart className="h-5 w-5 text-theme-500" /> Stato della Salute
                 </h2>
-                <IconButton
-                  label={
-                    healthLayout === 'horizontal'
-                      ? 'Passa alla vista verticale'
-                      : 'Passa alla vista orizzontale'
-                  }
-                  onClick={() =>
-                    setHealthLayout((current) =>
-                      current === 'horizontal' ? 'vertical' : 'horizontal',
-                    )
-                  }
-                  tip="left"
-                >
-                  {healthLayout === 'horizontal' ? (
-                    <GripHorizontal className="h-5 w-5" />
-                  ) : (
-                    <GripVertical className="h-5 w-5" />
-                  )}
-                </IconButton>
+                {/* Su schermi stretti il layout è forzato a orizzontale: il
+                    selettore non avrebbe alcun effetto, quindi sparisce. */}
+                {!isNarrow && (
+                  <IconButton
+                    label={
+                      healthLayout === 'horizontal'
+                        ? 'Passa alla vista verticale'
+                        : 'Passa alla vista orizzontale'
+                    }
+                    onClick={() =>
+                      setHealthLayout((current) =>
+                        current === 'horizontal' ? 'vertical' : 'horizontal',
+                      )
+                    }
+                    tip="left"
+                  >
+                    {healthLayout === 'horizontal' ? (
+                      <GripHorizontal className="h-5 w-5" />
+                    ) : (
+                      <GripVertical className="h-5 w-5" />
+                    )}
+                  </IconButton>
+                )}
               </div>
 
               <div className="max-h-[50vh] flex-1 space-y-5 overflow-y-auto pr-1 scrollbar-thin lg:max-h-none">
