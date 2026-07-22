@@ -25,8 +25,10 @@ import { DiceShape } from './DiceShape';
 import { IconButton } from './ui/IconButton';
 
 const LABEL_STORAGE_KEY = 'fantasia_selected_dice_label';
-const TICK_MS = 60;
-const TICKS = 9;
+
+/** Durata complessiva del lancio: 8 scatti da 50 ms, circa 0,4 secondi. */
+const TICK_MS = 50;
+const TICKS = 8;
 
 interface DiceRollerProps {
   onRoll: (diceType: string, result: number, label?: string) => void;
@@ -477,13 +479,15 @@ export function DiceRoller({
               )}
             </span>
 
+            {/* Il master vede sempre il proprio risultato: se è nascosto ai
+                giocatori resta visibile ma spento, non sostituito da un `?`. */}
             <DiceShape
               key={lastRoll.timestamp}
               diceType={lastRoll.diceType}
               value={lastRoll.result}
               state="result"
               accent={accent}
-              hidden={isRollHidden}
+              reveal={isRollHidden ? 'dimmed' : 'full'}
               outcome={critical ? 'critical' : fumble ? 'fumble' : null}
               className="h-36 w-36 sm:h-40 sm:w-40"
             />

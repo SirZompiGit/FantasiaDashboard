@@ -507,7 +507,7 @@ export function SharedView({
                         value={lastRoll.result}
                         state="result"
                         accent={accent}
-                        hidden={isRollHidden}
+                        reveal={isRollHidden ? 'hidden' : 'full'}
                         outcome={
                           isCritical(lastRoll.result, lastRoll.diceType)
                             ? 'critical'
