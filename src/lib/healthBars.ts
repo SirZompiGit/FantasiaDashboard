@@ -22,6 +22,17 @@ export const MIN_HP = 1;
  */
 export const SEGMENT_THRESHOLD = 60;
 
+/**
+ * Stessa soglia, ma per le tracce sottili delle risorse.
+ *
+ * Molto più bassa: su dieci pixel d'altezza, e con lo spazio fra una tacca e
+ * l'altra, cinquanta suddivisioni diventano una zebratura in cui non si
+ * distingue più il pieno dal vuoto. Sotto questa soglia i segmenti servono
+ * davvero — slot incantesimo, cariche d'ira, pile di scudo si contano a colpo
+ * d'occhio; sopra, il riempimento continuo dice la stessa cosa e si legge.
+ */
+export const THIN_SEGMENT_THRESHOLD = 12;
+
 export const DEFAULT_ZERO_HP_TEXT = 'DEFUNTO';
 
 /**

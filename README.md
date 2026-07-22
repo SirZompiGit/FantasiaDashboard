@@ -40,7 +40,7 @@ Altri comandi:
 
 ```bash
 npm run lint       # controllo dei tipi (TypeScript strict)
-npm test           # 141 verifiche automatiche
+npm test           # 145 verifiche automatiche
 npm run test:watch # le stesse, rieseguite a ogni salvataggio
 npm run build      # build di produzione in dist/
 npm run preview    # anteprima della build

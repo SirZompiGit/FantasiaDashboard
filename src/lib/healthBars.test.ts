@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { HealthBar, Resource } from '../types';
 import {
   MAX_RESOURCES,
+  SEGMENT_THRESHOLD,
+  THIN_SEGMENT_THRESHOLD,
   clampMaxHp,
   clampResources,
   getBarColor,
@@ -136,6 +138,19 @@ describe('getBarColor sulle risorse', () => {
     expect(getBarColor(resource({ colorMode: 'static' }))).toBe('#3b82f6');
     expect(getBarColor(resource({ colorMode: 'gradient', currentValue: 5 }))).toBe('#ff0000');
     expect(getBarColor(resource({ colorMode: 'smooth', currentValue: 50 }))).toBe('#0000ff');
+  });
+});
+
+describe('soglia dei segmenti', () => {
+  /**
+   * Su una traccia da dieci pixel cinquanta tacche diventano una zebratura in
+   * cui non si distingue il pieno dal vuoto: le risorse devono passare al
+   * riempimento continuo molto prima della barra della vita.
+   */
+  it('è molto più bassa sulle tracce sottili', () => {
+    expect(THIN_SEGMENT_THRESHOLD).toBeLessThan(SEGMENT_THRESHOLD);
+    // Slot incantesimo, cariche d'ira e pile di scudo restano contabili.
+    expect(THIN_SEGMENT_THRESHOLD).toBeGreaterThanOrEqual(9);
   });
 });
 

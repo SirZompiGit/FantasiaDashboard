@@ -28,6 +28,7 @@ import { Edit2, ShieldAlert, Trash2 } from 'lucide-react';
 import {
   DEFAULT_ZERO_HP_TEXT,
   SEGMENT_THRESHOLD,
+  THIN_SEGMENT_THRESHOLD,
   getBarColor,
   healthRatio,
   isLowHp,
@@ -133,7 +134,7 @@ function BarTrack({
 
   const interactive = !readOnly && Boolean(onChange);
   const percentage = max > 0 ? (value / max) * 100 : 0;
-  const useSegments = max <= SEGMENT_THRESHOLD;
+  const useSegments = max <= (thin ? THIN_SEGMENT_THRESHOLD : SEGMENT_THRESHOLD);
 
   const commit = (next: number) => {
     if (!onChange) return;
@@ -200,6 +201,14 @@ function BarTrack({
   const trackPadding = thin ? 'p-px' : 'p-[3px]';
   const segmentGap = thin ? 'gap-px' : max > 30 ? 'gap-[1px]' : 'gap-[2px]';
 
+  /**
+   * `hp-track--thin` non è decorativa: ogni design ridefinisce padding, spazi e
+   * spessore del bordo di `.hp-track` con selettori più specifici delle utility
+   * qui sopra, e quelle misure su dieci pixel azzerano il riempimento. La
+   * classe è l'aggancio con cui `index.css` le riporta in proporzione.
+   */
+  const trackVariant = thin ? 'hp-track--thin' : '';
+
   return (
     <div
       ref={hitRef}
@@ -227,7 +236,7 @@ function BarTrack({
         // `hp-track` è l'aggancio con cui ogni design ridefinisce l'aspetto della
         // barra. I colori sono token, non più esadecimali scritti a mano: era
         // l'ultimo punto che ignorava il design scelto.
-        className={`hp-track relative z-10 flex overflow-hidden border border-bento-border bg-bento-item select-none transition-shadow duration-200 ${trackRounding} ${trackPadding} ${trackSize} ${segmentGap} ${
+        className={`hp-track relative z-10 flex overflow-hidden border border-bento-border bg-bento-item select-none transition-shadow duration-200 ${trackVariant} ${trackRounding} ${trackPadding} ${trackSize} ${segmentGap} ${
           vertical ? 'flex-col-reverse' : 'flex-row'
         } ${alert ? 'is-alert' : ''} ${trackClassName}`}
       >

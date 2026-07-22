@@ -178,6 +178,46 @@ describe('marchio', () => {
   });
 });
 
+/**
+ * Le tracce delle risorse sono alte dieci pixel, e ogni design ridefinisce
+ * padding, spazi e spessore del bordo di `.hp-track` con selettori a
+ * specificità 0-2-0. `.hp-track.hp-track--thin` ha la stessa specificità: a
+ * pari punteggio decide l'ordine nel file, quindi deve stare dopo. Spostarla
+ * più in alto non darebbe alcun errore — semplicemente in Arcano e in Retro il
+ * riempimento tornerebbe largo zero.
+ */
+describe('tracce sottili delle risorse', () => {
+  // Senza commenti: i selettori citati nella spiegazione qui sopra sono prosa,
+  // non regole, e conteggiarli falserebbe il controllo sull'ordine.
+  const css = read('src/index.css').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('esistono e riportano in proporzione le misure dei design', () => {
+    const rule = css.match(/\.hp-track\.hp-track--thin\s*\{[^}]*\}/);
+    expect(rule).toBeTruthy();
+    for (const property of ['border-width', 'padding', 'gap']) {
+      expect(rule![0]).toContain(property);
+    }
+  });
+
+  it('la regola sta dopo ogni blocco di design che le sovrascriverebbe', () => {
+    const thinRule = css.search(/\.hp-track\.hp-track--thin\s*\{/);
+    expect(thinRule).toBeGreaterThan(-1);
+
+    const overrides = [
+      ...css.matchAll(/\[data-style='[a-z]+'\]\s+\.(?:hp-track|border)\b[^{]*\{/g),
+    ];
+    expect(overrides.length).toBeGreaterThan(0);
+
+    for (const match of overrides) {
+      expect(match.index).toBeLessThan(thinRule);
+    }
+  });
+
+  it('il componente applica davvero la classe', () => {
+    expect(read('src/components/HealthBarItem.tsx')).toContain("'hp-track--thin'");
+  });
+});
+
 describe('regole di Firestore', () => {
   it('lo chiudono del tutto, visto che l app non lo usa', () => {
     expect(read('firestore.rules')).toMatch(/allow read, write: if false;/);

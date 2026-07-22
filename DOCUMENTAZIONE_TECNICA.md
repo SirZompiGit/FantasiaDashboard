@@ -155,6 +155,8 @@ Una barra può portare **fino a due risorse**: mana, scudo, frenesia, slot incan
 | Visibilità | Interruttore per singola risorsa: lo scudo di un mostro può essere pubblico e la sua frenesia no. Nella vista condivisa il master vede esattamente ciò che vedono i giocatori |
 | Cronologia | `SET_RESOURCE_VALUE` ha una firma di fusione propria: un trascinamento intero occupa una sola voce di annullamento |
 | Layout verticale | Le risorse affiancano la barra come colonnine da 10px e la scheda si allarga di 20px ciascuna; nome e valore stanno nel suggerimento, perché a quella larghezza un'etichetta non è leggibile |
+| Segmenti | Passano al riempimento continuo a **12** invece che a 60: su dieci pixel cinquanta tacche sono una zebratura in cui non si distingue il pieno dal vuoto. Sotto la soglia servono davvero — slot incantesimo e cariche d'ira si contano a colpo d'occhio |
+| Misure per design | `.hp-track--thin` riporta bordo, padding e spazi in proporzione. Senza, le misure pensate per i 32px della barra della vita azzeravano il riempimento: Arcano 4px di padding per lato (`10 − 2 − 8 = 0`), Retro 3px di padding più cornice da 3px (`10 − 6 − 6 = −2`). La regola sta **dopo** tutti i blocchi dei design perché ne pareggia la specificità: un test lo verifica, perché spostandola non si romperebbe nulla di visibile in compilazione |
 
 Il limite di due non è tecnico ma di leggibilità: la barra della vita deve restare l'informazione dominante.
 

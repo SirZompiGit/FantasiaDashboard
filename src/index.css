@@ -877,6 +877,38 @@ html.theme-transitions .border-bento-border {
   animation: hp-alert-pulse 1.3s ease-in-out infinite;
 }
 
+/* --------------------------------------------------------------------------
+   Tracce sottili delle risorse.
+
+   Ogni design impone alla barra della vita misure pensate per i suoi 32 pixel
+   d'altezza. Su una traccia da 10 non resta nulla da riempire:
+
+     arcano  4px di padding per lato        →  10 - 2 - 8  =  0px
+     retro   3px di padding + cornice 3px   →  10 - 6 - 6  = -2px
+
+   Non era un riempimento poco visibile: era largo zero. Qui le metriche
+   tornano proporzionate, una volta sola per tutti i design — compresi quelli
+   che verranno, che altrimenti ripeterebbero lo stesso errore.
+
+   Il carattere resta intatto: le perle di Arcano e gli spigoli di Retro stanno
+   su `.hp-segment`, non qui.
+
+   Specificità: `.hp-track.hp-track--thin` pareggia `[data-style='x'] .hp-track`
+   e `[data-style='retro'] .border`, quindi questa regola deve restare DOPO
+   tutti i blocchi dei design. Spostarla più in alto la disattiva in silenzio.
+   -------------------------------------------------------------------------- */
+.hp-track.hp-track--thin {
+  border-width: 1px;
+  padding: 1px;
+  gap: 1px;
+  /* Un'ombra incassata su dieci pixel non si legge, mangia il colore e basta:
+     il bordo definisce già il contorno. */
+  box-shadow: none;
+  /* Sfocare lo sfondo dietro una scheggia da 10px costa e non si vede. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 0.45; }
   50% { opacity: 0.85; }
