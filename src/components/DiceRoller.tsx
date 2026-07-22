@@ -21,7 +21,7 @@ import { getThemeAccent } from '../theme';
 import type { CampaignTheme } from '../theme';
 import { playCritFailSound, playCritSuccessSound, playRollSound } from '../utils/audio';
 import { ConfirmInline } from './ui/ConfirmInline';
-import { DiceShape } from './DiceShape';
+import { CRITICAL_COLOR, DiceShape, FUMBLE_COLOR } from './DiceShape';
 import { IconButton } from './ui/IconButton';
 
 const LABEL_STORAGE_KEY = 'fantasia_selected_dice_label';
@@ -492,13 +492,25 @@ export function DiceRoller({
               className="h-36 w-36 sm:h-40 sm:w-40"
             />
 
+            {/* Le etichette prendono lo stesso colore del dado: oro e rosso
+                non seguono il tema, e lasciarle nel colore del tema le avrebbe
+                fatte stonare con la sagoma. */}
             {critical && (
-              <span className="mt-2 flex items-center gap-1 rounded-full bg-theme-500/10 px-2 py-0.5 text-xs font-semibold text-theme-500">
+              <span
+                className="mt-2 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold"
+                style={{
+                  color: CRITICAL_COLOR,
+                  backgroundColor: `${CRITICAL_COLOR}1f`,
+                }}
+              >
                 <Sparkles className="h-3 w-3" /> CRITICO!
               </span>
             )}
             {fumble && (
-              <span className="mt-2 flex items-center gap-1 rounded-full bg-theme-500/10 px-2 py-0.5 text-xs font-semibold text-theme-500">
+              <span
+                className="mt-2 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold"
+                style={{ color: FUMBLE_COLOR, backgroundColor: `${FUMBLE_COLOR}1f` }}
+              >
                 FALLIMENTO!
               </span>
             )}

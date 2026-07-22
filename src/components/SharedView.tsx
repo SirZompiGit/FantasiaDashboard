@@ -31,7 +31,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import { HealthBarItem } from './HealthBarItem';
-import { DiceShape } from './DiceShape';
+import { CRITICAL_COLOR, DiceShape, FUMBLE_COLOR } from './DiceShape';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
 import { getBarColor, groupBars } from '../lib/healthBars';
@@ -544,13 +544,27 @@ export function SharedView({
                     </div>
 
                     {!isRollHidden && isCritical(lastRoll.result, lastRoll.diceType) && (
-                      <div className="inline-flex animate-pulse items-center gap-1.5 rounded-full border border-theme-500/30 bg-theme-600/15 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-theme-500">
+                      <div
+                        className="inline-flex animate-pulse items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider"
+                        style={{
+                          color: CRITICAL_COLOR,
+                          borderColor: `${CRITICAL_COLOR}55`,
+                          backgroundColor: `${CRITICAL_COLOR}1f`,
+                        }}
+                      >
                         <Sparkles className="h-3.5 w-3.5" /> Critico!
                       </div>
                     )}
 
                     {!isRollHidden && isFumble(lastRoll.result, lastRoll.diceType) && (
-                      <div className="inline-flex items-center gap-1.5 rounded-full border border-theme-500/30 bg-theme-600/15 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-theme-500">
+                      <div
+                        className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider"
+                        style={{
+                          color: FUMBLE_COLOR,
+                          borderColor: `${FUMBLE_COLOR}55`,
+                          backgroundColor: `${FUMBLE_COLOR}1f`,
+                        }}
+                      >
                         Fallimento critico!
                       </div>
                     )}

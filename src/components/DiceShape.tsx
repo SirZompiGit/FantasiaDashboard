@@ -38,6 +38,15 @@ function centroid(points: string): { x: number; y: number } {
   return { x: sum.x / coords.length, y: sum.y / coords.length };
 }
 
+/**
+ * Colori dell'esito. Non seguono il tema: un critico deve essere oro e un
+ * fallimento rosso in qualunque palette, altrimenti in tema Druido il colpo
+ * fortunato sarebbe verde come tutto il resto e smetterebbe di saltare
+ * all'occhio.
+ */
+export const CRITICAL_COLOR = '#fbbf24';
+export const FUMBLE_COLOR = '#ef4444';
+
 export type DiceShapeState = 'idle' | 'rolling' | 'result';
 
 /**
@@ -76,6 +85,12 @@ export function DiceShape({
   const animation =
     state === 'rolling' ? 'dice-tumble' : state === 'result' ? 'dice-settle' : '';
 
+  // Sagoma e numero prendono il colore dell'esito, quando c'è.
+  const color =
+    outcome === 'critical' ? CRITICAL_COLOR : outcome === 'fumble' ? FUMBLE_COLOR : accent;
+
+  const textColor = outcome ? color : reveal === 'full' ? '#ffffff' : color;
+
   return (
     <svg
       viewBox="0 0 100 100"
@@ -88,23 +103,29 @@ export function DiceShape({
             : `${diceType}: ${text}`
       }
       className={`${animation} ${className}`}
-      style={{ overflow: 'visible' }}
+      style={{
+        overflow: 'visible',
+        // La rotazione gira attorno al baricentro, non al centro del riquadro.
+        // Con `50% 50%` le sagome asimmetriche — i triangoli del d3 e del d4 —
+        // ruotavano fuori asse, come una ruota storta.
+        transformOrigin: `${center.x}% ${center.y}%`,
+      }}
     >
       {/* Alone che stacca la sagoma dal fondo. Sta dietro, non dentro. */}
       <polygon
         points={outline}
-        fill={accent}
-        opacity={outcome === 'critical' ? 0.32 : 0.18}
+        fill={color}
+        opacity={outcome ? 0.34 : 0.18}
         style={{ filter: 'blur(7px)' }}
       />
 
       {/* Solo il profilo esterno. */}
       <polygon
         points={outline}
-        fill={accent}
-        fillOpacity={0.1}
-        stroke={accent}
-        strokeWidth={3}
+        fill={color}
+        fillOpacity={outcome ? 0.16 : 0.1}
+        stroke={color}
+        strokeWidth={outcome ? 3.5 : 3}
         strokeLinejoin="round"
       />
 
@@ -113,13 +134,13 @@ export function DiceShape({
         y={center.y}
         textAnchor="middle"
         dominantBaseline="central"
-        fill={reveal === 'full' ? '#ffffff' : accent}
+        fill={textColor}
         fillOpacity={reveal === 'dimmed' ? 0.55 : 1}
         fontSize={fontSize}
         fontWeight={800}
         style={{
           fontFamily: 'var(--font-display)',
-          filter: reveal === 'full' ? `drop-shadow(0 0 7px ${accent}70)` : 'none',
+          filter: reveal === 'dimmed' ? 'none' : `drop-shadow(0 0 8px ${color}90)`,
         }}
       >
         {text}
