@@ -64,7 +64,7 @@ export function RoomPanel({
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-theme-400">
               PIN
             </span>
-            <span className="font-display text-xl font-black tracking-widest text-white sm:text-2xl">
+            <span className="numeric-display font-display text-xl font-black tracking-widest text-white sm:text-2xl">
               {pin}
             </span>
           </div>
@@ -222,7 +222,7 @@ export function RoomPanel({
                     </span>
                   </div>
 
-                  <span className="py-2 text-center font-display text-4xl font-black text-white">
+                  <span className="numeric-display py-2 text-center font-display text-4xl font-black text-white">
                     {roll.result}
                   </span>
 

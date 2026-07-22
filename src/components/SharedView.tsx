@@ -31,6 +31,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import { HealthBarItem } from './HealthBarItem';
+import { DiceShape } from './DiceShape';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
 import { getBarColor, groupBars } from '../lib/healthBars';
@@ -500,14 +501,22 @@ export function SharedView({
                     )}
 
                     <div className="relative my-2">
-                      <span
-                        className={`block font-display text-4xl font-black tracking-tighter text-white sm:text-5xl lg:text-6xl ${
-                          isRollHidden ? 'opacity-30 blur-[2px]' : ''
-                        }`}
-                        style={{ filter: `drop-shadow(0 0 20px ${accent}59)` }}
-                      >
-                        {isRollHidden ? '?' : lastRoll.result}
-                      </span>
+                      <DiceShape
+                        key={lastRoll.timestamp}
+                        diceType={lastRoll.diceType}
+                        value={lastRoll.result}
+                        state="result"
+                        accent={accent}
+                        hidden={isRollHidden}
+                        outcome={
+                          isCritical(lastRoll.result, lastRoll.diceType)
+                            ? 'critical'
+                            : isFumble(lastRoll.result, lastRoll.diceType)
+                              ? 'fumble'
+                              : null
+                        }
+                        className="h-28 w-28 sm:h-32 sm:w-32 lg:h-40 lg:w-40"
+                      />
 
                       {isRollHidden && (
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -601,7 +610,7 @@ export function SharedView({
 
                             <div className="relative flex items-center justify-center py-1">
                               <span
-                                className={`font-display text-2xl font-black ${
+                                className={`numeric-display font-display text-2xl font-black ${
                                   roll.result === parseSides(roll.diceType)
                                     ? 'text-theme-400'
                                     : roll.result === 1

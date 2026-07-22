@@ -21,6 +21,7 @@ import { getThemeAccent } from '../theme';
 import type { CampaignTheme } from '../theme';
 import { playCritFailSound, playCritSuccessSound, playRollSound } from '../utils/audio';
 import { ConfirmInline } from './ui/ConfirmInline';
+import { DiceShape } from './DiceShape';
 import { IconButton } from './ui/IconButton';
 
 const LABEL_STORAGE_KEY = 'fantasia_selected_dice_label';
@@ -452,11 +453,15 @@ export function DiceRoller({
 
         {isRolling ? (
           <div className="flex flex-col items-center">
-            {/* Niente sfocatura sui numeri che scorrono: rendeva la cifra
-                sgranata invece di dare un senso di movimento. */}
-            <span className="animate-pulse font-display text-5xl font-extrabold tracking-tighter text-theme-500/90 sm:text-6xl">
-              {tempNumber ?? '?'}
-            </span>
+            {/* La sagoma che rotola è più piccola di quella del risultato:
+                il momento che conta è l'esito, non l'attesa. */}
+            <DiceShape
+              diceType={selectedDice}
+              value={tempNumber}
+              state="rolling"
+              accent={accent}
+              className="h-24 w-24 sm:h-28 sm:w-28"
+            />
             <span className="mt-3 animate-pulse font-mono text-xs uppercase tracking-widest text-theme-500/60">
               Rotolando...
             </span>
@@ -472,14 +477,16 @@ export function DiceRoller({
               )}
             </span>
 
-            <span
-              className={`dice-animation font-display text-5xl font-extrabold tracking-tighter text-white sm:text-6xl ${
-                isRollHidden ? 'opacity-30 blur-[2px]' : ''
-              }`}
-              style={{ filter: `drop-shadow(0 0 15px ${accent}33)` }}
-            >
-              {lastRoll.result}
-            </span>
+            <DiceShape
+              key={lastRoll.timestamp}
+              diceType={lastRoll.diceType}
+              value={lastRoll.result}
+              state="result"
+              accent={accent}
+              hidden={isRollHidden}
+              outcome={critical ? 'critical' : fumble ? 'fumble' : null}
+              className="h-36 w-36 sm:h-40 sm:w-40"
+            />
 
             {critical && (
               <span className="mt-2 flex items-center gap-1 rounded-full bg-theme-500/10 px-2 py-0.5 text-xs font-semibold text-theme-500">
@@ -546,7 +553,7 @@ export function DiceRoller({
                     {entry.diceType}
                   </span>
                   <span
-                    className={`font-display text-base font-bold ${
+                    className={`numeric-display font-display text-base font-bold ${
                       entry.result === parseSides(entry.diceType)
                         ? 'text-theme-400'
                         : entry.result === 1
