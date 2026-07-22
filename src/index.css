@@ -264,28 +264,29 @@ html.theme-transitions {
 
 /* Il bordo non è una linea: è un accenno di luce. */
 [data-style='arcano'] .border-bento-border {
-  border-color: color-mix(in oklab, var(--theme-400) 12%, transparent);
+  border-color: color-mix(in oklab, var(--theme-400) 16%, transparent);
 }
 
 /* La profondità viene dall'ombra scura; il colore del tema resta un velo.
    Con aloni più intensi ogni pannello sembrava un'insegna al neon. */
 [data-style='arcano'] .shadow-panel {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 0 18px color-mix(in oklab, var(--theme-600) 7%, transparent),
     0 8px 26px rgb(0 0 0 / 0.32);
 }
 
 [data-style='arcano'] .shadow-raised {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 0 14px color-mix(in oklab, var(--theme-500) 10%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 0 18px color-mix(in oklab, var(--theme-500) 15%, transparent),
     0 12px 34px rgb(0 0 0 / 0.4);
 }
 
 [data-style='arcano'] .shadow-overlay {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.07),
-    0 0 40px color-mix(in oklab, var(--theme-600) 10%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 0 50px color-mix(in oklab, var(--theme-600) 14%, transparent),
     0 28px 70px rgb(0 0 0 / 0.55);
 }
 
@@ -481,6 +482,142 @@ html.theme-transitions {
 [data-style='white'] .hp-track {
   background-color: #e4e7ee;
   box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.08);
+}
+
+/* ==========================================================================
+   RETRO — cabinato anni '80.
+   Qui non cambiano solo forme e colori: cambia il CARATTERE dell'interfaccia.
+   Press Start 2P sui titoli e VT323 su tutto il resto ribaltano la sensazione
+   dell'app più di qualsiasi raggio o ombra. Sopra a tutto passa una superficie
+   CRT con scanline e vignettatura, che non esiste in nessun altro design.
+   ========================================================================== */
+
+[data-style='retro'] {
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+
+  --font-display: 'Press Start 2P', ui-monospace, monospace;
+  --font-sans: 'VT323', ui-monospace, monospace;
+  --font-mono: 'VT323', ui-monospace, monospace;
+
+  /* VT323 disegna piccolo: la scala va alzata per restare leggibile. */
+  --text-xs: 0.95rem;
+  --text-sm: 1.05rem;
+  --text-base: 1.2rem;
+  --text-lg: 1.35rem;
+  --text-xl: 1.55rem;
+  --text-2xl: 1.85rem;
+  --text-3xl: 2.2rem;
+  --text-4xl: 2.7rem;
+
+  --color-bento-void: #05060a;
+  --color-bento-bg: #0a0c14;
+  --color-bento-panel: #141826;
+  --color-bento-item: #1c2133;
+  --color-bento-button: #262c42;
+  --color-bento-border: #5a6486;
+}
+
+/* Press Start 2P è larghissimo: a piena dimensione un titolo lungo sfonderebbe
+   il pannello. `em` lo rimpicciolisce in proporzione ovunque, senza dover
+   toccare una sola classe nei componenti. */
+[data-style='retro'] .font-display {
+  font-size: 0.62em;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+/* Cornici spesse e ombre dure: nessuna sfumatura, come una grafica a 8 bit. */
+[data-style='retro'] .border {
+  border-width: 3px;
+}
+
+[data-style='retro'] .shadow-panel {
+  box-shadow: 4px 4px 0 0 rgb(0 0 0 / 0.55);
+}
+
+[data-style='retro'] .shadow-raised {
+  box-shadow:
+    4px 4px 0 0 rgb(0 0 0 / 0.6),
+    0 0 0 1px color-mix(in oklab, var(--theme-500) 40%, transparent);
+}
+
+[data-style='retro'] .shadow-overlay {
+  box-shadow:
+    8px 8px 0 0 rgb(0 0 0 / 0.7),
+    0 0 0 3px var(--color-bento-border);
+}
+
+/* I pulsanti si "abbassano" alla pressione, come un tasto di un cabinato. */
+[data-style='retro'] button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+}
+
+/* Le immagini non vengono ammorbidite dall'interpolazione. */
+[data-style='retro'] img {
+  image-rendering: pixelated;
+}
+
+/* Barra della vita: tacche squadrate e piene, come le vite di un arcade. */
+[data-style='retro'] .hp-track {
+  background-color: #05060a;
+  border-color: var(--color-bento-border);
+  box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.6);
+  gap: 3px;
+  padding: 3px;
+}
+
+[data-style='retro'] .hp-segment {
+  border-radius: 0;
+  background-image: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.35) 0 35%,
+    rgb(0 0 0 / 0.15) 35% 100%
+  );
+}
+
+/* Il fondo è una griglia da vettoriale anni '80. */
+[data-style='retro'] body {
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--theme-600) 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--theme-600) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 44px 44px;
+  background-attachment: fixed;
+}
+
+/*
+ * La superficie CRT: scanline e vignettatura sopra l'intera interfaccia,
+ * modali compresi. È l'elemento che nessun altro design ha, ed è ciò che fa
+ * sembrare Retro un altro programma invece che lo stesso con altri colori.
+ */
+[data-style='retro'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0.16) 0 1px,
+      transparent 1px 3px
+    ),
+    radial-gradient(
+      120% 120% at 50% 50%,
+      transparent 55%,
+      rgb(0 0 0 / 0.35) 100%
+    );
 }
 
 /* ==========================================================================

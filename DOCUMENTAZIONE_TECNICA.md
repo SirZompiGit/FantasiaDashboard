@@ -88,7 +88,7 @@ La versione dello schema vive nell'involucro di localStorage, **non** dentro `Ca
 | Asse | Attributo su `<html>` | Valori |
 |---|---|---|
 | Colore | `data-theme` | crimson, emerald, sapphire, amber, amethyst, abyss, rose, obsidian |
-| Design | `data-style` | grimorio *(predefinito)*, arcano, runico, white |
+| Design | `data-style` | grimorio *(predefinito)*, arcano, runico, white, retro |
 
 Si combinano liberamente: 8 × 3.
 
@@ -104,6 +104,9 @@ Si combinano liberamente: 8 × 3.
 | **Arcano** | raggi 8–40px | vetro semi-trasparente + `backdrop-filter` | aloni nel colore del tema | lineare, `tracking` 0.14em |
 | **Runico** | raggio 0 | piatte, bordi chiari ad alto contrasto | nessuna | monospace su tutto, separatori `double` |
 | **White** | raggi 4–24px | chiare, testo scuro | ombre diffuse e leggere | lineare |
+| **Retro** | raggio 0, bordi 3px | griglia vettoriale + superficie CRT | ombre dure senza sfocatura | pixel: Press Start 2P + VT323 |
+
+**Retro** è l'unico che va oltre lo scambio di token, ed è il motivo per cui sembra un altro programma: cambia il **carattere tipografico** dell'intera interfaccia (i due font sono caricati in `index.html` apposta) e sovrappone una **superficie CRT** — scanline e vignettatura su `body::after`, sopra ogni cosa, modali compresi. Press Start 2P è molto largo: `.font-display` viene rimpicciolito con `font-size: 0.62em`, che scala in proporzione ovunque senza toccare una classe nei componenti.
 
 **White** è l'unico su fondo chiaro. L'app nasce chiara su fondo scuro, quindi oltre ai token delle superfici servono regole che ribaltano la scala dei testi (`.text-slate-*`, `.text-white`) e i pochi colori Slate rimasti scritti a mano nei componenti. Per non andare a memoria, l'elenco delle classi da coprire è stato estratto dai sorgenti e confrontato con quelle rimappate.
 

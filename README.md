@@ -91,8 +91,9 @@ Due assi indipendenti, combinabili liberamente:
 | **Arcano** | curve ampie | vetro sfocato, aloni di luce nel colore del tema | lineare, leggera |
 | **Runico** | nessuna curva | piatte, nessuna ombra, bordi chiari netti | monospace ovunque |
 | **White** | curve morbide | chiare, testo scuro, ombre diffuse | lineare |
+| **Retro** | squadrate, cornici da 3px | griglia vettoriale, **scanline CRT** sopra tutto | pixel (Press Start 2P + VT323) |
 
-Il colore scelto pilota tutti e quattro.
+Il colore scelto pilota tutti e cinque.
 
 ### Immagini
 

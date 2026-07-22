@@ -54,7 +54,7 @@ export const THEMES: ThemeDefinition[] = [
  * Asse indipendente dal colore: cambia forme, densità e tipografia, non la
  * palette. I due assi si combinano liberamente (8 colori × 3 design).
  */
-export type CampaignStyle = 'grimorio' | 'arcano' | 'runico' | 'white';
+export type CampaignStyle = 'grimorio' | 'arcano' | 'runico' | 'white' | 'retro';
 
 export const DEFAULT_STYLE: CampaignStyle = 'grimorio';
 
@@ -74,6 +74,7 @@ export const STYLES: StyleDefinition[] = [
   { id: 'arcano', label: 'Arcano', hint: 'Vetro sfocato, aloni di luce, curve ampie' },
   { id: 'runico', label: 'Runico', hint: 'Piatto, monospace, nessuna curva' },
   { id: 'white', label: 'White', hint: 'Chiaro, pulito, testo scuro' },
+  { id: 'retro', label: 'Retro', hint: 'Pixel, scanline, cornici spesse' },
 ];
 
 const THEME_IDS = new Set<string>(THEMES.map((t) => t.id));
