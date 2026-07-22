@@ -60,8 +60,16 @@ interface SharedViewProps {
   sceneImage?: string | null;
 }
 
-const PANEL =
-  'flex min-h-0 flex-col overflow-hidden rounded-xl border border-bento-border bg-bento-panel p-4 shadow-panel sm:p-5';
+/**
+ * Pannello senza spaziatura interna, per i casi che ne vogliono una diversa.
+ * Concatenare `p-2` a una stringa che contiene già `p-4` non funziona: sono
+ * classi di pari specificità e vince quella che capita dopo nel CSS generato,
+ * non quella scritta per ultima nell'attributo.
+ */
+const PANEL_BASE =
+  'flex min-h-0 flex-col overflow-hidden rounded-xl border border-bento-border bg-bento-panel shadow-panel';
+
+const PANEL = `${PANEL_BASE} p-4 sm:p-5`;
 
 const PANEL_TITLE =
   'flex items-center gap-2 font-display text-sm font-extrabold uppercase tracking-wider text-slate-200 sm:text-base';
@@ -380,11 +388,11 @@ export function SharedView({
             {/* Immagine di scena: compare solo se il master ne ha caricata una,
                 altrimenti la colonna resta esattamente com'era. */}
             {sceneImage && (
-              <div className={`${PANEL} shrink-0 overflow-hidden p-2`}>
+              <div className={`${PANEL_BASE} shrink-0 p-1`}>
                 <img
                   src={sceneImage}
                   alt="Immagine della scena"
-                  className="max-h-[32vh] w-full rounded-lg object-contain lg:max-h-[26vh]"
+                  className="max-h-[42vh] w-full rounded-lg object-contain lg:max-h-[34vh]"
                 />
               </div>
             )}

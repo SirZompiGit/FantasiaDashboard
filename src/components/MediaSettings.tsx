@@ -42,7 +42,8 @@ export function MediaSettings({
 }: MediaSettingsProps) {
   const bgFileRef = useRef<HTMLInputElement>(null);
   const sceneFileRef = useRef<HTMLInputElement>(null);
-  const [urlDraft, setUrlDraft] = useState('');
+  const [bgUrl, setBgUrl] = useState('');
+  const [sceneUrl, setSceneUrl] = useState('');
   const [busy, setBusy] = useState<'background' | 'scene' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,17 +64,57 @@ export function MediaSettings({
     }
   };
 
-  const applyUrl = () => {
-    const url = urlDraft.trim();
+  const applyUrl = (target: 'background' | 'scene') => {
+    const url = (target === 'scene' ? sceneUrl : bgUrl).trim();
     if (!url) return;
     if (!/^https?:\/\//i.test(url)) {
       setError('Inserisci un indirizzo che inizi con http:// o https://');
       return;
     }
     setError(null);
-    onChange({ source: url });
-    setUrlDraft('');
+    onChange(target === 'scene' ? { scene: url } : { source: url });
+    if (target === 'scene') setSceneUrl('');
+    else setBgUrl('');
   };
+
+  /** Campo per incollare un indirizzo, uguale per sfondo e scena. */
+  const urlField = (
+    target: 'background' | 'scene',
+    value: string,
+    setValue: (v: string) => void,
+  ) => (
+    <div className="flex gap-1.5">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-bento-border bg-bento-panel px-2">
+        <Link2 className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+        <input
+          type="url"
+          placeholder="oppure incolla un indirizzo"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              applyUrl(target);
+            }
+          }}
+          aria-label={
+            target === 'scene'
+              ? "Indirizzo dell'immagine di scena"
+              : "Indirizzo dell'immagine di sfondo"
+          }
+          className="w-full min-w-0 bg-transparent py-2 text-[11px] text-slate-200 placeholder-slate-600 focus:outline-none"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => applyUrl(target)}
+        disabled={!value.trim()}
+        className="shrink-0 rounded-lg bg-theme-600 px-2.5 text-[11px] font-semibold text-white transition-colors duration-200 hover:bg-theme-500 disabled:opacity-40"
+      >
+        Usa
+      </button>
+    </div>
+  );
 
   const preview = (src: string, onRemove: () => void, label: string) => (
     <div className="flex items-center gap-2 rounded-lg border border-bento-border bg-bento-panel p-2">
@@ -145,33 +186,7 @@ export function MediaSettings({
           </button>
         </div>
 
-        <div className="flex gap-1.5">
-          <div className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-bento-border bg-bento-panel px-2">
-            <Link2 className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-            <input
-              type="url"
-              placeholder="oppure incolla un indirizzo"
-              value={urlDraft}
-              onChange={(event) => setUrlDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  applyUrl();
-                }
-              }}
-              aria-label="Indirizzo dell'immagine di sfondo"
-              className="w-full min-w-0 bg-transparent py-2 text-[11px] text-slate-200 placeholder-slate-600 focus:outline-none"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={applyUrl}
-            disabled={!urlDraft.trim()}
-            className="shrink-0 rounded-lg bg-theme-600 px-2.5 text-[11px] font-semibold text-white transition-colors duration-200 hover:bg-theme-500 disabled:opacity-40"
-          >
-            Usa
-          </button>
-        </div>
+        {urlField('background', bgUrl, setBgUrl)}
 
         {media.source && (
           <div className="space-y-2.5 rounded-lg border border-bento-border bg-bento-panel/40 p-2.5">
@@ -260,6 +275,8 @@ export function MediaSettings({
           <Upload className="h-3.5 w-3.5" />
           {busy === 'scene' ? 'Elaboro...' : media.scene ? 'Sostituisci' : 'Carica scena'}
         </button>
+
+        {urlField('scene', sceneUrl, setSceneUrl)}
       </div>
 
       {(error || storageError) && (

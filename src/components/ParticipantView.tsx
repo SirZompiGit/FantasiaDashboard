@@ -106,8 +106,11 @@ export function ParticipantView({
   };
 
   return (
-    <div className="app-surface flex min-h-screen flex-col gap-4 bg-bento-bg p-3 font-sans text-slate-400 sm:p-5 lg:p-8">
-      <header className="flex shrink-0 flex-col gap-3 rounded-xl border border-bento-border bg-bento-panel p-3 shadow-panel sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    // Nessuna spaziatura qui: la vista condivisa ha già la propria e il
+    // pannello che contiene tutto. Sommandole, il contenuto veniva schiacciato
+    // al centro da tre cornici annidate.
+    <div className="app-surface flex min-h-screen flex-col bg-bento-bg font-sans text-slate-400">
+      <header className="m-3 flex shrink-0 flex-col gap-3 rounded-xl border border-bento-border bg-bento-panel p-3 shadow-panel sm:m-5 sm:mb-0 sm:flex-row sm:items-center sm:justify-between sm:p-4 lg:mx-8 lg:mt-8">
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 font-mono font-bold text-slate-300">
             {user.name.charAt(0).toUpperCase()}
@@ -187,7 +190,9 @@ export function ParticipantView({
         </div>
       </header>
 
-      <div className="flex-1 overflow-hidden rounded-2xl border border-bento-border">
+      {/* La vista condivisa si estende per intero: la cornice che la
+          racchiudeva le rubava spazio ai lati senza aggiungere nulla. */}
+      <div className="flex-1">
         <SharedView
           state={campaign}
           participantRolls={roomState.participantRolls}
