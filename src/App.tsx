@@ -24,7 +24,8 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { type CampaignBackup, restoreBackup, useCampaignState } from './hooks/useCampaignState';
 import { useRoom } from './hooks/useRoom';
 import { useToasts } from './hooks/useToasts';
-import { useBackground } from './hooks/useBackground';
+import { useMedia } from './hooks/useMedia';
+import { setRoomMedia, subscribeToRoomMedia } from './firebaseUtils';
 import { normalizeCampaign, parseImportedCampaign } from './state/migrations';
 import { applyTheme } from './theme';
 import { setMuted } from './utils/audio';
@@ -59,10 +60,10 @@ export default function App() {
   const room = useRoom(state, !sharedUrl.shared);
   const { notify } = useToasts();
 
-  // Governato qui e non nell'intestazione: così lo sfondo si applica anche
+  // Governato qui e non nell'intestazione: così le immagini si applicano anche
   // nella finestra dello schermo condiviso e nella vista dei giocatori, dove
   // l'intestazione non viene renderizzata.
-  const backgroundControls = useBackground();
+  const mediaControls = useMedia();
 
   const [localMode, setLocalMode] = useState<LocalMode>(() => {
     try {
@@ -110,6 +111,37 @@ export default function App() {
     () => applyTheme(displayed.theme, displayed.style),
     [displayed.theme, displayed.style],
   );
+
+  /**
+   * Il master trasmette le proprie immagini alla stanza.
+   * Viaggiano su `roomMedia/{pin}`, un ramo separato dalla campagna: dentro
+   * `rooms/{pin}` sarebbero state rispedite a tutti i giocatori a ogni singola
+   * modifica degli appunti.
+   */
+  const { local: localMedia, applyRemote } = mediaControls;
+  const roomRole = room.session?.role;
+  const roomPin = room.session?.pin;
+
+  useEffect(() => {
+    if (roomRole !== 'master' || !roomPin) return;
+    setRoomMedia(roomPin, localMedia).catch((e) =>
+      console.warn('[fantasia] immagini non trasmesse alla stanza:', e),
+    );
+  }, [roomRole, roomPin, localMedia]);
+
+  /** Giocatori e finestra di proiezione adottano le immagini del master. */
+  useEffect(() => {
+    if (!roomPin || roomRole === 'master') {
+      applyRemote(null);
+      return;
+    }
+
+    const unsubscribe = subscribeToRoomMedia(roomPin, applyRemote);
+    return () => {
+      unsubscribe();
+      applyRemote(null);
+    };
+  }, [roomPin, roomRole, applyRemote]);
 
   useEffect(() => {
     setMuted(isMuted);
@@ -358,7 +390,7 @@ export default function App() {
   if (sharedUrl.shared) {
     if (!sharedUrl.pin) {
       // Modalità Lite: legge la stessa campagna locale, sincronizzata fra schede.
-      return <SharedView state={state} isLite />;
+      return <SharedView state={state} isLite sceneImage={mediaControls.media.scene} />;
     }
 
     if (room.roomClosed) {
@@ -386,6 +418,7 @@ export default function App() {
         state={roomCampaign}
         roomUsers={room.roomState.users}
         participantRolls={room.roomState.participantRolls}
+        sceneImage={mediaControls.media.scene}
       />
     );
   }
@@ -422,6 +455,7 @@ export default function App() {
         roomState={room.roomState}
         online={room.online}
         onExit={room.exitRoom}
+        sceneImage={mediaControls.media.scene}
       />
     );
   }
@@ -466,6 +500,7 @@ export default function App() {
           isLite={!isMaster}
           roomUsers={room.roomState?.users}
           participantRolls={room.roomState?.participantRolls}
+          sceneImage={mediaControls.media.scene}
         />
       </div>
     );
@@ -525,7 +560,8 @@ export default function App() {
         onRedo={redo}
         canUndo={canUndo}
         canRedo={canRedo}
-        backgroundControls={backgroundControls}
+        mediaControls={mediaControls}
+        sharingMedia={isMaster}
         onBackToWelcome={() => {
           // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
           // sul database, con i giocatori collegati a un master che non c'è più.

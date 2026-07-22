@@ -142,8 +142,11 @@ export interface UseMediaResult {
   setMedia: (next: Partial<MediaSettings>) => void;
   clearBackground: () => void;
   clearScene: () => void;
-  /** Adotta le immagini ricevute dalla stanza. `null` torna alle proprie. */
-  applyRemote: (remote: MediaSettings | null) => void;
+  /**
+   * Adotta le immagini ricevute dalla stanza. `null` torna alle proprie.
+   * Accetta un valore grezzo perché arriva direttamente dal database.
+   */
+  applyRemote: (remote: unknown) => void;
   error: string | null;
 }
 
@@ -203,8 +206,11 @@ export function useMedia(): UseMediaResult {
 
   const clearScene = useCallback(() => setLocal((current) => ({ ...current, scene: null })), []);
 
-  const applyRemote = useCallback((next: MediaSettings | null) => {
-    setRemote(next ? normalizeMedia(next) : null);
+  const applyRemote = useCallback((next: unknown) => {
+    // `null` significa "nessuna immagine condivisa": si torna alle proprie.
+    // Qualsiasi altro valore viene normalizzato, quindi anche un dato corrotto
+    // sul database non può rompere nulla.
+    setRemote(next === null || next === undefined ? null : normalizeMedia(next));
   }, []);
 
   return useMemo(

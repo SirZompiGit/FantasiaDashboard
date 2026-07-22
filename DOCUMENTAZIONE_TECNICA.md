@@ -111,13 +111,20 @@ L'implementazione non tocca i componenti. Tailwind v4 costruisce le utility di r
 
 Il valore è salvato in `CampaignState.style`: campo **additivo**, assente nelle campagne più vecchie e normalizzato al predefinito, quindi il database resta compatibile. Anche i design rimossi in passato (`bento`, `compatto`, `sangue-scuro`, `sangue-chiaro`) ricadono su `grimorio` senza rompere nulla.
 
-### Sfondo personalizzato
+### Immagini (sfondo e scena)
 
-Immagine impostata dall'utente, indipendente dal design. Vive su un livello fisso dietro l'app: `.app-surface` — il contenitore radice di ogni schermata — si fa da parte per lasciarlo vedere, mentre i pannelli mantengono la propria superficie e il testo resta leggibile. Ripetizione, sfocatura e intensità viaggiano come variabili CSS su `<html>`.
+Gestite da `hooks/useMedia.ts`, indipendenti dal design.
 
-Non è in `CampaignState`, ma in una chiave di `localStorage` a sé. Tre motivi: non gonfia il file esportato, non viene trasmesso a Firebase a ogni modifica — dove un'immagine in base64 verrebbe riscritta per intero a ogni tasto premuto — e resta una preferenza del dispositivo, giusta perché lo schermo condiviso è spesso un altro monitor.
+- **Sfondo**: livello fisso dietro l'app. `.app-surface` — il contenitore radice di ogni schermata — si fa da parte per lasciarlo vedere, mentre i pannelli mantengono la propria superficie e il testo resta leggibile. Ripetizione, sfocatura e intensità viaggiano come variabili CSS su `<html>`.
+- **Scena**: riquadro sotto l'ordine di turno nella vista condivisa. Assente l'immagine, il riquadro non viene renderizzato.
 
-Le immagini caricate vengono ridisegnate su canvas a un massimo di 1920px e riesportate in JPEG: senza questo passaggio una foto da telefono esaurirebbe la quota di `localStorage`, impedendo il salvataggio della campagna.
+**Non sono in `CampaignState`**, ma in una chiave di `localStorage` a sé: un'immagine in base64 dentro la campagna verrebbe riscritta per intero a ogni tasto premuto, sia su disco sia verso Firebase.
+
+Nelle stanze viaggiano su `roomMedia/{pin}`, un ramo **separato** da `rooms/{pin}`. Non è un dettaglio: la sottoscrizione alla stanza riceve l'intero nodo a ogni modifica della campagna, quindi con le immagini lì dentro ogni tasto premuto negli appunti avrebbe rispedito centinaia di kilobyte a tutti i giocatori collegati.
+
+Chi è collegato adotta le immagini del master; le proprie restano salvate e tornano all'uscita. Il valore ricevuto dal database passa sempre da `normalizeMedia`, quindi un dato corrotto non può rompere nulla.
+
+Le immagini caricate vengono ridisegnate su canvas (1920px lo sfondo, 1280px la scena) e riesportate in JPEG: una foto da 6 MB scende tipicamente sotto i 400 KB. I PNG con trasparenza mantengono il formato originale.
 
 ## 4. Dadi
 

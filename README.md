@@ -94,19 +94,22 @@ Due assi indipendenti, combinabili liberamente:
 
 Il colore scelto pilota tutti e quattro.
 
-### Sfondo personalizzato
+### Immagini
 
-Dalle impostazioni si può mettere un'immagine di sfondo, caricandola da file o
-incollando un indirizzo, con controlli per **ripetizione a mosaico**,
-**sfocatura** e **intensità**.
+Dalle impostazioni si caricano due immagini, da file o da indirizzo web:
 
-Le immagini caricate vengono ridotte a 1920px prima di essere conservate: senza
-questo passaggio una foto da telefono esaurirebbe da sola lo spazio del browser,
-impedendo il salvataggio della campagna.
+| Immagine | Dove compare |
+|---|---|
+| **Sfondo** | Dietro tutta l'interfaccia, con **ripetizione a mosaico**, **sfocatura** e **intensità** regolabili |
+| **Scena** | In un riquadro sotto l'ordine di turno nella vista condivisa — mappe, ritratti, indizi. Se non c'è, il riquadro non esiste affatto |
 
-Lo sfondo è una preferenza **del dispositivo**: non entra nel file esportato né
-viene trasmesso alla stanza. Ogni schermo può quindi avere il proprio, cosa utile
-quando la vista condivisa sta su un secondo monitor.
+In una stanza multiplayer entrambe vengono **trasmesse ai giocatori**: chi entra
+vede quelle scelte dal master. Le proprie restano salvate e tornano all'uscita.
+
+Le immagini vengono ridotte prima di essere conservate (1920px lo sfondo, 1280px
+la scena): senza questo passaggio una foto da telefono esaurirebbe lo spazio del
+browser, impedendo il salvataggio della campagna, e andrebbe scaricata per intero
+da ogni giocatore.
 
 Nella vista condivisa ci sono anche **schermo intero** e **zoom**, utili quando lo schermo è un proiettore o una TV a qualche metro di distanza.
 

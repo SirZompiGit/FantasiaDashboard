@@ -78,6 +78,26 @@
 
         "$altro": { ".validate": false }
       }
+    },
+
+    "roomMedia": {
+      "_nota": [
+        "Sfondo e immagine di scena della stanza. Stanno su un ramo separato da",
+        "rooms/{pin} apposta: la sottoscrizione alla stanza riceve l'intero nodo",
+        "a ogni modifica della campagna, e con le immagini lì dentro ogni tasto",
+        "premuto negli appunti avrebbe rispedito centinaia di kilobyte a tutti i",
+        "giocatori collegati."
+      ],
+      "$pin": {
+        ".read": "$pin.matches(/^[0-9]{6}$/)",
+        ".write": "$pin.matches(/^[0-9]{6}$/)",
+        "source": { ".validate": "newData.isString() && newData.val().length <= 4000000" },
+        "scene": { ".validate": "newData.isString() && newData.val().length <= 4000000" },
+        "repeat": { ".validate": "newData.isBoolean()" },
+        "blur": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 40" },
+        "opacity": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1" },
+        "$altro": { ".validate": false }
+      }
     }
   }
 }

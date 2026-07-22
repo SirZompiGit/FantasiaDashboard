@@ -56,6 +56,8 @@ interface SharedViewProps {
   diceRollerSlot?: React.ReactNode;
   /** In modalità Lite non esistono giocatori collegati: il riquadro si nasconde. */
   isLite?: boolean;
+  /** Immagine caricata dal master. Se assente, il riquadro non compare affatto. */
+  sceneImage?: string | null;
 }
 
 const PANEL =
@@ -71,6 +73,7 @@ export function SharedView({
   personalNotesSlot,
   diceRollerSlot,
   isLite,
+  sceneImage,
 }: SharedViewProps) {
   const { title, players, healthBars, lastRoll, theme, activePlayerId, isRollHidden } = state;
 
@@ -276,10 +279,9 @@ export function SharedView({
 
         <div className="flex flex-1 flex-col gap-4 lg:gap-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-            {/* Ordine di turno */}
-            <section
-              className={`${PANEL} @container order-3 md:order-2 lg:order-1 lg:col-span-3 lg:h-full`}
-            >
+            {/* Ordine di turno, con sotto l'immagine di scena quando c'è */}
+            <div className="order-3 flex flex-col gap-4 md:order-2 lg:order-1 lg:col-span-3 lg:h-full lg:min-h-0">
+            <section className={`${PANEL} @container flex-1`}>
               <div className="mb-3 shrink-0 border-b border-bento-border pb-3">
                 <h2 className={PANEL_TITLE}>
                   <Shield className="h-5 w-5 text-theme-500" /> Ordine di Turno
@@ -374,6 +376,19 @@ export function SharedView({
                 )}
               </div>
             </section>
+
+            {/* Immagine di scena: compare solo se il master ne ha caricata una,
+                altrimenti la colonna resta esattamente com'era. */}
+            {sceneImage && (
+              <div className={`${PANEL} shrink-0 overflow-hidden p-2`}>
+                <img
+                  src={sceneImage}
+                  alt="Immagine della scena"
+                  className="max-h-[32vh] w-full rounded-lg object-contain lg:max-h-[26vh]"
+                />
+              </div>
+            )}
+            </div>
 
             {/* Salute */}
             <section

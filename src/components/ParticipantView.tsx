@@ -29,6 +29,8 @@ interface ParticipantViewProps {
   roomState: RoomState;
   online: boolean;
   onExit: () => void;
+  /** Immagine di scena ricevuta dal master. */
+  sceneImage?: string | null;
 }
 
 export function ParticipantView({
@@ -37,6 +39,7 @@ export function ParticipantView({
   roomState,
   online,
   onExit,
+  sceneImage,
 }: ParticipantViewProps) {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -189,6 +192,7 @@ export function ParticipantView({
           state={campaign}
           participantRolls={roomState.participantRolls}
           roomUsers={roomState.users}
+          sceneImage={sceneImage}
           personalNotesSlot={
             assignedPlayer ? (
               <textarea

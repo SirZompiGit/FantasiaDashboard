@@ -37,8 +37,8 @@ import { STYLES, THEMES, type CampaignStyle, type CampaignTheme } from '../theme
 import { ConfirmInline } from './ui/ConfirmInline';
 import { IconButton } from './ui/IconButton';
 import { Modal } from './ui/Modal';
-import { BackgroundSettings } from './BackgroundSettings';
-import type { UseBackgroundResult } from '../hooks/useBackground';
+import { MediaSettings } from './MediaSettings';
+import type { UseMediaResult } from '../hooks/useMedia';
 import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
 
 interface DashboardHeaderProps {
@@ -65,8 +65,10 @@ interface DashboardHeaderProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
-  /** Lo sfondo è governato da App, così vale anche nella finestra condivisa. */
-  backgroundControls: UseBackgroundResult;
+  /** Le immagini sono governate da App, così valgono anche nella finestra condivisa. */
+  mediaControls: UseMediaResult;
+  /** True quando c'è una stanza aperta: le immagini raggiungono i giocatori. */
+  sharingMedia: boolean;
 }
 
 const TOOL_BUTTON =
@@ -94,7 +96,8 @@ export function DashboardHeader({
   onRedo,
   canUndo,
   canRedo,
-  backgroundControls,
+  mediaControls,
+  sharingMedia,
 }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -332,11 +335,14 @@ export function DashboardHeader({
               </label>
             </div>
 
-            <BackgroundSettings
-              background={backgroundControls.background}
-              onChange={backgroundControls.setBackground}
-              onClear={backgroundControls.clearBackground}
-              storageError={backgroundControls.error}
+            <MediaSettings
+              media={mediaControls.local}
+              onChange={mediaControls.setMedia}
+              onClearBackground={mediaControls.clearBackground}
+              onClearScene={mediaControls.clearScene}
+              storageError={mediaControls.error}
+              isRemote={mediaControls.isRemote}
+              isSharing={sharingMedia}
             />
 
             <div className="flex items-center justify-between gap-4 border-t border-bento-border pt-3">
