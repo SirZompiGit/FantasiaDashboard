@@ -1,0 +1,125 @@
+import { describe, expect, it } from 'vitest';
+import type { HealthBar } from '../types';
+import { clampMaxHp, getBarColor, groupBars, healthRatio, isLowHp } from './healthBars';
+
+const bar = (over: Partial<HealthBar> = {}): HealthBar => ({
+  id: 'x',
+  name: 'Prova',
+  maxValue: 100,
+  currentValue: 50,
+  colorMode: 'static',
+  staticColor: '#000000',
+  gradientColors: { low: '#ff0000', mid: '#00ff00', high: '#0000ff' },
+  ...over,
+});
+
+describe('getBarColor', () => {
+  it('in modalita statica ignora la percentuale', () => {
+    expect(getBarColor(bar({ currentValue: 1 }))).toBe('#000000');
+    expect(getBarColor(bar({ currentValue: 99 }))).toBe('#000000');
+  });
+
+  it('a soglie sceglie il livello per fascia', () => {
+    const g = (currentValue: number) => getBarColor(bar({ colorMode: 'gradient', currentValue }));
+    expect(g(20)).toBe('#ff0000');
+    expect(g(50)).toBe('#00ff00');
+    expect(g(90)).toBe('#0000ff');
+  });
+
+  it('sfumato attraversa i tre colori con continuita', () => {
+    const s = (currentValue: number) => getBarColor(bar({ colorMode: 'smooth', currentValue }));
+    expect(s(0)).toBe('#ff0000');
+    expect(s(50)).toBe('#00ff00');
+    expect(s(100)).toBe('#0000ff');
+    // A meta strada fra basso e medio
+    expect(s(25)).toBe('#808000');
+  });
+
+  it('sfumato non fa salti bruschi, a soglie li conserva', () => {
+    const distance = (a: string, b: string) => {
+      const parse = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+      const [r1, g1, b1] = parse(a);
+      const [r2, g2, b2] = parse(b);
+      return Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+    };
+
+    const maxJump = (mode: HealthBar['colorMode']) => {
+      let max = 0;
+      for (let v = 0; v < 100; v++) {
+        max = Math.max(
+          max,
+          distance(
+            getBarColor(bar({ colorMode: mode, currentValue: v })),
+            getBarColor(bar({ colorMode: mode, currentValue: v + 1 })),
+          ),
+        );
+      }
+      return max;
+    };
+
+    expect(maxJump('smooth')).toBeLessThan(25);
+    expect(maxJump('gradient')).toBeGreaterThan(200);
+  });
+
+  it('accetta anche i colori a tre cifre', () => {
+    const short = bar({
+      colorMode: 'smooth',
+      currentValue: 0,
+      gradientColors: { low: '#f00', mid: '#0f0', high: '#00f' },
+    });
+    expect(getBarColor(short)).toBe('#ff0000');
+  });
+});
+
+describe('healthRatio', () => {
+  it('non divide per zero', () => {
+    expect(healthRatio({ currentValue: 5, maxValue: 0 })).toBe(0);
+  });
+});
+
+describe('clampMaxHp', () => {
+  it('limita il massimo, che l input testuale non faceva', () => {
+    expect(clampMaxHp(100000)).toBe(999);
+    expect(clampMaxHp(0)).toBe(1);
+    expect(clampMaxHp(NaN)).toBe(1);
+  });
+});
+
+describe('isLowHp', () => {
+  const low = bar({ maxValue: 100, currentValue: 20 });
+
+  it('scatta sotto un quarto dei punti ferita', () => {
+    expect(isLowHp(low)).toBe(true);
+    expect(isLowHp({ ...low, currentValue: 25 })).toBe(true);
+    expect(isLowHp({ ...low, currentValue: 26 })).toBe(false);
+  });
+
+  it('tace a zero, dove c e gia l etichetta DEFUNTO', () => {
+    expect(isLowHp({ ...low, currentValue: 0 })).toBe(false);
+  });
+
+  it('rispetta l interruttore della singola barra', () => {
+    expect(isLowHp({ ...low, lowHpAlert: false })).toBe(false);
+    // Assente significa attivo: le barre create prima devono comportarsi
+    // come quelle nuove.
+    expect(isLowHp({ ...low, lowHpAlert: undefined })).toBe(true);
+  });
+});
+
+describe('groupBars', () => {
+  it('esclude i gruppi vuoti e rispetta l ordine scelto', () => {
+    const { groups, ungrouped } = groupBars(
+      [
+        bar({ id: 'a', group: 'Nemici' }),
+        bar({ id: 'b', group: 'Sparito' }),
+        bar({ id: 'c' }),
+        bar({ id: 'd', group: 'Alleati' }),
+      ],
+      ['Nemici', 'Alleati', 'Vuoto'],
+    );
+
+    expect(groups.map((g) => g.name)).toEqual(['Nemici', 'Alleati']);
+    // Chi ha un gruppo che non esiste piu finisce fra le non raggruppate.
+    expect(ungrouped).toHaveLength(2);
+  });
+});

@@ -71,8 +71,11 @@
 
         "participantRolls": {
           ".write": "$pin.matches(/^[0-9]{6}$/)",
-          ".validate": "!newData.hasChildren() || newData.numChildren() <= 10",
           "$indice": {
+            // Il limite di 10 lanci si esprime vincolando la CHIAVE a una sola
+            // cifra: gli indici ammessi sono 0-9. Nelle regole non esiste
+            // `numChildren()` — quello appartiene all'SDK client, non qui.
+            ".validate": "$indice.matches(/^[0-9]$/) && newData.hasChildren(['diceType', 'result', 'timestamp'])",
             "diceType": {
               ".validate": "newData.isString() && newData.val().matches(/^d[0-9]{1,3}$/)"
             },

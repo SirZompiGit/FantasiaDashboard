@@ -526,7 +526,7 @@ html.theme-transitions {
    il pannello. `em` lo rimpicciolisce in proporzione ovunque, senza dover
    toccare una sola classe nei componenti. */
 [data-style='retro'] .font-display {
-  font-size: 0.62em;
+  font-size: 0.72em;
   letter-spacing: 0;
   line-height: 1.5;
 }

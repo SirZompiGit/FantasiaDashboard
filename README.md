@@ -13,6 +13,14 @@ Funziona in due modalità:
 
 **Requisiti:** Node.js 20 o superiore.
 
+> ⚠️ **Il nome della cartella non deve contenere `&`.**
+> npm risolve i comandi passando dal `PATH`, e la e commerciale spezza il
+> percorso: `npm run dev`, `npm run build`, `npm run lint` e `npm test`
+> falliscono tutti con *"...non è riconosciuto come comando interno o esterno"*.
+> Non è un problema del progetto, è una limitazione di npm su Windows.
+> Se la cartella si chiama `d&d-campaign-master-dashboard(1)`, rinominala
+> (per esempio in `fantasia`) prima di iniziare.
+
 ```bash
 npm install
 npm run dev      # http://localhost:3000
@@ -23,10 +31,27 @@ Il server ascolta anche sull'IP di rete (`--host=0.0.0.0`), così i giocatori po
 Altri comandi:
 
 ```bash
-npm run lint     # controllo dei tipi (TypeScript strict)
-npm run build    # build di produzione in dist/
-npm run preview  # anteprima della build
+npm run lint       # controllo dei tipi (TypeScript strict)
+npm test           # 106 verifiche automatiche
+npm run test:watch # le stesse, rieseguite a ogni salvataggio
+npm run build      # build di produzione in dist/
+npm run preview    # anteprima della build
 ```
+
+### Cosa coprono i test
+
+Stanno accanto al codice che verificano (`src/**/*.test.ts`) e non toccano il
+DOM, quindi girano in mezzo secondo.
+
+| File | Cosa protegge |
+|---|---|
+| `state/migrations.test.ts` | Che nessun dato malformato possa rendere l'app irrecuperabile |
+| `state/history.test.ts` | Annulla e ripeti, inclusa la fusione dei gesti continui |
+| `state/campaignReducer.test.ts` | Le mutazioni e il ripristino dopo una cancellazione |
+| `lib/*.test.ts` | Dadi, barre vita, identificatori, formato dei lanci sul database |
+| `theme.test.ts` | Che i temi salvati restino leggibili e i design rimossi non rompano nulla |
+| `components/DiceShape.test.ts` | La geometria delle sagome dei dadi |
+| `project.test.ts` | Regole Firebase valide e nessuna classe Tailwind in conflitto |
 
 ## Configurare la Versione X
 

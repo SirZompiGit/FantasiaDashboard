@@ -1,0 +1,186 @@
+/**
+ * Controlli sul progetto, non sulla logica.
+ *
+ * Verificano due classi di errori che passano inosservati: regole di sicurezza
+ * che Firebase rifiuterebbe, e classi Tailwind in conflitto nella stessa
+ * stringa. Entrambe si sono già verificate durante lo sviluppo.
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+// Vitest esegue dalla radice del progetto.
+const root = process.cwd();
+const read = (relative: string) => fs.readFileSync(path.join(root, relative), 'utf8');
+
+function sourceFiles(extension: RegExp): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (extension.test(entry.name)) out.push(full);
+    }
+  };
+  walk(path.join(root, 'src'));
+  return out;
+}
+
+describe('regole del Realtime Database', () => {
+  // Firebase accetta i commenti nelle regole; per analizzarle qui vanno tolti.
+  const parsed = JSON.parse(read('firebase.rules.json').replace(/^\s*\/\/.*$/gm, ''));
+
+  it('restano JSON valido una volta tolti i commenti', () => {
+    expect(parsed.rules).toBeTruthy();
+  });
+
+  /**
+   * Ogni chiave senza punto iniziale è un percorso e il suo valore DEVE essere
+   * un oggetto. Le chiavi di commento con valore array — che avevo usato in una
+   * prima versione — vengono rifiutate dalla console.
+   */
+  it('non contengono chiavi di percorso con valore non valido', () => {
+    const invalid: string[] = [];
+
+    const walk = (node: Record<string, unknown>, at: string) => {
+      for (const [key, value] of Object.entries(node)) {
+        if (key.startsWith('.')) continue;
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+          invalid.push(`${at}/${key}`);
+          continue;
+        }
+        walk(value as Record<string, unknown>, `${at}/${key}`);
+      }
+    };
+
+    walk(parsed.rules, '');
+    expect(invalid).toEqual([]);
+  });
+
+  it('chiudono la radice', () => {
+    expect(parsed.rules['.read']).toBe(false);
+    expect(parsed.rules['.write']).toBe(false);
+  });
+
+  it('prevedono tutti i rami che l app scrive', () => {
+    for (const branch of ['campaign', 'lastSeen', 'users', 'participantRolls']) {
+      expect(parsed.rules.rooms.$pin[branch]).toBeTruthy();
+    }
+    expect(parsed.rules.roomMedia).toBeTruthy();
+  });
+
+  it('indicizzano lastSeen, senza cui la pulizia delle stanze sarebbe lenta', () => {
+    expect(parsed.rules.rooms['.indexOn']).toContain('lastSeen');
+  });
+
+  /**
+   * Il linguaggio delle regole ha un'API molto più piccola di quella dell'SDK.
+   * `numChildren()` per esempio esiste sul DataSnapshot del client ma NON nelle
+   * regole: usarlo fa fallire la pubblicazione con
+   * "No such method/property", e senza questo controllo l'errore si scopre
+   * solo incollando le regole nella console.
+   */
+  it('usano solo metodi che esistono nel linguaggio delle regole', () => {
+    const ALLOWED = new Set([
+      // RuleDataSnapshot
+      'val',
+      'child',
+      'parent',
+      'hasChild',
+      'hasChildren',
+      'exists',
+      'getPriority',
+      'isNumber',
+      'isString',
+      'isBoolean',
+      // Metodi delle stringhe
+      'length',
+      'contains',
+      'beginsWith',
+      'endsWith',
+      'replace',
+      'toLowerCase',
+      'toUpperCase',
+      'matches',
+    ]);
+
+    const unknown = new Set<string>();
+
+    const walk = (node: Record<string, unknown>) => {
+      for (const [key, value] of Object.entries(node)) {
+        if (typeof value === 'string' && key.startsWith('.')) {
+          for (const match of value.matchAll(/\.([a-zA-Z][a-zA-Z0-9]*)\s*\(/g)) {
+            if (!ALLOWED.has(match[1])) unknown.add(match[1]);
+          }
+        } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          walk(value as Record<string, unknown>);
+        }
+      }
+    };
+
+    walk(parsed.rules);
+    expect([...unknown]).toEqual([]);
+  });
+
+  it('limitano i lanci vincolando la chiave, non contando i figli', () => {
+    const roll = parsed.rules.rooms.$pin.participantRolls.$indice;
+    expect(roll['.validate']).toContain('$indice.matches');
+  });
+});
+
+describe('regole di Firestore', () => {
+  it('lo chiudono del tutto, visto che l app non lo usa', () => {
+    expect(read('firestore.rules')).toMatch(/allow read, write: if false;/);
+    const usesFirestore = sourceFiles(/\.tsx?$/).some((file) =>
+      /firebase\/firestore/.test(fs.readFileSync(file, 'utf8')),
+    );
+    expect(usesFirestore).toBe(false);
+  });
+});
+
+/**
+ * Due utility che scrivono la stessa proprietà hanno pari specificità: vince
+ * quella che capita dopo nel CSS generato, non quella scritta per ultima
+ * nell'attributo. È così che un `p-2` veniva ignorato a favore di un `p-4`.
+ */
+describe('classi Tailwind in conflitto', () => {
+  const GROUPS: { name: string; test: RegExp }[] = [
+    { name: 'padding', test: /^p-[\d.]+$/ },
+    { name: 'padding-x', test: /^px-[\d.]+$/ },
+    { name: 'padding-y', test: /^py-[\d.]+$/ },
+    { name: 'margin', test: /^m-[\d.]+$/ },
+    { name: 'display', test: /^(block|flex|grid|inline-flex|hidden)$/ },
+    { name: 'flex-direction', test: /^flex-(row|col|row-reverse|col-reverse)$/ },
+    { name: 'border-radius', test: /^rounded(-(none|sm|md|lg|xl|2xl|3xl|full))?$/ },
+    { name: 'overflow', test: /^overflow-(auto|hidden|visible|scroll)$/ },
+    { name: 'position', test: /^(static|fixed|absolute|relative|sticky)$/ },
+  ];
+
+  const hasVariant = (klass: string) => /^(?:[a-z0-9@:[\]/-]+:)+/.test(klass);
+
+  it('non ce ne sono in nessun componente', () => {
+    const conflicts: string[] = [];
+
+    for (const file of sourceFiles(/\.tsx$/)) {
+      const source = fs.readFileSync(file, 'utf8');
+      const relative = path.relative(root, file);
+
+      for (const match of source.matchAll(/className=(?:"([^"]+)"|\{`([^`]+)`\})/g)) {
+        // Le interpolazioni sono ignote a compilazione: si escludono.
+        const raw = (match[1] ?? match[2] ?? '').replace(/\$\{[^}]*\}/g, ' ');
+        const classes = raw
+          .split(/\s+/)
+          .filter(Boolean)
+          .filter((klass: string) => !hasVariant(klass));
+
+        for (const group of GROUPS) {
+          const hits = classes.filter((klass: string) => group.test.test(klass));
+          if (hits.length > 1) conflicts.push(`${relative} — ${group.name}: ${hits.join(' + ')}`);
+        }
+      }
+    }
+
+    expect(conflicts).toEqual([]);
+  });
+});
