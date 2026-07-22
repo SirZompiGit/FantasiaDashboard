@@ -136,6 +136,20 @@ Due assi indipendenti, combinabili liberamente:
 
 Il colore scelto pilota tutti e cinque.
 
+### Marchio
+
+Dalle impostazioni si sceglie fra due varianti:
+
+- **Normale** — il logo dorato originale
+- **Colorato** — la sagoma del logo riempita con il colore del tema scelto
+
+Il colorato non è un file per ogni colore: la versione bianca viene usata come
+**maschera** su un fondo pieno, quindi il marchio prende esattamente la tinta
+scelta e la segue anche durante la dissolvenza del cambio tema.
+
+Il design **White** fa eccezione e usa sempre la versione nera, perché su fondo
+chiaro né l'oro né il bianco si leggerebbero.
+
 ### Immagini
 
 Dalle impostazioni si caricano due immagini, da file o da indirizzo web:

@@ -13,8 +13,12 @@
 import { type FormEvent, useState } from 'react';
 import { AlertTriangle, ArrowRight, Shield, Sword, Users } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
+import type { CampaignStyle, LogoVariant } from '../theme';
 
 interface WelcomeScreenProps {
+  /** Design in vigore: sceglie la variante del marchio adatta al fondo. */
+  style: CampaignStyle;
+  logoVariant: LogoVariant;
   onSelectLite: () => void;
   onCreateRoom: () => void;
   onJoinRoom: (pin: string, displayName: string) => void;
@@ -32,6 +36,8 @@ function readInvitedPin(): string {
 }
 
 export function WelcomeScreen({
+  style,
+  logoVariant,
   onSelectLite,
   onCreateRoom,
   onJoinRoom,
@@ -55,6 +61,8 @@ export function WelcomeScreen({
     <div className="app-surface flex min-h-screen flex-col items-center justify-center gap-6 bg-bento-bg p-4 font-sans text-slate-100 sm:p-8">
       <header className="flex flex-col items-center text-center">
         <Wordmark
+          style={style}
+          variant={logoVariant}
           className="h-14 max-w-[min(80vw,26rem)] object-contain sm:h-20"
           fallbackClassName="font-display text-3xl font-black uppercase tracking-[0.2em] text-slate-100 sm:text-4xl"
         />

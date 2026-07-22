@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_STYLE, STYLES, THEMES, normalizeStyle, normalizeTheme } from './theme';
+import {
+  DEFAULT_LOGO_VARIANT,
+  DEFAULT_STYLE,
+  LOGO_VARIANTS,
+  STYLES,
+  THEMES,
+  normalizeLogoVariant,
+  normalizeStyle,
+  normalizeTheme,
+} from './theme';
 
 describe('temi di colore', () => {
   it('conserva le chiavi storiche, che sono salvate nelle campagne', () => {
@@ -50,5 +59,24 @@ describe('design', () => {
       expect(normalizeStyle(removed)).toBe(DEFAULT_STYLE);
     }
     expect(normalizeStyle(undefined)).toBe(DEFAULT_STYLE);
+  });
+});
+
+describe('variante del marchio', () => {
+  it('ne offre due', () => {
+    expect(LOGO_VARIANTS.map((v) => v.id)).toEqual(['normal', 'colored']);
+  });
+
+  it('parte da quella originale', () => {
+    expect(DEFAULT_LOGO_VARIANT).toBe('normal');
+  });
+
+  it('accetta solo i valori previsti', () => {
+    expect(normalizeLogoVariant('colored')).toBe('colored');
+    expect(normalizeLogoVariant('normal')).toBe('normal');
+    // Le campagne salvate prima non hanno il campo.
+    expect(normalizeLogoVariant(undefined)).toBe('normal');
+    expect(normalizeLogoVariant('arcobaleno')).toBe('normal');
+    expect(normalizeLogoVariant(42)).toBe('normal');
   });
 });

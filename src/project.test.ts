@@ -129,6 +129,42 @@ describe('regole del Realtime Database', () => {
   });
 });
 
+describe('marchio', () => {
+  it('tutte e tre le varianti del logo sono presenti', () => {
+    for (const file of [
+      'logo-fantasia.png',
+      'logo-fantasia-black.png',
+      'logo-fantasia-white.png',
+    ]) {
+      expect(fs.existsSync(path.join(root, 'public', file))).toBe(true);
+    }
+  });
+
+  it('hanno tutte le stesse proporzioni, altrimenti si deformerebbero', () => {
+    const ratios = ['logo-fantasia.png', 'logo-fantasia-black.png', 'logo-fantasia-white.png'].map(
+      (file) => {
+        const buffer = fs.readFileSync(path.join(root, 'public', file));
+        // Intestazione PNG: larghezza a 16, altezza a 20.
+        return buffer.readUInt32BE(16) / buffer.readUInt32BE(20);
+      },
+    );
+
+    for (const ratio of ratios) {
+      expect(ratio).toBeCloseTo(ratios[0], 3);
+    }
+  });
+
+  it('il rapporto usato nel componente corrisponde ai file', () => {
+    const buffer = fs.readFileSync(path.join(root, 'public', 'logo-fantasia-white.png'));
+    const source = read('src/components/ui/Wordmark.tsx');
+    const declared = source.match(/ASPECT = '(\d+) \/ (\d+)'/);
+
+    expect(declared).toBeTruthy();
+    expect(Number(declared![1])).toBe(buffer.readUInt32BE(16));
+    expect(Number(declared![2])).toBe(buffer.readUInt32BE(20));
+  });
+});
+
 describe('regole di Firestore', () => {
   it('lo chiudono del tutto, visto che l app non lo usa', () => {
     expect(read('firestore.rules')).toMatch(/allow read, write: if false;/);

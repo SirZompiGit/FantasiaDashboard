@@ -1,4 +1,4 @@
-import type { CampaignStyle, CampaignTheme } from './theme';
+import type { CampaignStyle, CampaignTheme, LogoVariant } from './theme';
 
 export interface InventoryItem {
   id: string;
@@ -97,6 +97,8 @@ export interface CampaignState {
    * 'bento' tramite la normalizzazione, quindi il database resta compatibile.
    */
   style: CampaignStyle;
+  /** Variante del marchio. Campo additivo, come `style`. */
+  logoVariant: LogoVariant;
   healthGroups: string[];
   diceLabels: string[];
 }

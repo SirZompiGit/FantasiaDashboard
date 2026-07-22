@@ -77,6 +77,28 @@ export const STYLES: StyleDefinition[] = [
   { id: 'retro', label: 'Retro', hint: 'Pixel, scanline, cornici spesse' },
 ];
 
+/**
+ * Variante del marchio.
+ *
+ * `normal`  — il logo dorato originale
+ * `colored` — la sagoma del logo riempita con il colore del tema scelto
+ *
+ * Il design chiaro fa eccezione e usa sempre la versione nera: l'oro su fondo
+ * chiaro non si legge.
+ */
+export type LogoVariant = 'normal' | 'colored';
+
+export const DEFAULT_LOGO_VARIANT: LogoVariant = 'normal';
+
+export const LOGO_VARIANTS: { id: LogoVariant; label: string; hint: string }[] = [
+  { id: 'normal', label: 'Normale', hint: 'Oro originale' },
+  { id: 'colored', label: 'Colorato', hint: 'Segue il colore scelto' },
+];
+
+export function normalizeLogoVariant(value: unknown): LogoVariant {
+  return value === 'colored' ? 'colored' : DEFAULT_LOGO_VARIANT;
+}
+
 const THEME_IDS = new Set<string>(THEMES.map((t) => t.id));
 const STYLE_IDS = new Set<string>(STYLES.map((s) => s.id));
 

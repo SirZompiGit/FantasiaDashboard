@@ -15,8 +15,6 @@
 import { useEffect, useState } from 'react';
 import {
   AlertTriangle,
-  Check,
-  Cloud,
   Download,
   ExternalLink,
   History,
@@ -26,6 +24,7 @@ import {
   Palette,
   Redo2,
   Settings,
+  Sparkles,
   Trash2,
   Undo2,
   Upload,
@@ -33,7 +32,14 @@ import {
   VolumeX,
   Wand2,
 } from 'lucide-react';
-import { STYLES, THEMES, type CampaignStyle, type CampaignTheme } from '../theme';
+import {
+  LOGO_VARIANTS,
+  STYLES,
+  THEMES,
+  type CampaignStyle,
+  type CampaignTheme,
+  type LogoVariant,
+} from '../theme';
 import { ConfirmInline } from './ui/ConfirmInline';
 import { IconButton } from './ui/IconButton';
 import { Modal } from './ui/Modal';
@@ -47,6 +53,8 @@ interface DashboardHeaderProps {
   onThemeChange: (theme: CampaignTheme) => void;
   style: CampaignStyle;
   onStyleChange: (style: CampaignStyle) => void;
+  logoVariant: LogoVariant;
+  onLogoVariantChange: (variant: LogoVariant) => void;
   isMuted: boolean;
   onMutedChange: (muted: boolean) => void;
   onImport: () => void;
@@ -92,6 +100,8 @@ export function DashboardHeader({
   onThemeChange,
   style,
   onStyleChange,
+  logoVariant,
+  onLogoVariantChange,
   isMuted,
   onMutedChange,
   onImport,
@@ -195,33 +205,23 @@ export function DashboardHeader({
     </>
   );
 
-  const saveIndicator = (() => {
-    if (saveStatus === 'error') {
-      return (
-        <span
-          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400"
-          title={saveError ?? undefined}
-        >
-          <AlertTriangle className="h-3 w-3" /> Non salvato
-        </span>
-      );
-    }
-    if (saveStatus === 'saving') {
-      return (
-        <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-          <Cloud className="h-3 w-3 animate-pulse" /> Salvataggio
-        </span>
-      );
-    }
-    if (saveStatus === 'saved') {
-      return (
-        <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-          <Check className="h-3 w-3 text-emerald-500" /> Salvato
-        </span>
-      );
-    }
-    return null;
-  })();
+  /**
+   * L'indicatore compare solo quando il salvataggio FALLISCE.
+   *
+   * "Salvato" e "Salvataggio" erano rumore: confermavano ogni volta una cosa
+   * che funziona sempre, rubando spazio al marchio. L'errore invece va detto,
+   * perché senza quel segnale lo spazio del browser si esaurisce e la campagna
+   * smette di essere scritta su disco senza che nulla lo lasci intuire.
+   */
+  const saveIndicator =
+    saveStatus === 'error' ? (
+      <span
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-950/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-300"
+        title={saveError ?? undefined}
+      >
+        <AlertTriangle className="h-3 w-3" /> Non salvato
+      </span>
+    ) : null;
 
   return (
     <header className="relative z-30 mx-auto mb-6 flex w-full max-w-7xl flex-col gap-3 border-b border-bento-border pb-4 lg:flex-row lg:items-center lg:justify-between">
@@ -230,10 +230,9 @@ export function DashboardHeader({
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-bento-border bg-bento-panel shadow-panel">
             <Wand2 className="h-5 w-5 stroke-[2] text-theme-500" />
           </span>
-          <div className="flex flex-col gap-0.5">
-            <Wordmark className="h-5 sm:h-6" />
-            {saveIndicator}
-          </div>
+          {/* Senza l'indicatore sotto, il marchio si prende tutta l'altezza. */}
+          <Wordmark style={style} variant={logoVariant} className="h-7 sm:h-9" />
+          {saveIndicator}
         </div>
 
         {/* Su schermi stretti gli strumenti stanno dietro a un menu. */}
@@ -344,6 +343,46 @@ export function DashboardHeader({
                   ))}
                 </select>
               </label>
+
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <Sparkles className="h-3.5 w-3.5 text-theme-500" /> Marchio
+                </span>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                  {LOGO_VARIANTS.map((definition) => (
+                    <button
+                      key={definition.id}
+                      type="button"
+                      onClick={() => onLogoVariantChange(definition.id)}
+                      aria-pressed={logoVariant === definition.id}
+                      title={definition.hint}
+                      className={`flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2 transition-colors duration-200 ${
+                        logoVariant === definition.id
+                          ? 'border-theme-500/50 bg-bento-item'
+                          : 'border-bento-border bg-bento-panel/40 hover:border-slate-600'
+                      }`}
+                    >
+                      {/* Anteprima dal vivo: si vede subito la differenza. */}
+                      <Wordmark style={style} variant={definition.id} className="h-4" />
+                      <span
+                        className={`font-mono text-[10px] uppercase ${
+                          logoVariant === definition.id ? 'text-slate-100' : 'text-slate-500'
+                        }`}
+                      >
+                        {definition.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {style === 'white' && (
+                  <p className="text-[10px] leading-snug text-slate-600">
+                    Il design chiaro usa comunque il marchio nero: sul fondo chiaro le altre
+                    versioni non si leggerebbero.
+                  </p>
+                )}
+              </div>
             </div>
 
             <MediaSettings

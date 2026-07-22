@@ -467,6 +467,8 @@ export default function App() {
   if (localMode === 'welcome' && !isMaster) {
     return (
       <WelcomeScreen
+        style={displayed.style}
+        logoVariant={displayed.logoVariant}
         isConnecting={room.status === 'connecting'}
         multiplayerAvailable={room.available}
         error={room.error}
@@ -541,6 +543,8 @@ export default function App() {
         onThemeChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
         style={state.style}
         onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
+        logoVariant={state.logoVariant}
+        onLogoVariantChange={(variant) => dispatch({ type: 'SET_LOGO_VARIANT', variant })}
         isMuted={isMuted}
         onMutedChange={setIsMuted}
         onImport={() => fileInputRef.current?.click()}
