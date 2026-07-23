@@ -25,6 +25,7 @@ import {
   MoreHorizontal,
   Palette,
   Redo2,
+  Rows3,
   Settings,
   Sparkles,
   Trash2,
@@ -88,6 +89,9 @@ interface DashboardHeaderProps {
   /** Etichette delle due facce del d2 (vuote = numeri 1/2). */
   d2Labels: string[];
   onD2LabelChange: (index: number, label: string) => void;
+  /** Barre della vita in versione sottile. */
+  compactBars: boolean;
+  onCompactBarsChange: (enabled: boolean) => void;
 }
 
 /**
@@ -137,6 +141,8 @@ export function DashboardHeader({
   onStatLabelChange,
   d2Labels,
   onD2LabelChange,
+  compactBars,
+  onCompactBarsChange,
 }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -440,6 +446,24 @@ export function DashboardHeader({
                   ))}
                 </div>
               )}
+
+              <label className="flex cursor-pointer items-start gap-2.5 select-none">
+                <input
+                  type="checkbox"
+                  checked={compactBars}
+                  onChange={(event) => onCompactBarsChange(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-theme-500"
+                />
+                <span className="min-w-0">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <Rows3 className="h-3.5 w-3.5 text-theme-500" /> Barre compatte
+                  </span>
+                  <span className="block text-[11px] leading-snug text-slate-500">
+                    Barre della vita più sottili e dense, per starci in più a schermo. Vale anche
+                    nella condivisione.
+                  </span>
+                </span>
+              </label>
 
               {/* Facce del d2: se lasciate vuote il dado mostra 1 e 2. */}
               <div className="space-y-1.5">

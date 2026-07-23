@@ -250,6 +250,11 @@ describe('statistiche di campagna', () => {
     ]);
   });
 
+  it('le barre compatte partono spente', () => {
+    expect(normalizeCampaign({ title: 'X' }).compactBars).toBe(false);
+    expect(normalizeCampaign({ title: 'X', compactBars: true }).compactBars).toBe(true);
+  });
+
   it('rispetta i valori salvati e i nomi rinominati', () => {
     const state = normalizeCampaign({
       title: 'X',

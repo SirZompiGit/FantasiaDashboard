@@ -300,6 +300,7 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     statsEnabled: asBoolean(raw.statsEnabled),
     statLabels: normalizeStatLabels(raw.statLabels),
     d2Labels: normalizeD2Labels(raw.d2Labels),
+    compactBars: asBoolean(raw.compactBars),
   };
 }
 

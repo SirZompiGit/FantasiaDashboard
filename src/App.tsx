@@ -572,6 +572,8 @@ export default function App() {
         onStatLabelChange={(index, label) => dispatch({ type: 'SET_STAT_LABEL', index, label })}
         d2Labels={state.d2Labels}
         onD2LabelChange={(index, label) => dispatch({ type: 'SET_D2_LABEL', index, label })}
+        compactBars={state.compactBars}
+        onCompactBarsChange={(enabled) => dispatch({ type: 'SET_COMPACT_BARS', enabled })}
         onBackToWelcome={() => {
           // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
           // sul database, con i giocatori collegati a un master che non c'è più.
@@ -616,6 +618,7 @@ export default function App() {
               healthBars={state.healthBars}
               healthGroups={state.healthGroups}
               dispatch={dispatch}
+              compactBars={state.compactBars}
             />
           </div>
 

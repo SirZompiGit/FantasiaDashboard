@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RollResult } from '../types';
 import { Check, Dices, Edit2, Eye, EyeOff, Plus, RotateCcw, Sparkles, Tag, Trash2, X } from 'lucide-react';
-import { DICE_TYPES, d2FaceText, isCritical, isFumble, parseSides, rollDie } from '../lib/dice';
+import { DICE_TYPES, d2FaceText, isCritical, isFumble, rollDie } from '../lib/dice';
 import { getThemeAccent } from '../theme';
 import type { CampaignTheme } from '../theme';
 import { playCritFailSound, playCritSuccessSound, playRollSound } from '../utils/audio';
@@ -554,15 +554,20 @@ export function DiceRoller({
                     {entry.diceType}
                   </span>
                   <span
-                    className={`numeric-display font-display text-base font-bold ${
-                      entry.result === parseSides(entry.diceType)
-                        ? 'text-theme-400'
-                        : entry.result === 1
-                          ? 'text-theme-500'
-                          : 'text-slate-200'
+                    className={`numeric-display max-w-full truncate px-0.5 font-display font-bold ${
+                      d2FaceText(entry.diceType, entry.result, d2Labels)
+                        ? 'text-[11px] text-slate-200'
+                        : `text-base ${
+                            isCritical(entry.result, entry.diceType)
+                              ? 'text-theme-400'
+                              : isFumble(entry.result, entry.diceType)
+                                ? 'text-theme-500'
+                                : 'text-slate-200'
+                          }`
                     }`}
+                    title={d2FaceText(entry.diceType, entry.result, d2Labels) ?? undefined}
                   >
-                    {entry.result}
+                    {d2FaceText(entry.diceType, entry.result, d2Labels) ?? entry.result}
                   </span>
                   {entry.label && (
                     <span

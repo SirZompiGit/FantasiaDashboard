@@ -86,6 +86,8 @@ interface HealthBarItemProps {
   onDelete?: (bar: HealthBar) => void;
   /** Presente solo in dashboard: abilita maniglia e frecce di riordino. */
   reorder?: ReorderControls;
+  /** Versione più sottile e densa della barra (impostazione di campagna). */
+  compact?: boolean;
   readOnly?: boolean;
   layout?: 'horizontal' | 'vertical';
 }
@@ -129,6 +131,8 @@ interface BarTrackProps {
   vertical: boolean;
   /** Traccia di una risorsa: molto più sottile di quella della vita. */
   thin?: boolean;
+  /** Barra della vita più sottile, ma non quanto una risorsa. */
+  compact?: boolean;
   readOnly?: boolean;
   onChange?: (value: number) => void;
   label: string;
@@ -155,6 +159,7 @@ function BarTrack({
   color,
   vertical,
   thin = false,
+  compact = false,
   readOnly = false,
   onChange,
   label,
@@ -234,7 +239,14 @@ function BarTrack({
   };
 
   const hitPadding = thin ? (vertical ? 'px-1' : 'py-1') : '';
-  const trackSize = vertical ? 'h-full w-full' : thin ? 'h-2.5 w-full' : 'h-8 w-full';
+  // Compatta: 20px, a metà strada fra la barra piena (32px) e una risorsa (10px).
+  const trackSize = vertical
+    ? 'h-full w-full'
+    : thin
+      ? 'h-2.5 w-full'
+      : compact
+        ? 'h-5 w-full'
+        : 'h-8 w-full';
   const trackRounding = thin ? 'rounded-md' : 'rounded-lg';
   const trackPadding = thin ? 'p-px' : 'p-[3px]';
   const segmentGap = thin ? 'gap-px' : max > 30 ? 'gap-[1px]' : 'gap-[2px]';
@@ -334,6 +346,7 @@ export function HealthBarItem({
   onEdit,
   onDelete,
   reorder,
+  compact = false,
   readOnly = false,
   layout = 'horizontal',
 }: HealthBarItemProps) {
@@ -442,6 +455,7 @@ export function HealthBarItem({
       max={bar.maxValue}
       color={activeColor}
       vertical={isVertical}
+      compact={compact}
       readOnly={readOnly}
       onChange={(value) => onChangeValue(bar, value)}
       label={`Punti ferita di ${bar.name}`}
@@ -584,13 +598,19 @@ export function HealthBarItem({
           : undefined
       }
       onDragEnd={reorder?.onDragEnd}
-      className={`group relative rounded-xl border bg-bento-bg p-3 transition-colors duration-200 sm:p-4 ${
-        readOnly ? 'border-bento-border' : 'border-bento-border hover:border-slate-600'
-      } ${reorder?.dragging ? 'opacity-30' : ''} ${
-        reorder?.dragOver ? 'border-theme-500 ring-1 ring-theme-500/30' : ''
-      } ${shaking ? 'health-shake' : ''}`}
+      className={`group relative rounded-xl border bg-bento-bg transition-colors duration-200 ${
+        compact ? 'p-2 sm:p-2.5' : 'p-3 sm:p-4'
+      } ${readOnly ? 'border-bento-border' : 'border-bento-border hover:border-slate-600'} ${
+        reorder?.dragging ? 'opacity-30' : ''
+      } ${reorder?.dragOver ? 'border-theme-500 ring-1 ring-theme-500/30' : ''} ${
+        shaking ? 'health-shake' : ''
+      }`}
     >
-      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${
+          compact ? 'mb-1.5' : 'mb-2.5'
+        }`}
+      >
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {/* Maniglia di trascinamento: è l'UNICO elemento `draggable`, così il
               riordino non entra mai in conflitto col trascinamento degli HP

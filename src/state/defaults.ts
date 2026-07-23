@@ -35,6 +35,7 @@ export function createEmptyCampaign(): CampaignState {
     statsEnabled: false,
     statLabels: [...DEFAULT_STAT_LABELS],
     d2Labels: ['', ''],
+    compactBars: false,
   };
 }
 

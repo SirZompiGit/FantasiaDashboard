@@ -38,7 +38,7 @@ import { CritSparkles } from './CritSparkles';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
 import { groupBars } from '../lib/healthBars';
-import { d2FaceText, isCritical, isFumble, parseSides } from '../lib/dice';
+import { d2FaceText, isCritical, isFumble } from '../lib/dice';
 import { decodeRollLabel, resolveRollerName } from '../lib/participantRolls';
 import { getThemeAccent } from '../theme';
 import { NARROW_SCREEN, useMediaQuery } from '../hooks/useMediaQuery';
@@ -224,6 +224,7 @@ export function SharedView({
       // Risorse ed effetti che il master tiene privati spariscono anche dalla
       // sua anteprima: qui vede esattamente ciò che vedono i giocatori.
       onlyShared
+      compact={state.compactBars}
       readOnly
       layout={effectiveLayout}
     />
@@ -658,15 +659,20 @@ export function SharedView({
 
                             <div className="relative flex items-center justify-center py-1">
                               <span
-                                className={`numeric-display font-display text-2xl font-black ${
-                                  roll.result === parseSides(roll.diceType)
-                                    ? 'text-theme-400'
-                                    : roll.result === 1
-                                      ? 'text-theme-500'
-                                      : 'text-white'
+                                className={`numeric-display max-w-full truncate px-0.5 font-display font-black ${
+                                  d2FaceText(roll.diceType, roll.result, state.d2Labels)
+                                    ? 'text-sm text-white'
+                                    : `text-2xl ${
+                                        isCritical(roll.result, roll.diceType)
+                                          ? 'text-theme-400'
+                                          : isFumble(roll.result, roll.diceType)
+                                            ? 'text-theme-500'
+                                            : 'text-white'
+                                      }`
                                 }`}
+                                title={d2FaceText(roll.diceType, roll.result, state.d2Labels) ?? undefined}
                               >
-                                {roll.result}
+                                {d2FaceText(roll.diceType, roll.result, state.d2Labels) ?? roll.result}
                               </span>
                               {isCritical(roll.result, roll.diceType) && (
                                 <Sparkles className="absolute top-0 right-1 h-3 w-3 text-theme-400 opacity-60" />

@@ -33,6 +33,7 @@ export type CampaignAction =
   | { type: 'SET_STATS_ENABLED'; enabled: boolean }
   | { type: 'SET_STAT_LABEL'; index: number; label: string }
   | { type: 'SET_D2_LABEL'; index: number; label: string }
+  | { type: 'SET_COMPACT_BARS'; enabled: boolean }
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'INSERT_PLAYER'; player: Player; index: number }
   | { type: 'REMOVE_PLAYER'; id: string }
@@ -201,6 +202,9 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
       d2Labels[action.index] = label;
       return { ...state, d2Labels };
     }
+
+    case 'SET_COMPACT_BARS':
+      return { ...state, compactBars: action.enabled };
 
 
     case 'ADD_PLAYER': {

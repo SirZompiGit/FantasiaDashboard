@@ -176,4 +176,6 @@ export interface CampaignState {
    * significa nessuna etichetta e il d2 mostra 1/2. Campo additivo.
    */
   d2Labels: string[];
+  /** Barre della vita in versione più sottile e densa. Campo additivo. */
+  compactBars: boolean;
 }

@@ -42,12 +42,14 @@ interface HealthBarsManagerProps {
   healthBars: HealthBar[];
   healthGroups: string[];
   dispatch: React.Dispatch<CampaignAction>;
+  compactBars: boolean;
 }
 
 export function HealthBarsManager({
   healthBars,
   healthGroups,
   dispatch,
+  compactBars,
 }: HealthBarsManagerProps) {
   const { notifyUndo } = useToasts();
 
@@ -124,6 +126,7 @@ export function HealthBarsManager({
         setEditingId(target.id);
       }}
       onDelete={handleDeleteBar}
+      compact={compactBars}
       reorder={{
         onMoveUp: () => dispatch({ type: 'MOVE_HEALTH_BAR', id: bar.id, direction: 'up' }),
         onMoveDown: () => dispatch({ type: 'MOVE_HEALTH_BAR', id: bar.id, direction: 'down' }),
