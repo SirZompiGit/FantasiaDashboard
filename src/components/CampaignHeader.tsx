@@ -24,6 +24,7 @@ import {
   Star,
   Trash2,
   Users,
+  X,
 } from 'lucide-react';
 import { NotesPanel } from './ui/NotesPanel';
 import { IconButton } from './ui/IconButton';
@@ -72,6 +73,9 @@ export function CampaignHeader({
   const [tempTime, setTempTime] = useState(scheduleTime);
   const [newPlayerName, setNewPlayerName] = useState('');
 
+  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [tempPlayerName, setTempPlayerName] = useState('');
+
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -97,6 +101,18 @@ export function CampaignHeader({
     notifyUndo(`"${player.name}" rimosso.`, () =>
       dispatch({ type: 'INSERT_PLAYER', player, index }),
     );
+  };
+
+  const startRename = (player: Player) => {
+    setEditingPlayerId(player.id);
+    setTempPlayerName(player.name);
+  };
+
+  const saveRename = () => {
+    if (!editingPlayerId) return;
+    const name = tempPlayerName.trim();
+    if (name) dispatch({ type: 'UPDATE_PLAYER', id: editingPlayerId, changes: { name } });
+    setEditingPlayerId(null);
   };
 
   const move = (from: number, to: number) => {
@@ -311,7 +327,7 @@ export function CampaignHeader({
                 return (
                   <div
                     key={player.id}
-                    draggable
+                    draggable={editingPlayerId !== player.id}
                     onDragStart={(event) => handleDragStart(event, index)}
                     onDragOver={(event) => {
                       event.preventDefault();
@@ -359,40 +375,78 @@ export function CampaignHeader({
                         <Star className={`h-4 w-4 ${isTurn ? 'fill-theme-500' : ''}`} />
                       </button>
 
-                      <span
-                        className={`min-w-0 truncate font-medium transition-colors duration-200 ${
-                          isTurn ? 'font-bold text-theme-400' : 'text-slate-200'
-                        }`}
-                      >
-                        {player.name}
-                      </span>
+                      {editingPlayerId === player.id ? (
+                        <input
+                          type="text"
+                          value={tempPlayerName}
+                          onChange={(event) => setTempPlayerName(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') saveRename();
+                            if (event.key === 'Escape') setEditingPlayerId(null);
+                          }}
+                          onBlur={saveRename}
+                          autoFocus
+                          maxLength={40}
+                          aria-label={`Nuovo nome per ${player.name}`}
+                          className={`${inputBase} min-w-0 flex-1 px-2 py-1 text-sm`}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onDoubleClick={() => startRename(player)}
+                          title="Doppio clic per rinominare"
+                          className={`min-w-0 truncate text-left font-medium transition-colors duration-200 ${
+                            isTurn ? 'font-bold text-theme-400' : 'text-slate-200'
+                          }`}
+                        >
+                          {player.name}
+                        </button>
+                      )}
                     </div>
 
-                    <div className="touch-visible flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/player:opacity-100 group-focus-within/player:opacity-100">
-                      <IconButton
-                        label={`Sposta ${player.name} in alto`}
-                        onClick={() => move(index, index - 1)}
-                        disabled={index === 0}
-                        className="disabled:opacity-25"
-                      >
-                        <ChevronUp className="h-3.5 w-3.5" />
-                      </IconButton>
-                      <IconButton
-                        label={`Sposta ${player.name} in basso`}
-                        onClick={() => move(index, index + 1)}
-                        disabled={index === players.length - 1}
-                        className="disabled:opacity-25"
-                      >
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      </IconButton>
-                      <IconButton
-                        label={`Rimuovi ${player.name}`}
-                        tone="danger"
-                        onClick={() => removePlayer(player, index)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </IconButton>
-                    </div>
+                    {editingPlayerId === player.id ? (
+                      <div className="flex shrink-0 items-center gap-0.5">
+                        <IconButton label="Salva nome" tone="positive" onClick={saveRename}>
+                          <Check className="h-3.5 w-3.5" />
+                        </IconButton>
+                        <IconButton label="Annulla" onClick={() => setEditingPlayerId(null)}>
+                          <X className="h-3.5 w-3.5" />
+                        </IconButton>
+                      </div>
+                    ) : (
+                      <div className="touch-visible flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/player:opacity-100 group-focus-within/player:opacity-100">
+                        <IconButton
+                          label={`Rinomina ${player.name}`}
+                          tone="accent"
+                          onClick={() => startRename(player)}
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </IconButton>
+                        <IconButton
+                          label={`Sposta ${player.name} in alto`}
+                          onClick={() => move(index, index - 1)}
+                          disabled={index === 0}
+                          className="disabled:opacity-25"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </IconButton>
+                        <IconButton
+                          label={`Sposta ${player.name} in basso`}
+                          onClick={() => move(index, index + 1)}
+                          disabled={index === players.length - 1}
+                          className="disabled:opacity-25"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </IconButton>
+                        <IconButton
+                          label={`Rimuovi ${player.name}`}
+                          tone="danger"
+                          onClick={() => removePlayer(player, index)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </IconButton>
+                      </div>
+                    )}
                   </div>
                 );
               })
