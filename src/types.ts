@@ -106,6 +106,12 @@ export interface HealthBar extends ColoredBar {
    * `resources`.
    */
   statusEffects?: StatusEffect[];
+  /**
+   * Nascosta del tutto ai giocatori: non compare nella vista condivisa, ma
+   * resta nella dashboard del master. Campo additivo e assente quando la barra
+   * è visibile, così le barre normali non cambiano payload.
+   */
+  hidden?: boolean;
 }
 
 export interface RollResult {
@@ -165,4 +171,9 @@ export interface CampaignState {
   statsEnabled: boolean;
   /** Nomi delle sei statistiche, rinominabili a livello di campagna. */
   statLabels: string[];
+  /**
+   * Etichette delle due facce del d2 (es. "Testa" / "Croce"). Due voci; vuote
+   * significa nessuna etichetta e il d2 mostra 1/2. Campo additivo.
+   */
+  d2Labels: string[];
 }

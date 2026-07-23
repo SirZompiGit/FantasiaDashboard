@@ -38,7 +38,7 @@ import { CritSparkles } from './CritSparkles';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
 import { groupBars } from '../lib/healthBars';
-import { isCritical, isFumble, parseSides } from '../lib/dice';
+import { d2FaceText, isCritical, isFumble, parseSides } from '../lib/dice';
 import { decodeRollLabel, resolveRollerName } from '../lib/participantRolls';
 import { getThemeAccent } from '../theme';
 import { NARROW_SCREEN, useMediaQuery } from '../hooks/useMediaQuery';
@@ -190,7 +190,11 @@ export function SharedView({
     }
   }, [lastRoll]);
 
-  const { groups, ungrouped } = groupBars(healthBars, state.healthGroups);
+  // Le barre nascoste dal master non compaiono affatto qui.
+  const { groups, ungrouped } = groupBars(
+    healthBars.filter((bar) => !bar.hidden),
+    state.healthGroups,
+  );
 
   /**
    * Gli ultimi quattro lanci, su una riga sola.
@@ -555,6 +559,7 @@ export function SharedView({
                               ? 'fumble'
                               : null
                         }
+                        label={d2FaceText(lastRoll.diceType, lastRoll.result, state.d2Labels)}
                         className="h-28 w-28 sm:h-32 sm:w-32 lg:h-40 lg:w-40"
                       />
 

@@ -570,6 +570,8 @@ export default function App() {
         onStatsEnabledChange={(enabled) => dispatch({ type: 'SET_STATS_ENABLED', enabled })}
         statLabels={state.statLabels}
         onStatLabelChange={(index, label) => dispatch({ type: 'SET_STAT_LABEL', index, label })}
+        d2Labels={state.d2Labels}
+        onD2LabelChange={(index, label) => dispatch({ type: 'SET_D2_LABEL', index, label })}
         onBackToWelcome={() => {
           // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
           // sul database, con i giocatori collegati a un master che non c'è più.
@@ -622,6 +624,7 @@ export default function App() {
               selectedDice={state.selectedDice}
               theme={state.theme}
               diceLabels={state.diceLabels}
+              d2Labels={state.d2Labels}
               enableShortcuts
               onRoll={(diceType, result, label) =>
                 dispatch({

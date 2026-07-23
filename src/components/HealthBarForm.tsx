@@ -80,6 +80,7 @@ interface FormValues extends ColorDraft {
   group: string;
   zeroHpText: string;
   lowHpAlert: boolean;
+  hidden: boolean;
   resources: ResourceDraft[];
   statusEffects: StatusDraft[];
 }
@@ -100,6 +101,7 @@ const EMPTY_FORM: FormValues = {
   group: '',
   zeroHpText: DEFAULT_ZERO_HP_TEXT,
   lowHpAlert: true,
+  hidden: false,
   resources: [],
   statusEffects: [],
 };
@@ -139,6 +141,7 @@ function toDraft(bar: HealthBar): FormValues {
     group: bar.group ?? '',
     zeroHpText: bar.zeroHpText ?? DEFAULT_ZERO_HP_TEXT,
     lowHpAlert: bar.lowHpAlert !== false,
+    hidden: bar.hidden === true,
     resources: (bar.resources ?? []).map((resource) => ({
       id: resource.id,
       name: resource.name,
@@ -418,6 +421,7 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
       group: form.group || undefined,
       zeroHpText: form.zeroHpText.trim() || DEFAULT_ZERO_HP_TEXT,
       lowHpAlert: form.lowHpAlert,
+      hidden: form.hidden || undefined,
       // Assente quando non ce ne sono: una barra senza risorse deve produrre lo
       // stesso identico payload di prima che le risorse esistessero.
       resources: resources.length > 0 ? resources : undefined,
@@ -775,6 +779,24 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
                 <span className="block text-[11px] leading-snug text-slate-500">
                   La barra pulsa quando i punti ferita scendono sotto un quarto. Si spegne da
                   sola a 0 HP, dove compare già l&apos;etichetta.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-bento-border bg-bento-panel px-3 py-2.5 select-none">
+              <input
+                type="checkbox"
+                checked={form.hidden}
+                onChange={(event) => setField('hidden', event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-theme-500"
+              />
+              <span className="min-w-0">
+                <span className="block text-xs font-medium text-slate-200">
+                  Nascondi ai giocatori
+                </span>
+                <span className="block text-[11px] leading-snug text-slate-500">
+                  La barra sparisce del tutto dalla vista condivisa, ma resta qui nella tua
+                  dashboard. Diverso dalle risorse e dagli effetti, che si nascondono uno per uno.
                 </span>
               </span>
             </label>

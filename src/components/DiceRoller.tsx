@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RollResult } from '../types';
 import { Check, Dices, Edit2, Eye, EyeOff, Plus, RotateCcw, Sparkles, Tag, Trash2, X } from 'lucide-react';
-import { DICE_TYPES, isCritical, isFumble, parseSides, rollDie } from '../lib/dice';
+import { DICE_TYPES, d2FaceText, isCritical, isFumble, parseSides, rollDie } from '../lib/dice';
 import { getThemeAccent } from '../theme';
 import type { CampaignTheme } from '../theme';
 import { playCritFailSound, playCritSuccessSound, playRollSound } from '../utils/audio';
@@ -48,6 +48,8 @@ interface DiceRollerProps {
   hideHistory?: boolean;
   /** Attiva le scorciatoie globali. Solo la dashboard del master le usa. */
   enableShortcuts?: boolean;
+  /** Etichette delle facce del d2 (es. "Testa" / "Croce"). */
+  d2Labels?: string[];
 }
 
 export function DiceRoller({
@@ -66,6 +68,7 @@ export function DiceRoller({
   onDeleteDiceLabel,
   hideHistory = false,
   enableShortcuts = false,
+  d2Labels,
 }: DiceRollerProps) {
   const [isRolling, setIsRolling] = useState(false);
   const [tempNumber, setTempNumber] = useState<number | null>(null);
@@ -442,6 +445,7 @@ export function DiceRoller({
               value={tempNumber}
               state="rolling"
               accent={accent}
+              label={d2FaceText(selectedDice, tempNumber ?? 1, d2Labels)}
               className="h-24 w-24 sm:h-28 sm:w-28"
             />
             <span className="mt-3 animate-pulse font-mono text-xs uppercase tracking-widest text-theme-500/60">
@@ -469,6 +473,7 @@ export function DiceRoller({
               accent={accent}
               reveal={isRollHidden ? 'dimmed' : 'full'}
               outcome={critical ? 'critical' : fumble ? 'fumble' : null}
+              label={d2FaceText(lastRoll.diceType, lastRoll.result, d2Labels)}
               className="h-36 w-36 sm:h-40 sm:w-40"
             />
 

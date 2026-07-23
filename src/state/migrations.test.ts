@@ -197,6 +197,24 @@ describe('effetti di stato', () => {
   });
 });
 
+describe('barra nascosta ai giocatori', () => {
+  const bar = (hidden: unknown) =>
+    normalizeCampaign({
+      title: 'X',
+      healthBars: [{ name: 'Trappola', maxValue: 10, currentValue: 10, hidden }],
+    }).healthBars[0];
+
+  it('conserva la barra nascosta', () => {
+    expect(bar(true).hidden).toBe(true);
+  });
+
+  it('resta assente quando la barra è visibile', () => {
+    for (const input of [undefined, false, 'boh', 0]) {
+      expect(bar(input)).not.toHaveProperty('hidden');
+    }
+  });
+});
+
 describe('statistiche del personaggio', () => {
   const withStats = (stats: unknown) =>
     normalizeCampaign({
@@ -222,6 +240,14 @@ describe('statistiche di campagna', () => {
     expect(state.statsEnabled).toBe(false);
     expect(state.statLabels).toHaveLength(6);
     expect(state.statLabels[0]).toBe('Forza');
+  });
+
+  it('le etichette del d2 partono vuote e restano sempre due', () => {
+    expect(normalizeCampaign({ title: 'X' }).d2Labels).toEqual(['', '']);
+    expect(normalizeCampaign({ title: 'X', d2Labels: ['Testa'] }).d2Labels).toEqual([
+      'Testa',
+      '',
+    ]);
   });
 
   it('rispetta i valori salvati e i nomi rinominati', () => {

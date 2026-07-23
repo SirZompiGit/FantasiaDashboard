@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DICE_TYPES, isCritical, isFumble, parseSides, rollDie } from './dice';
+import { DICE_TYPES, d2FaceText, isCritical, isFumble, parseSides, rollDie } from './dice';
 
 describe('parseSides', () => {
   it('legge il numero di facce', () => {
@@ -25,6 +25,27 @@ describe('esiti', () => {
   it('riconosce il fallimento sull uno naturale', () => {
     expect(isFumble(1, 'd20')).toBe(true);
     expect(isFumble(2, 'd20')).toBe(false);
+  });
+
+  it('il d2 non fa mai critico né fallimento', () => {
+    expect(isCritical(2, 'd2')).toBe(false);
+    expect(isFumble(1, 'd2')).toBe(false);
+    // Il d3 invece li ha ancora entrambi.
+    expect(isCritical(3, 'd3')).toBe(true);
+    expect(isFumble(1, 'd3')).toBe(true);
+  });
+});
+
+describe('etichette del d2', () => {
+  it('restituisce l etichetta della faccia quando è impostata', () => {
+    expect(d2FaceText('d2', 1, ['Testa', 'Croce'])).toBe('Testa');
+    expect(d2FaceText('d2', 2, ['Testa', 'Croce'])).toBe('Croce');
+  });
+
+  it('resta senza etichetta se non impostata o su un altro dado', () => {
+    expect(d2FaceText('d2', 1, ['', ''])).toBeUndefined();
+    expect(d2FaceText('d2', 1, undefined)).toBeUndefined();
+    expect(d2FaceText('d20', 1, ['Testa', 'Croce'])).toBeUndefined();
   });
 });
 

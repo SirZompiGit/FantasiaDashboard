@@ -223,6 +223,9 @@ function normalizeHealthBar(value: unknown): HealthBar | null {
 
   if (statusEffects.length > 0) bar.statusEffects = statusEffects;
 
+  // Assente quando visibile: una barra normale si serializza come prima.
+  if (value.hidden === true) bar.hidden = true;
+
   return bar;
 }
 
@@ -296,6 +299,7 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     diceLabels: asStringList(raw.diceLabels, DEFAULT_DICE_LABELS),
     statsEnabled: asBoolean(raw.statsEnabled),
     statLabels: normalizeStatLabels(raw.statLabels),
+    d2Labels: normalizeD2Labels(raw.d2Labels),
   };
 }
 
@@ -306,6 +310,12 @@ function normalizeStatLabels(value: unknown): string[] {
     const label = asString(source[i]).trim();
     return label ? label.slice(0, 20) : DEFAULT_STAT_LABELS[i];
   });
+}
+
+/** Sempre due voci; vuote quando non impostate (il d2 mostra i numeri). */
+function normalizeD2Labels(value: unknown): string[] {
+  const source = Array.isArray(value) ? value : [];
+  return [asString(source[0]).trim().slice(0, 16), asString(source[1]).trim().slice(0, 16)];
 }
 
 /**

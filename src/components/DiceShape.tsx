@@ -104,6 +104,8 @@ interface DiceShapeProps {
   accent: string;
   reveal?: DiceReveal;
   outcome?: 'critical' | 'fumble' | null;
+  /** Testo da mostrare al posto del numero (etichetta di faccia del d2). */
+  label?: string;
   className?: string;
 }
 
@@ -114,6 +116,7 @@ export function DiceShape({
   accent,
   reveal = 'full',
   outcome = null,
+  label,
   className = '',
 }: DiceShapeProps) {
   const isRound = parseSides(diceType) === 2;
@@ -126,7 +129,10 @@ export function DiceShape({
     return { center: c, radius: inradius(points, c) };
   }, [isRound, outlineText]);
 
-  const text = reveal === 'hidden' || value === null ? '?' : String(value);
+  // Un'etichetta di faccia (Testa/Croce) prende il posto del numero, ma solo
+  // quando il valore è visibile.
+  const text =
+    reveal === 'hidden' || value === null ? '?' : (label ?? String(value));
 
   const textRef = useRef<SVGTextElement>(null);
   const [fit, setFit] = useState(1);

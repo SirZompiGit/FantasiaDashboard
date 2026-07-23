@@ -32,6 +32,7 @@ export type CampaignAction =
   | { type: 'SET_LOGO_VARIANT'; variant: LogoVariant }
   | { type: 'SET_STATS_ENABLED'; enabled: boolean }
   | { type: 'SET_STAT_LABEL'; index: number; label: string }
+  | { type: 'SET_D2_LABEL'; index: number; label: string }
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'INSERT_PLAYER'; player: Player; index: number }
   | { type: 'REMOVE_PLAYER'; id: string }
@@ -130,6 +131,9 @@ function applyBarChanges(bar: HealthBar, changes: Partial<Omit<HealthBar, 'id'>>
   if (statusEffects) next.statusEffects = statusEffects;
   else delete next.statusEffects;
 
+  // Assente quando visibile: il payload di una barra normale non cambia.
+  if (!next.hidden) delete next.hidden;
+
   return next;
 }
 
@@ -187,6 +191,15 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
       const statLabels = [...state.statLabels];
       statLabels[action.index] = label;
       return { ...state, statLabels };
+    }
+
+    case 'SET_D2_LABEL': {
+      if (action.index !== 0 && action.index !== 1) return state;
+      const label = action.label.slice(0, 16);
+      if (state.d2Labels[action.index] === label) return state;
+      const d2Labels = [...state.d2Labels];
+      d2Labels[action.index] = label;
+      return { ...state, d2Labels };
     }
 
 
@@ -338,6 +351,8 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
       if (statusEffects) bar.statusEffects = statusEffects;
       else delete bar.statusEffects;
+
+      if (!bar.hidden) delete bar.hidden;
 
       return { ...state, healthBars: [...state.healthBars, bar] };
     }

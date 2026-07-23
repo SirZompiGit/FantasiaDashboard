@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   BarChart3,
+  Coins,
   Download,
   ExternalLink,
   History,
@@ -84,6 +85,9 @@ interface DashboardHeaderProps {
   onStatsEnabledChange: (enabled: boolean) => void;
   statLabels: string[];
   onStatLabelChange: (index: number, label: string) => void;
+  /** Etichette delle due facce del d2 (vuote = numeri 1/2). */
+  d2Labels: string[];
+  onD2LabelChange: (index: number, label: string) => void;
 }
 
 /**
@@ -131,6 +135,8 @@ export function DashboardHeader({
   onStatsEnabledChange,
   statLabels,
   onStatLabelChange,
+  d2Labels,
+  onD2LabelChange,
 }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -434,6 +440,27 @@ export function DashboardHeader({
                   ))}
                 </div>
               )}
+
+              {/* Facce del d2: se lasciate vuote il dado mostra 1 e 2. */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                  <Coins className="h-3.5 w-3.5 text-theme-500" /> Facce del d2
+                </span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[0, 1].map((index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      value={d2Labels[index] ?? ''}
+                      onChange={(event) => onD2LabelChange(index, event.target.value)}
+                      maxLength={16}
+                      placeholder={index === 0 ? 'es. Testa (1)' : 'es. Croce (2)'}
+                      aria-label={`Etichetta della faccia ${index + 1} del d2`}
+                      className="rounded-lg border border-bento-border bg-bento-panel px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
             <MediaSettings

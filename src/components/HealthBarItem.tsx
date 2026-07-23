@@ -24,7 +24,15 @@
 
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import type { HealthBar, Resource } from '../types';
-import { ChevronDown, ChevronUp, Edit2, GripVertical, ShieldAlert, Trash2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Edit2,
+  EyeOff,
+  GripVertical,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
 import { Tooltip } from './ui/Tooltip';
 import {
   DEFAULT_ZERO_HP_TEXT,
@@ -600,6 +608,16 @@ export function HealthBarItem({
           <span className="truncate font-display text-sm font-bold tracking-wide text-slate-200 md:text-base">
             {bar.name}
           </span>
+          {/* Solo il master la vede: promemoria che la barra è nascosta ai
+              giocatori. Nella condivisione la barra non compare proprio. */}
+          {!readOnly && bar.hidden && (
+            <Tooltip label="Nascosta ai giocatori" className="shrink-0">
+              <span className="flex items-center gap-1 rounded-full bg-slate-700/40 px-2 py-0.5 text-[10px] font-bold text-slate-400">
+                <EyeOff className="h-3 w-3" />
+                Nascosta
+              </span>
+            </Tooltip>
+          )}
           {bar.currentValue === 0 && (
             <span className="flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-500">
               <ShieldAlert className="h-3 w-3" />

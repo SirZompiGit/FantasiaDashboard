@@ -34,6 +34,7 @@ export function createEmptyCampaign(): CampaignState {
     diceLabels: [...DEFAULT_DICE_LABELS],
     statsEnabled: false,
     statLabels: [...DEFAULT_STAT_LABELS],
+    d2Labels: ['', ''],
   };
 }
 

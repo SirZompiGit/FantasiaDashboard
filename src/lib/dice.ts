@@ -38,17 +38,37 @@ export function rollDie(diceType: string): number {
   return Math.floor(Math.random() * sides) + 1;
 }
 
-/** Successo critico: risultato massimo del dado. */
+/**
+ * Successo critico: risultato massimo del dado.
+ *
+ * Non vale per il d2: su una moneta ogni lancio sarebbe metà critico e metà
+ * fallimento, il che non ha senso. Il critico parte dal d3 in su.
+ */
 export function isCritical(result: number, diceType: string): boolean {
   const sides = parseSides(diceType);
-  return sides > 0 && result === sides;
+  return sides >= 3 && result === sides;
 }
 
-/** Fallimento critico: 1 naturale. */
+/** Fallimento critico: 1 naturale. Anche questo non vale per il d2. */
 export function isFumble(result: number, diceType: string): boolean {
-  return parseSides(diceType) > 0 && result === 1;
+  return parseSides(diceType) >= 3 && result === 1;
 }
 
 export function isDiceType(value: unknown): value is DiceType {
   return typeof value === 'string' && (DICE_TYPES as readonly string[]).includes(value);
+}
+
+/**
+ * Testo di una faccia del d2, se il master ha impostato le etichette (es.
+ * "Testa" / "Croce"). Fuori dal d2, o senza etichetta, restituisce `undefined`
+ * e resta il numero.
+ */
+export function d2FaceText(
+  diceType: string,
+  result: number,
+  d2Labels: string[] | undefined,
+): string | undefined {
+  if (diceType !== 'd2') return undefined;
+  const label = d2Labels?.[result - 1]?.trim();
+  return label || undefined;
 }

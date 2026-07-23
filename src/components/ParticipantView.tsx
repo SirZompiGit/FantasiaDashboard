@@ -248,6 +248,7 @@ export function ParticipantView({
                 lastRoll={myRolls[0] ?? null}
                 theme={campaign.theme}
                 diceLabels={campaign.diceLabels}
+                d2Labels={campaign.d2Labels}
                 hideHistory
                 onRoll={(diceType, result, label) => {
                   pushParticipantRoll(roomId, {
