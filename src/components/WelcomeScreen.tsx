@@ -134,7 +134,7 @@ export function WelcomeScreen({
           <button
             type="button"
             onClick={onSelectLite}
-            className={`${CTA} mt-6 border-sky-400/20 bg-sky-400/10 text-sky-300 hover:bg-sky-400 hover:text-slate-900`}
+            className={`${CTA} mt-auto border-sky-400/20 bg-sky-400/10 text-sky-300 hover:bg-sky-400 hover:text-slate-900`}
           >
             Avvia <ArrowRight className="h-4 w-4" />
           </button>
@@ -159,7 +159,7 @@ export function WelcomeScreen({
               type="button"
               onClick={onCreateRoom}
               disabled={disabled}
-              className={`${CTA} mt-6 border-theme-500 bg-theme-600 text-white shadow-raised hover:bg-theme-500`}
+              className={`${CTA} mt-auto border-theme-500 bg-theme-600 text-white shadow-raised hover:bg-theme-500`}
             >
               {isConnecting ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
