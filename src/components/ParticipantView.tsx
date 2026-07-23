@@ -13,7 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { RoomState } from '../firebaseUtils';
 import { pushParticipantRoll, updateUser } from '../firebaseUtils';
-import { Check, LogOut, User, WifiOff } from 'lucide-react';
+import { Check, Hourglass, LogOut, User, WifiOff } from 'lucide-react';
 import { SharedView } from './SharedView';
 import { DiceRoller } from './DiceRoller';
 import { IconButton } from './ui/IconButton';
@@ -88,6 +88,9 @@ export function ParticipantView({
   }
 
   const assignedPlayer = campaign.players.find((p) => p.id === user.assignedPlayerId);
+
+  // Solo il giocatore di turno può lanciare i dadi.
+  const isMyTurn = Boolean(assignedPlayer && campaign.activePlayerId === assignedPlayer.id);
 
   const saveName = () => {
     if (tempName.trim()) {
@@ -219,7 +222,26 @@ export function ParticipantView({
             )
           }
           diceRollerSlot={
-            assignedPlayer ? (
+            !assignedPlayer ? (
+              <div className="flex h-28 flex-col items-center justify-center gap-1 p-4 text-center opacity-60">
+                <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+                  Dadi non disponibili
+                </span>
+                <span className="text-[10px] text-slate-600">
+                  Il master deve assegnarti un personaggio
+                </span>
+              </div>
+            ) : !isMyTurn ? (
+              <div className="flex h-28 flex-col items-center justify-center gap-2 p-4 text-center opacity-70">
+                <Hourglass className="h-5 w-5 text-slate-500" />
+                <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+                  Non è il tuo turno
+                </span>
+                <span className="text-[10px] text-slate-600">
+                  Potrai lanciare quando il master ti darà l&apos;iniziativa
+                </span>
+              </div>
+            ) : (
               <DiceRoller
                 selectedDice={selectedDice}
                 onSelectedDiceChange={setSelectedDice}
@@ -236,15 +258,6 @@ export function ParticipantView({
                   }).catch(console.error);
                 }}
               />
-            ) : (
-              <div className="flex h-28 flex-col items-center justify-center gap-1 p-4 text-center opacity-60">
-                <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
-                  Dadi non disponibili
-                </span>
-                <span className="text-[10px] text-slate-600">
-                  Il master deve assegnarti un personaggio
-                </span>
-              </div>
             )
           }
         />

@@ -537,9 +537,12 @@ export function SharedView({
                       </span>
                     )}
 
+                    {/* Nessuna `key` sul timestamp: rimontare il dado a ogni
+                        lancio faceva lasciare a Chrome un fantasma GPU del
+                        precedente (alone sfocato + animazione). Aggiornandolo
+                        sul posto, il dado vecchio sparisce sempre. */}
                     <div className="relative my-2">
                       <DiceShape
-                        key={lastRoll.timestamp}
                         diceType={lastRoll.diceType}
                         value={lastRoll.result}
                         state="result"

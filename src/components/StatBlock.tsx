@@ -1,11 +1,14 @@
 /**
- * Le sei statistiche di un personaggio, in griglia 3 × 2.
+ * Le sei statistiche di un personaggio.
  *
- * Un solo componente per i tre posti in cui compaiono: la scheda PG in
- * dashboard (modificabile dal master), la scheda personale del giocatore
- * (modificabile se il master ha passato il controllo) e la condivisione (sola
- * lettura). La sigla è nella cella, il nome completo nel tooltip — così ogni
- * cella si spiega da sola anche nella colonna stretta della proiezione.
+ * Un solo componente per i due posti in cui compaiono: la scheda PG in
+ * dashboard (modificabile dal master) e la condivisione (sola lettura, solo per
+ * il giocatore di turno). La sigla è nella cella, il nome completo nel tooltip
+ * — così ogni cella si spiega da sola anche nella colonna stretta della
+ * proiezione.
+ *
+ * `dense` le mette tutte e sei su **una riga**, molto strette: è la forma più
+ * compatta, quella che occupa meno spazio nelle schede.
  */
 
 import { clampStat, readStats, statAbbr } from '../lib/stats';
@@ -17,7 +20,7 @@ interface StatBlockProps {
   stats: number[] | undefined;
   /** Assente = sola lettura. Riceve l'intero array aggiornato. */
   onChange?: (next: number[]) => void;
-  /** Più compatta per la colonna della condivisione. */
+  /** Sei celle su una riga sola, più piccole. */
   dense?: boolean;
 }
 
@@ -33,15 +36,19 @@ export function StatBlock({ labels, stats, onChange, dense = false }: StatBlockP
   };
 
   return (
-    <div className="grid grid-cols-3 gap-1.5">
+    <div className={`grid gap-1 ${dense ? 'grid-cols-6' : 'grid-cols-3 gap-1.5'}`}>
       {labels.map((label, index) => (
         <Tooltip key={index} label={label} className="w-full">
           <div
-            className={`flex w-full flex-col items-center rounded-lg border border-bento-border bg-bento-bg ${
-              dense ? 'px-1 py-1' : 'px-1.5 py-1.5'
+            className={`flex w-full flex-col items-center rounded-md border border-bento-border bg-bento-bg ${
+              dense ? 'px-0.5 py-0.5' : 'rounded-lg px-1.5 py-1.5'
             }`}
           >
-            <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <span
+              className={`font-mono font-bold uppercase tracking-wider text-slate-500 ${
+                dense ? 'text-[8px]' : 'text-[9px]'
+              }`}
+            >
               {statAbbr(label)}
             </span>
             {editable ? (
@@ -52,13 +59,13 @@ export function StatBlock({ labels, stats, onChange, dense = false }: StatBlockP
                 onChange={(event) => setAt(index, Number.parseInt(event.target.value, 10) || 0)}
                 aria-label={label}
                 className={`w-full bg-transparent text-center font-display font-black text-slate-100 focus:outline-none ${
-                  dense ? 'text-base' : 'text-lg'
+                  dense ? 'text-sm' : 'text-lg'
                 }`}
               />
             ) : (
               <span
                 className={`font-display font-black text-slate-100 ${
-                  dense ? 'text-base' : 'text-lg'
+                  dense ? 'text-sm' : 'text-lg'
                 }`}
               >
                 {values[index]}
