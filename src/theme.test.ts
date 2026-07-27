@@ -25,8 +25,8 @@ describe('temi di colore', () => {
     expect(normalizeTheme(42)).toBe('crimson');
   });
 
-  it('include i due colori nuovi', () => {
-    for (const id of ['lime', 'indigo']) {
+  it('include i colori nuovi', () => {
+    for (const id of ['lime', 'indigo', 'gold']) {
       expect(THEMES.some((t) => t.id === id)).toBe(true);
       expect(normalizeTheme(id)).toBe(id);
     }
@@ -58,21 +58,31 @@ describe('design', () => {
     }
   });
 
-  it('include i tre design nuovi', () => {
-    for (const id of ['pergamena', 'neon', 'ferro']) {
+  it('include i design nuovi', () => {
+    for (const id of ['pergamena', 'neon', 'ferro', 'ombra', 'cristallo', 'taverna']) {
       expect(STYLES.some((s) => s.id === id)).toBe(true);
       expect(normalizeStyle(id)).toBe(id);
     }
   });
 
   /**
-   * Solo i design su fondo chiaro impongono il marchio nero: White e Pergamena.
-   * Neon e Ferro sono scuri nonostante il carattere diverso.
+   * Solo i design su fondo chiaro impongono il marchio nero: White, Pergamena
+   * e Cristallo. Ombra e Taverna sono scuri, nonostante siano nuovi.
    */
-  it('segna come chiari solo White e Pergamena', () => {
-    expect(isLightStyle('white')).toBe(true);
-    expect(isLightStyle('pergamena')).toBe(true);
-    for (const dark of ['grimorio', 'arcano', 'runico', 'retro', 'neon', 'ferro'] as const) {
+  it('segna come chiari solo White, Pergamena e Cristallo', () => {
+    for (const light of ['white', 'pergamena', 'cristallo'] as const) {
+      expect(isLightStyle(light)).toBe(true);
+    }
+    for (const dark of [
+      'grimorio',
+      'arcano',
+      'runico',
+      'retro',
+      'neon',
+      'ferro',
+      'ombra',
+      'taverna',
+    ] as const) {
       expect(isLightStyle(dark)).toBe(false);
     }
   });

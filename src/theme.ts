@@ -22,7 +22,8 @@ export type CampaignTheme =
   | 'rose'
   | 'obsidian'
   | 'lime'
-  | 'indigo';
+  | 'indigo'
+  | 'gold';
 
 export const DEFAULT_THEME: CampaignTheme = 'crimson';
 
@@ -50,14 +51,16 @@ export const THEMES: ThemeDefinition[] = [
   // Chiave invariata per compatibilità; il colore è magenta, non più rosa.
   { id: 'rose', label: 'Bardo', swatch: '#d946ef', accent: '#d946ef' },
   { id: 'obsidian', label: 'Ladro', swatch: '#94a3b8', accent: '#94a3b8' },
-  // Due tinte nuove, in gamme non ancora usate: verde acido e indaco.
+  // Tinte nuove, in gamme non ancora usate: verde acido, indaco e oro.
   { id: 'lime', label: 'Alchimista', swatch: '#84cc16', accent: '#84cc16' },
   { id: 'indigo', label: 'Illusionista', swatch: '#6366f1', accent: '#6366f1' },
+  // Giallo pieno: nel vuoto fra l'arancio dell'Oste e il verde acido.
+  { id: 'gold', label: 'Paladino', swatch: '#eab308', accent: '#eab308' },
 ];
 
 /**
  * Asse indipendente dal colore: cambia forme, densità e tipografia, non la
- * palette. I due assi si combinano liberamente (10 colori × 8 design).
+ * palette. I due assi si combinano liberamente (11 colori × 11 design).
  */
 export type CampaignStyle =
   | 'grimorio'
@@ -67,7 +70,10 @@ export type CampaignStyle =
   | 'retro'
   | 'pergamena'
   | 'neon'
-  | 'ferro';
+  | 'ferro'
+  | 'ombra'
+  | 'cristallo'
+  | 'taverna';
 
 export const DEFAULT_STYLE: CampaignStyle = 'grimorio';
 
@@ -91,14 +97,17 @@ export const STYLES: StyleDefinition[] = [
   { id: 'pergamena', label: 'Pergamena', hint: 'Carta antica, sepia, serif caldo' },
   { id: 'neon', label: 'Neon', hint: 'Contorni luminosi, griglia, sci-fi' },
   { id: 'ferro', label: 'Ferro', hint: 'Acciaio, smussi, condensato industriale' },
+  { id: 'ombra', label: 'Ombra', hint: 'Nero pieno, contrasto forte, serif gotico' },
+  { id: 'cristallo', label: 'Cristallo', hint: 'Chiaro, vetro ghiacciato, nitido' },
+  { id: 'taverna', label: 'Taverna', hint: 'Legno scuro, cuoio, ottone caldo' },
 ];
 
 /**
  * Design su fondo chiaro: il marchio dorato non si legge e va usato quello nero.
- * White e Pergamena sono gli unici due.
+ * White, Pergamena e Cristallo sono i tre design chiari.
  */
 export function isLightStyle(style: CampaignStyle): boolean {
-  return style === 'white' || style === 'pergamena';
+  return style === 'white' || style === 'pergamena' || style === 'cristallo';
 }
 
 /**

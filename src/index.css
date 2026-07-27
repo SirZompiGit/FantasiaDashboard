@@ -117,6 +117,16 @@
   --theme-rgb: 99, 102, 241;
 }
 
+/* Oro: giallo pieno nel vuoto fra l'arancio dell'ambra e il verde acido del
+   lime. Il 600 resta abbastanza scuro da leggersi anche sui design chiari. */
+[data-theme="gold"] {
+  --theme-400: #facc15;
+  --theme-500: #eab308;
+  --theme-600: #ca8a04;
+  --theme-950: #422006;
+  --theme-rgb: 234, 179, 8;
+}
+
 /* La transizione si attiva solo dopo il primo paint (classe aggiunta da
    applyTheme), così all'avvio non si vede una dissolvenza dal colore iniziale. */
 html.theme-transitions {
@@ -432,11 +442,13 @@ html.theme-transitions {
   --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   --color-bento-void: #ffffff;
-  --color-bento-bg: #eef0f4;
+  --color-bento-bg: #e8ebf1;
   --color-bento-panel: #ffffff;
-  --color-bento-item: #f5f6f9;
-  --color-bento-button: #e7e9ef;
-  --color-bento-border: #d3d7e0;
+  --color-bento-item: #f3f5f8;
+  --color-bento-button: #e3e6ed;
+  /* Bordo più marcato: su fondo bianco un grigio troppo chiaro spariva e i
+     pannelli sembravano fondersi tra loro. */
+  --color-bento-border: #c3c9d5;
 
   --color-indigo-glow: rgba(79, 70, 229, 0.08);
 }
@@ -459,39 +471,41 @@ html.theme-transitions {
   letter-spacing: 0.02em;
 }
 
-/* Inversione della scala tipografica. */
-[data-style='white'] .text-white { color: #0f172a; }
-[data-style='white'] .text-slate-100 { color: #111827; }
-[data-style='white'] .text-slate-200 { color: #1f2937; }
-[data-style='white'] .text-slate-300 { color: #334155; }
-[data-style='white'] .text-slate-400 { color: #52607a; }
-[data-style='white'] .text-slate-500 { color: #6b7688; }
-[data-style='white'] .text-slate-600 { color: #8b94a5; }
-[data-style='white'] .text-slate-700 { color: #a3aab8; }
+/* Inversione della scala tipografica. I toni muti (400-700) sono più scuri di
+   prima: i grigi chiari su fondo bianco non raggiungevano il contrasto minimo e
+   le etichette secondarie risultavano slavate. */
+[data-style='white'] .text-white { color: #0b1220; }
+[data-style='white'] .text-slate-100 { color: #0f172a; }
+[data-style='white'] .text-slate-200 { color: #1c2637; }
+[data-style='white'] .text-slate-300 { color: #2d3a4f; }
+[data-style='white'] .text-slate-400 { color: #3f4a5f; }
+[data-style='white'] .text-slate-500 { color: #505b70; }
+[data-style='white'] .text-slate-600 { color: #626d82; }
+[data-style='white'] .text-slate-700 { color: #767f93; }
 
 [data-style='white'] .hover\:text-slate-100:hover,
-[data-style='white'] .hover\:text-white:hover { color: #0f172a; }
-[data-style='white'] .hover\:text-slate-200:hover { color: #1f2937; }
-[data-style='white'] .hover\:text-slate-300:hover { color: #334155; }
+[data-style='white'] .hover\:text-white:hover { color: #0b1220; }
+[data-style='white'] .hover\:text-slate-200:hover { color: #1c2637; }
+[data-style='white'] .hover\:text-slate-300:hover { color: #2d3a4f; }
 
 [data-style='white'] .placeholder-slate-500::placeholder,
 [data-style='white'] .placeholder-slate-600::placeholder,
-[data-style='white'] .placeholder\:text-slate-600::placeholder { color: #9aa3b2; }
+[data-style='white'] .placeholder\:text-slate-600::placeholder { color: #737d90; }
 
-[data-style='white'] .bg-slate-700 { background-color: #dfe3ea; }
-[data-style='white'] .bg-slate-800 { background-color: #e9ecf1; }
-[data-style='white'] .bg-slate-900 { background-color: #f2f4f7; }
-[data-style='white'] .bg-slate-800\/50 { background-color: rgb(233 236 241 / 0.7); }
-[data-style='white'] .bg-slate-900\/50 { background-color: rgb(210 216 226 / 0.5); }
+[data-style='white'] .bg-slate-700 { background-color: #dbe0e8; }
+[data-style='white'] .bg-slate-800 { background-color: #e6eaf0; }
+[data-style='white'] .bg-slate-900 { background-color: #eff2f6; }
+[data-style='white'] .bg-slate-800\/50 { background-color: rgb(230 234 240 / 0.7); }
+[data-style='white'] .bg-slate-900\/50 { background-color: rgb(205 212 224 / 0.5); }
 [data-style='white'] .hover\:bg-slate-600:hover,
-[data-style='white'] .hover\:bg-slate-700:hover { background-color: #d4d9e2; }
+[data-style='white'] .hover\:bg-slate-700:hover { background-color: #ccd2dd; }
 
 [data-style='white'] .border-slate-700,
 [data-style='white'] .border-slate-800,
-[data-style='white'] .border-slate-700\/50 { border-color: #d9dde5; }
-[data-style='white'] .border-white { border-color: #0f172a; }
+[data-style='white'] .border-slate-700\/50 { border-color: #cbd1db; }
+[data-style='white'] .border-white { border-color: #0b1220; }
 [data-style='white'] .hover\:border-slate-500:hover,
-[data-style='white'] .hover\:border-slate-600:hover { border-color: #a9b1c1; }
+[data-style='white'] .hover\:border-slate-600:hover { border-color: #99a2b4; }
 
 /* Il colore del tema va scurito per restare leggibile su fondo chiaro. */
 [data-style='white'] .text-theme-400,
@@ -664,12 +678,13 @@ html.theme-transitions {
   --font-display: 'Cinzel', Georgia, serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  --color-bento-void: #efe4c9;
-  --color-bento-bg: #e7d8b6;
+  --color-bento-void: #ede1c3;
+  --color-bento-bg: #e2d1ab;
   --color-bento-panel: #f7f0dd;
-  --color-bento-item: #efe6cd;
-  --color-bento-button: #e3d5b2;
-  --color-bento-border: #cbb787;
+  --color-bento-item: #ece1c4;
+  --color-bento-button: #ddcda4;
+  /* Bordo più deciso: la carta chiara aveva contorni quasi invisibili. */
+  --color-bento-border: #b9a26e;
 }
 
 /* Fondo di carta: vignettatura calda e una trama fibrosa appena percettibile. */
@@ -695,38 +710,39 @@ html.theme-transitions {
   letter-spacing: 0.05em;
 }
 
-/* Inversione della scala tipografica, verso i bruni. */
-[data-style='pergamena'] .text-white { color: #2c2110; }
-[data-style='pergamena'] .text-slate-100 { color: #352814; }
-[data-style='pergamena'] .text-slate-200 { color: #443619; }
-[data-style='pergamena'] .text-slate-300 { color: #574727; }
-[data-style='pergamena'] .text-slate-400 { color: #776540; }
-[data-style='pergamena'] .text-slate-500 { color: #8f7d56; }
-[data-style='pergamena'] .text-slate-600 { color: #a6946b; }
-[data-style='pergamena'] .text-slate-700 { color: #bca882; }
+/* Inversione della scala tipografica, verso i bruni. I toni muti sono più
+   scuri di prima: sul giallo della carta i marroni chiari sbiadivano. */
+[data-style='pergamena'] .text-white { color: #241a0b; }
+[data-style='pergamena'] .text-slate-100 { color: #2c2110; }
+[data-style='pergamena'] .text-slate-200 { color: #3a2d15; }
+[data-style='pergamena'] .text-slate-300 { color: #4b3b1f; }
+[data-style='pergamena'] .text-slate-400 { color: #5f4d2b; }
+[data-style='pergamena'] .text-slate-500 { color: #6f5c37; }
+[data-style='pergamena'] .text-slate-600 { color: #806c46; }
+[data-style='pergamena'] .text-slate-700 { color: #927d58; }
 
 [data-style='pergamena'] .hover\:text-slate-100:hover,
-[data-style='pergamena'] .hover\:text-white:hover { color: #2c2110; }
-[data-style='pergamena'] .hover\:text-slate-200:hover { color: #443619; }
-[data-style='pergamena'] .hover\:text-slate-300:hover { color: #574727; }
+[data-style='pergamena'] .hover\:text-white:hover { color: #241a0b; }
+[data-style='pergamena'] .hover\:text-slate-200:hover { color: #3a2d15; }
+[data-style='pergamena'] .hover\:text-slate-300:hover { color: #4b3b1f; }
 
 [data-style='pergamena'] .placeholder-slate-500::placeholder,
 [data-style='pergamena'] .placeholder-slate-600::placeholder,
-[data-style='pergamena'] .placeholder\:text-slate-600::placeholder { color: #a89670; }
+[data-style='pergamena'] .placeholder\:text-slate-600::placeholder { color: #8a774f; }
 
-[data-style='pergamena'] .bg-slate-700 { background-color: #ddceac; }
-[data-style='pergamena'] .bg-slate-800 { background-color: #e6dabb; }
-[data-style='pergamena'] .bg-slate-900 { background-color: #efe6cd; }
-[data-style='pergamena'] .bg-slate-800\/50 { background-color: rgb(230 218 187 / 0.7); }
-[data-style='pergamena'] .bg-slate-900\/50 { background-color: rgb(215 200 165 / 0.5); }
+[data-style='pergamena'] .bg-slate-700 { background-color: #d8c8a2; }
+[data-style='pergamena'] .bg-slate-800 { background-color: #e2d5b0; }
+[data-style='pergamena'] .bg-slate-900 { background-color: #ece1c4; }
+[data-style='pergamena'] .bg-slate-800\/50 { background-color: rgb(226 213 176 / 0.7); }
+[data-style='pergamena'] .bg-slate-900\/50 { background-color: rgb(210 193 155 / 0.5); }
 [data-style='pergamena'] .hover\:bg-slate-600:hover,
-[data-style='pergamena'] .hover\:bg-slate-700:hover { background-color: #d3c39c; }
+[data-style='pergamena'] .hover\:bg-slate-700:hover { background-color: #ccba90; }
 
 [data-style='pergamena'] .border-slate-700,
 [data-style='pergamena'] .border-slate-800,
-[data-style='pergamena'] .border-slate-700\/50 { border-color: #d3c096; }
+[data-style='pergamena'] .border-slate-700\/50 { border-color: #c3ac78; }
 [data-style='pergamena'] .hover\:border-slate-500:hover,
-[data-style='pergamena'] .hover\:border-slate-600:hover { border-color: #b09a6d; }
+[data-style='pergamena'] .hover\:border-slate-600:hover { border-color: #a68f60; }
 
 /* Colore del tema scurito per restare leggibile sul chiaro. */
 [data-style='pergamena'] .text-theme-400,
@@ -893,6 +909,310 @@ html.theme-transitions {
 [data-style='ferro'] .hp-segment {
   border-radius: 2px;
   background-image: linear-gradient(180deg, rgb(255 255 255 / 0.18), rgb(0 0 0 / 0) 55%);
+}
+
+/* ==========================================================================
+   OMBRA — nero pieno, gotico.
+   Superfici quasi nere, testo molto chiaro, un filo del colore del tema sui
+   bordi e serif Cinzel pesante. Il massimo contrasto: niente aloni (quello è
+   Neon) né vetro (quello è Arcano), solo nero e luce.
+   ========================================================================== */
+
+[data-style='ombra'] {
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 5px;
+  --radius-3xl: 8px;
+
+  --font-display: 'Cinzel', Georgia, serif;
+
+  --color-bento-void: #000000;
+  --color-bento-bg: #040405;
+  --color-bento-panel: #0a0a0d;
+  --color-bento-item: #0f0f13;
+  --color-bento-button: #17171d;
+  --color-bento-border: #26262e;
+}
+
+/* Vignettatura profonda e un alone bassissimo nel colore del tema in alto. */
+[data-style='ombra'] body {
+  background-image:
+    radial-gradient(
+      70rem 45rem at 50% -20%,
+      color-mix(in oklab, var(--theme-600) 10%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(130% 130% at 50% 40%, transparent 60%, #000 100%);
+  background-attachment: fixed;
+}
+
+/* Il bordo è un filo netto, appena tinto dal tema. */
+[data-style='ombra'] .border-bento-border {
+  border-color: color-mix(in oklab, var(--theme-500) 22%, #26262e);
+}
+
+/* Ombre nere profonde con un filetto di luce in cima: superficie incisa. */
+[data-style='ombra'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 2px 10px rgb(0 0 0 / 0.7);
+}
+[data-style='ombra'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 8px 28px rgb(0 0 0 / 0.8);
+}
+[data-style='ombra'] .shadow-overlay {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 70px rgb(0 0 0 / 0.85);
+}
+
+[data-style='ombra'] .font-display {
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* Contrasto spinto: i toni chiari tendono al bianco puro, i muti restano
+   leggibili sul nero invece di sprofondarci. */
+[data-style='ombra'] .text-white { color: #ffffff; }
+[data-style='ombra'] .text-slate-100 { color: #f4f5f8; }
+[data-style='ombra'] .text-slate-200 { color: #e6e8ee; }
+[data-style='ombra'] .text-slate-300 { color: #cfd3dd; }
+[data-style='ombra'] .text-slate-400 { color: #aab0be; }
+
+/* Barra della vita: solco nero da cui affiora il colore. */
+[data-style='ombra'] .hp-track {
+  background-color: #000000;
+  border-color: color-mix(in oklab, var(--theme-500) 25%, #26262e);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9);
+}
+
+/* ==========================================================================
+   CRISTALLO — vetro ghiacciato.
+   Il terzo design chiaro, ma freddo e traslucido dove White è opaco e
+   Pergamena è caldo: fondo di ghiaccio, pannelli di vetro smerigliato, angoli
+   ampi. La scala tipografica si ribalta verso lo slate bluastro.
+   ========================================================================== */
+
+[data-style='cristallo'] {
+  --radius-sm: 0.35rem;
+  --radius-md: 0.55rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.3rem;
+  --radius-3xl: 1.8rem;
+
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bento-void: #e9f1f8;
+  --color-bento-bg: #d3e2f0;
+  /* Superfici traslucide: sfocando lo sfondo diventano vetro smerigliato. */
+  --color-bento-panel: rgb(255 255 255 / 0.74);
+  --color-bento-item: rgb(255 255 255 / 0.55);
+  --color-bento-button: rgb(255 255 255 / 0.85);
+  --color-bento-border: #b7cbde;
+
+  --color-indigo-glow: rgba(79, 70, 229, 0.06);
+}
+
+/* Fondo di ghiaccio: due aloni freddi diffusi. */
+[data-style='cristallo'] body {
+  background-image:
+    radial-gradient(60rem 40rem at 12% -10%, rgb(255 255 255 / 0.9), transparent 60%),
+    radial-gradient(70rem 50rem at 100% 0, rgb(186 214 240 / 0.7), transparent 55%),
+    linear-gradient(180deg, #dfeaf5, #c9dcee);
+  background-attachment: fixed;
+}
+
+/* Vetro smerigliato: le superfici traslucide sfocano ciò che sta dietro. */
+[data-style='cristallo'] .bg-bento-panel,
+[data-style='cristallo'] .bg-bento-item,
+[data-style='cristallo'] .bg-bento-button {
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+}
+
+/* Ombre fredde e morbide, con un filo di luce interno sul bordo alto. */
+[data-style='cristallo'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 1px 2px rgb(30 58 95 / 0.06),
+    0 8px 24px rgb(30 58 95 / 0.1);
+}
+[data-style='cristallo'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    0 4px 10px rgb(30 58 95 / 0.1),
+    0 14px 36px rgb(30 58 95 / 0.14);
+}
+[data-style='cristallo'] .shadow-overlay {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    0 16px 40px rgb(30 58 95 / 0.18),
+    0 36px 80px rgb(30 58 95 / 0.22);
+}
+
+[data-style='cristallo'] .font-display {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Inversione della scala tipografica, verso lo slate freddo. */
+[data-style='cristallo'] .text-white { color: #0b1a28; }
+[data-style='cristallo'] .text-slate-100 { color: #0f2233; }
+[data-style='cristallo'] .text-slate-200 { color: #1b3245; }
+[data-style='cristallo'] .text-slate-300 { color: #2b4459; }
+[data-style='cristallo'] .text-slate-400 { color: #3d566b; }
+[data-style='cristallo'] .text-slate-500 { color: #4e6478; }
+[data-style='cristallo'] .text-slate-600 { color: #62778c; }
+[data-style='cristallo'] .text-slate-700 { color: #78899c; }
+
+[data-style='cristallo'] .hover\:text-slate-100:hover,
+[data-style='cristallo'] .hover\:text-white:hover { color: #0b1a28; }
+[data-style='cristallo'] .hover\:text-slate-200:hover { color: #1b3245; }
+[data-style='cristallo'] .hover\:text-slate-300:hover { color: #2b4459; }
+
+[data-style='cristallo'] .placeholder-slate-500::placeholder,
+[data-style='cristallo'] .placeholder-slate-600::placeholder,
+[data-style='cristallo'] .placeholder\:text-slate-600::placeholder { color: #74889b; }
+
+[data-style='cristallo'] .bg-slate-700 { background-color: rgb(255 255 255 / 0.55); }
+[data-style='cristallo'] .bg-slate-800 { background-color: rgb(255 255 255 / 0.4); }
+[data-style='cristallo'] .bg-slate-900 { background-color: rgb(255 255 255 / 0.28); }
+[data-style='cristallo'] .bg-slate-800\/50 { background-color: rgb(255 255 255 / 0.35); }
+[data-style='cristallo'] .bg-slate-900\/50 { background-color: rgb(200 219 238 / 0.4); }
+[data-style='cristallo'] .hover\:bg-slate-600:hover,
+[data-style='cristallo'] .hover\:bg-slate-700:hover { background-color: rgb(255 255 255 / 0.7); }
+
+[data-style='cristallo'] .border-slate-700,
+[data-style='cristallo'] .border-slate-800,
+[data-style='cristallo'] .border-slate-700\/50 { border-color: #b7cbde; }
+[data-style='cristallo'] .hover\:border-slate-500:hover,
+[data-style='cristallo'] .hover\:border-slate-600:hover { border-color: #93aecb; }
+
+/* Il colore del tema va scurito per restare leggibile sul ghiaccio. */
+[data-style='cristallo'] .text-theme-400,
+[data-style='cristallo'] .text-theme-500 { color: var(--theme-600); }
+
+/* Barra della vita: lastra di ghiaccio incisa. */
+[data-style='cristallo'] .hp-track {
+  background-color: rgb(255 255 255 / 0.5);
+  border-color: #a8c1d8;
+  box-shadow: inset 0 1px 3px rgb(30 58 95 / 0.1);
+}
+
+/* ==========================================================================
+   TAVERNA — legno e cuoio.
+   Scuro come Ferro ma caldo dove Ferro è freddo: assito di legno, pannelli di
+   cuoio, filo d'ottone. La scala tipografica vira verso la crema e il tabacco.
+   ========================================================================== */
+
+[data-style='taverna'] {
+  --radius-sm: 0.25rem;
+  --radius-md: 0.4rem;
+  --radius-lg: 0.55rem;
+  --radius-xl: 0.7rem;
+  --radius-2xl: 0.9rem;
+  --radius-3xl: 1.2rem;
+
+  --font-display: 'Cinzel', Georgia, serif;
+
+  --color-bento-void: #150e07;
+  --color-bento-bg: #1c130a;
+  --color-bento-panel: #271b0f;
+  --color-bento-item: #2f2113;
+  --color-bento-button: #3a2917;
+  --color-bento-border: #4a3620;
+}
+
+/* Assito di legno: venatura verticale calda e una vignettatura scura. */
+[data-style='taverna'] body {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.14) 0 3px,
+      rgb(255 190 120 / 0.02) 3px 7px,
+      transparent 7px 11px
+    ),
+    radial-gradient(120% 120% at 50% -10%, transparent 55%, rgb(0 0 0 / 0.4)),
+    linear-gradient(180deg, #20150a, #140c05);
+  background-attachment: fixed;
+}
+
+/* Il cuoio dei pannelli prende un filo d'ottone in alto. */
+[data-style='taverna'] .bg-bento-panel {
+  background-image: linear-gradient(180deg, rgb(255 200 130 / 0.05), rgb(0 0 0 / 0.14));
+}
+[data-style='taverna'] .bg-bento-item {
+  background-image: linear-gradient(180deg, rgb(255 200 130 / 0.03), rgb(0 0 0 / 0.1));
+}
+
+[data-style='taverna'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 200 130 / 0.1),
+    0 2px 4px rgb(0 0 0 / 0.4),
+    0 8px 20px rgb(0 0 0 / 0.45);
+}
+[data-style='taverna'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 200 130 / 0.12),
+    0 8px 26px rgb(0 0 0 / 0.55);
+}
+[data-style='taverna'] .shadow-overlay {
+  box-shadow:
+    inset 0 1px 0 rgb(255 200 130 / 0.1),
+    0 24px 64px rgb(0 0 0 / 0.65);
+}
+
+[data-style='taverna'] .font-display {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* La scala tipografica vira al caldo: crema sui titoli, tabacco sui muti. */
+[data-style='taverna'] .text-white { color: #f6ecd7; }
+[data-style='taverna'] .text-slate-100 { color: #efe1c8; }
+[data-style='taverna'] .text-slate-200 { color: #e4d2b2; }
+[data-style='taverna'] .text-slate-300 { color: #d2bd97; }
+[data-style='taverna'] .text-slate-400 { color: #bda07a; }
+[data-style='taverna'] .text-slate-500 { color: #a4855f; }
+[data-style='taverna'] .text-slate-600 { color: #8c6f4c; }
+[data-style='taverna'] .text-slate-700 { color: #7a6043; }
+
+[data-style='taverna'] .hover\:text-slate-100:hover,
+[data-style='taverna'] .hover\:text-white:hover { color: #f6ecd7; }
+[data-style='taverna'] .hover\:text-slate-200:hover { color: #e4d2b2; }
+[data-style='taverna'] .hover\:text-slate-300:hover { color: #d2bd97; }
+
+[data-style='taverna'] .placeholder-slate-500::placeholder,
+[data-style='taverna'] .placeholder-slate-600::placeholder,
+[data-style='taverna'] .placeholder\:text-slate-600::placeholder { color: #8a704e; }
+
+[data-style='taverna'] .bg-slate-700 { background-color: #3a2917; }
+[data-style='taverna'] .bg-slate-800 { background-color: #2f2113; }
+[data-style='taverna'] .bg-slate-900 { background-color: #271b0f; }
+[data-style='taverna'] .bg-slate-800\/50 { background-color: rgb(47 33 19 / 0.7); }
+[data-style='taverna'] .bg-slate-900\/50 { background-color: rgb(39 27 15 / 0.6); }
+[data-style='taverna'] .hover\:bg-slate-600:hover,
+[data-style='taverna'] .hover\:bg-slate-700:hover { background-color: #45311c; }
+
+[data-style='taverna'] .border-slate-700,
+[data-style='taverna'] .border-slate-800,
+[data-style='taverna'] .border-slate-700\/50 { border-color: #43301c; }
+[data-style='taverna'] .hover\:border-slate-500:hover,
+[data-style='taverna'] .hover\:border-slate-600:hover { border-color: #5c452a; }
+
+/* Barra della vita: doga scavata nel legno. */
+[data-style='taverna'] .hp-track {
+  background-color: #180f07;
+  border-color: #4a3620;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 rgb(255 200 130 / 0.06);
 }
 
 /* ==========================================================================
