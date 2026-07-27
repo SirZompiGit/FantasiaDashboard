@@ -622,6 +622,7 @@ export default function App() {
               healthGroups={state.healthGroups}
               dispatch={dispatch}
               compactBars={state.compactBars}
+              barStyle={state.barStyle}
             />
           </div>
 

@@ -1684,16 +1684,22 @@ html.theme-transitions {
 
 /* ==========================================================================
    Design delle barre della vita
-   Asse a sé, da <html data-bar="...">, applicato DOPO i design generali così
-   vince quando entrambi toccano `.hp-track`. 'classico' non ha regole: è
-   l'aspetto di default. Le altre tre cambiano finitura e forma, mai il colore
-   (che resta quello della barra) e mai il meccanismo di riempimento (la
-   `transform` dei segmenti non si tocca).
+   Asse a sé, da <html data-bar="...">. Ridisegna l'INTERA struttura della barra
+   — la scheda (.hp-card), la traccia principale E quelle delle risorse — non
+   solo la barra principale. Applicato DOPO i design generali (così vince) e con
+   soli colori ADATTIVI: i token del design (--color-bento-*), il tema
+   (--theme-*) e il colore reale della barra (--hp-color). Nessuna tinta fissa,
+   così ogni design barre sta bene su qualunque design generale (era il difetto
+   di Tacche su Olografico). 'classico' non ha regole: è il default.
    ========================================================================== */
 
-/* PIATTO — via il bagliore, spigoli netti. Minimale. */
+/* PIATTO — scheda essenziale: via sfondo e bordo della scheda, tutto piatto. */
+[data-bar='piatto'] .hp-card {
+  background-color: transparent;
+  border-color: transparent;
+}
 [data-bar='piatto'] .hp-track {
-  border-radius: 3px;
+  border-radius: 4px;
   box-shadow: none;
 }
 [data-bar='piatto'] .hp-segment {
@@ -1701,13 +1707,35 @@ html.theme-transitions {
   box-shadow: none !important;
 }
 
-/* VETRO — pillola lucida con un riflesso di luce in alto. */
+/* CORNICE — scheda incorniciata: bordo del tema più marcato e un filo del tema
+   in cima; anche le tracce prendono lo stesso bordo. */
+[data-bar='cornice'] .hp-card {
+  border-width: 2px;
+  border-color: color-mix(in oklab, var(--theme-500) 55%, var(--color-bento-border));
+  background-image: linear-gradient(var(--theme-500), var(--theme-500));
+  background-repeat: no-repeat;
+  background-size: 100% 3px;
+  background-position: top center;
+}
+[data-bar='cornice'] .hp-track {
+  border-color: color-mix(in oklab, var(--theme-500) 30%, var(--color-bento-border));
+}
+
+/* VETRO — scheda di vetro (traslucida e sfocata) con tracce a pillola lucida.
+   La translucenza parte dal fondo del design (bento-bg), così regge su scuro,
+   chiaro e sui design già trasparenti. */
+[data-bar='vetro'] .hp-card {
+  background-color: color-mix(in srgb, var(--color-bento-bg) 68%, transparent);
+  border-color: color-mix(in srgb, var(--color-bento-border) 75%, transparent);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
 [data-bar='vetro'] .hp-track {
   border-radius: 9999px;
 }
-[data-bar='vetro'] .hp-segment {
-  border-radius: 9999px !important;
-}
+/* NB: i segmenti NON diventano pillole. La barra è già suddivisa in segmenti:
+   arrotondarli a pillola creava una seconda "seghettatura" sopra la prima. Solo
+   la traccia (il contenitore) prende la forma a pillola. */
 [data-bar='vetro'] .hp-track::after {
   content: '';
   position: absolute;
@@ -1723,24 +1751,75 @@ html.theme-transitions {
   );
 }
 
-/* TACCHE — incisioni regolari: sembra un indicatore a segmenti anche quando il
-   riempimento è continuo. Le tacche seguono il verso della barra e risparmiano
-   le tracce sottili delle risorse. */
-[data-bar='tacche'] .hp-track:not(.hp-track--thin).flex-row::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-  background: repeating-linear-gradient(90deg, transparent 0 9px, rgb(0 0 0 / 0.45) 9px 11px);
+/* TACCHE — vuoti REALI ritagliati nella traccia con una mask: lasciano
+   intravedere la scheda dietro, quindi si adattano a qualunque design invece di
+   dipingere righe nere fisse. La mask sta sulla traccia (non sul riempimento),
+   quindi il passo delle tacche non cambia col livello. Vale anche sulle risorse.
+   La scheda prende un bordo tratteggiato, in sintonia. */
+[data-bar='tacche'] .hp-card {
+  border-style: dashed;
 }
-[data-bar='tacche'] .hp-track:not(.hp-track--thin).flex-col-reverse::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-  background: repeating-linear-gradient(0deg, transparent 0 9px, rgb(0 0 0 / 0.45) 9px 11px);
+[data-bar='tacche'] .hp-track.flex-row {
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+}
+[data-bar='tacche'] .hp-track.flex-col-reverse {
+  -webkit-mask-image: repeating-linear-gradient(0deg, #000 0 9px, transparent 9px 12px);
+  mask-image: repeating-linear-gradient(0deg, #000 0 9px, transparent 9px 12px);
+}
+
+/* REATTORE — scheda e tracce pulsano nel colore REALE della barra (--hp-color),
+   quindi si intonano sempre. */
+[data-bar='reattore'] .hp-card {
+  border-color: color-mix(in oklab, var(--hp-color, var(--theme-500)) 40%, var(--color-bento-border));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--hp-color, var(--theme-500)) 30%, transparent),
+    0 0 22px -8px var(--hp-color, var(--theme-500));
+}
+[data-bar='reattore'] .hp-track {
+  animation: bar-reattore 1.8s ease-in-out infinite;
+}
+[data-bar='reattore'] .hp-segment {
+  box-shadow: 0 0 8px var(--hp-color) !important;
+}
+@keyframes bar-reattore {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 6px rgb(0 0 0 / 0.3),
+      0 0 6px -2px var(--hp-color);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 8px rgb(0 0 0 / 0.4),
+      0 0 16px 0 var(--hp-color);
+  }
+}
+
+/* ONDA — le tracce diventano un nastro SINUSOIDALE che scorre (mask animata). È
+   pura forma, quindi si adatta a ogni design; la scheda si arrotonda. Vale sia
+   sulla barra principale che sulle risorse. */
+[data-bar='onda'] .hp-card {
+  border-radius: 1.25rem;
+}
+[data-bar='onda'] .hp-track {
+  box-shadow: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='56'%20height='40'%20viewBox='0%200%2056%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,12%20Q14,0,28,12%20T56,12%20V28%20Q42,40,28,28%20T0,28%20Z'%20fill='white'/%3E%3C/svg%3E") center / 56px 100% repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='56'%20height='40'%20viewBox='0%200%2056%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,12%20Q14,0,28,12%20T56,12%20V28%20Q42,40,28,28%20T0,28%20Z'%20fill='white'/%3E%3C/svg%3E") center / 56px 100% repeat-x;
+  animation: bar-onda 1.4s linear infinite;
+}
+@keyframes bar-onda {
+  to {
+    -webkit-mask-position: -56px center;
+    mask-position: -56px center;
+  }
+}
+
+/* Chi riduce le animazioni non vede pulsare Reattore né scorrere Onda. */
+@media (prefers-reduced-motion: reduce) {
+  [data-bar='reattore'] .hp-track,
+  [data-bar='onda'] .hp-track {
+    animation: none;
+  }
 }
 
 /* ==========================================================================

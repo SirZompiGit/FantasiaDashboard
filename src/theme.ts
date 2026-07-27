@@ -167,15 +167,33 @@ export function isLightStyle(style: CampaignStyle): boolean {
  * Cambia l'aspetto della traccia e dei segmenti (forma, bagliore, tacche), non
  * i colori, che restano guidati dal tema. `classico` è quello attuale.
  */
-export type BarStyle = 'classico' | 'piatto' | 'vetro' | 'tacche';
+export type BarStyle =
+  | 'classico'
+  | 'piatto'
+  | 'cornice'
+  | 'vetro'
+  | 'tacche'
+  | 'reattore'
+  | 'onda'
+  | 'circolare';
 
 export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
 
+/**
+ * Ogni design ridisegna l'INTERA scheda della barra (contenitore, traccia
+ * principale e risorse), non solo la barra principale, e usa colori adattivi
+ * (token del design, tema, colore della barra) così sta bene su ogni design.
+ */
 export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
-  { id: 'classico', label: 'Classico', hint: 'Traccia morbida, segmenti che brillano' },
-  { id: 'piatto', label: 'Piatto', hint: 'Nessun bagliore, spigoli netti, minimale' },
-  { id: 'vetro', label: 'Vetro', hint: 'Pillola lucida con riflesso in alto' },
-  { id: 'tacche', label: 'Tacche', hint: 'Incisa a tacche, come un indicatore' },
+  { id: 'classico', label: 'Classico', hint: 'Scheda morbida, segmenti che brillano' },
+  { id: 'piatto', label: 'Piatto', hint: 'Scheda essenziale, tutto piatto e minimale' },
+  { id: 'cornice', label: 'Cornice', hint: 'Scheda incorniciata, filo del tema in cima' },
+  { id: 'vetro', label: 'Vetro', hint: 'Scheda di vetro, tracce a pillola lucida' },
+  { id: 'tacche', label: 'Tacche', hint: 'Tracce incise a segmenti, bordo tratteggiato' },
+  { id: 'reattore', label: 'Reattore', hint: 'Scheda e tracce che pulsano nel colore' },
+  { id: 'onda', label: 'Onda', hint: 'Tracce a nastro sinusoidale che scorre' },
+  // Non è una skin CSS ma un layout a sé: anelli invece di tracce lineari.
+  { id: 'circolare', label: 'Circolare', hint: 'Anelli: barra a destra, risorse a sinistra' },
 ];
 
 const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));

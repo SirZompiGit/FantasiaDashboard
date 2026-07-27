@@ -150,9 +150,9 @@ describe('design delle barre', () => {
     expect(BAR_STYLES.some((b) => b.id === 'classico')).toBe(true);
   });
 
-  it('propone tre design oltre al classico', () => {
-    expect(BAR_STYLES).toHaveLength(4);
-    for (const id of ['piatto', 'vetro', 'tacche']) {
+  it('propone diversi design oltre al classico', () => {
+    expect(BAR_STYLES).toHaveLength(8);
+    for (const id of ['piatto', 'cornice', 'vetro', 'tacche', 'reattore', 'onda', 'circolare']) {
       expect(BAR_STYLES.some((b) => b.id === id)).toBe(true);
     }
   });
