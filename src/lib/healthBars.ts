@@ -49,11 +49,12 @@ export const DEFAULT_ZERO_HP_TEXT = 'DEFUNTO';
 /**
  * Risorse per barra.
  *
- * Il limite non è tecnico ma di leggibilità: la barra della vita deve restare
- * l'informazione dominante, e tre tracce sottili sotto — o accanto, in verticale
- * — la trasformerebbero in un grafico.
+ * Dieci è il tetto: nella scheda orizzontale le risorse sono righe che scorrono,
+ * quindi ci stanno comodamente; nella barra verticale, dove affiancano la
+ * traccia della vita, oltre le due o tre diventano strette, ma il layout non si
+ * rompe più (l'indice delle misure è protetto in HealthBarItem).
  */
-export const MAX_RESOURCES = 2;
+export const MAX_RESOURCES = 10;
 
 export const DEFAULT_RESOURCE_COLOR = '#3b82f6';
 

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   ANIMATED_THEMES,
+  BAR_STYLES,
+  DEFAULT_BAR_STYLE,
   DEFAULT_LOGO_VARIANT,
   DEFAULT_STYLE,
   LOGO_VARIANTS,
@@ -8,6 +10,7 @@ import {
   STYLES,
   THEMES,
   isLightStyle,
+  normalizeBarStyle,
   normalizeLogoVariant,
   normalizeStyle,
   normalizeTheme,
@@ -138,6 +141,27 @@ describe('design', () => {
       expect(normalizeStyle(removed)).toBe(DEFAULT_STYLE);
     }
     expect(normalizeStyle(undefined)).toBe(DEFAULT_STYLE);
+  });
+});
+
+describe('design delle barre', () => {
+  it('parte dal classico, presente in elenco', () => {
+    expect(DEFAULT_BAR_STYLE).toBe('classico');
+    expect(BAR_STYLES.some((b) => b.id === 'classico')).toBe(true);
+  });
+
+  it('propone tre design oltre al classico', () => {
+    expect(BAR_STYLES).toHaveLength(4);
+    for (const id of ['piatto', 'vetro', 'tacche']) {
+      expect(BAR_STYLES.some((b) => b.id === id)).toBe(true);
+    }
+  });
+
+  it('accetta i valori previsti e ricade sul classico', () => {
+    for (const b of BAR_STYLES) expect(normalizeBarStyle(b.id)).toBe(b.id);
+    expect(normalizeBarStyle('boh')).toBe(DEFAULT_BAR_STYLE);
+    expect(normalizeBarStyle(undefined)).toBe(DEFAULT_BAR_STYLE);
+    expect(normalizeBarStyle(42)).toBe(DEFAULT_BAR_STYLE);
   });
 });
 

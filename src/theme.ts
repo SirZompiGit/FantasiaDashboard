@@ -163,6 +163,30 @@ export function isLightStyle(style: CampaignStyle): boolean {
 }
 
 /**
+ * Design delle SOLE barre della vita — un asse a parte dal design generale.
+ * Cambia l'aspetto della traccia e dei segmenti (forma, bagliore, tacche), non
+ * i colori, che restano guidati dal tema. `classico` è quello attuale.
+ */
+export type BarStyle = 'classico' | 'piatto' | 'vetro' | 'tacche';
+
+export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
+
+export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
+  { id: 'classico', label: 'Classico', hint: 'Traccia morbida, segmenti che brillano' },
+  { id: 'piatto', label: 'Piatto', hint: 'Nessun bagliore, spigoli netti, minimale' },
+  { id: 'vetro', label: 'Vetro', hint: 'Pillola lucida con riflesso in alto' },
+  { id: 'tacche', label: 'Tacche', hint: 'Incisa a tacche, come un indicatore' },
+];
+
+const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));
+
+export function normalizeBarStyle(value: unknown): BarStyle {
+  return typeof value === 'string' && BAR_STYLE_IDS.has(value)
+    ? (value as BarStyle)
+    : DEFAULT_BAR_STYLE;
+}
+
+/**
  * Variante del marchio.
  *
  * `normal`  — il logo dorato originale
@@ -217,12 +241,18 @@ export function getThemeAccent(theme: CampaignTheme): string {
  * accortezza al primo caricamento si vedrebbe una dissolvenza dal colore
  * iniziale a quello salvato.
  */
-export function applyTheme(theme: CampaignTheme, style: CampaignStyle = DEFAULT_STYLE): void {
+export function applyTheme(
+  theme: CampaignTheme,
+  style: CampaignStyle = DEFAULT_STYLE,
+  barStyle: BarStyle = DEFAULT_BAR_STYLE,
+): void {
   if (typeof document === 'undefined') return;
 
   const root = document.documentElement;
   root.dataset.theme = normalizeTheme(theme);
   root.dataset.style = normalizeStyle(style);
+  // Terzo asse indipendente: l'aspetto delle sole barre della vita.
+  root.dataset.bar = normalizeBarStyle(barStyle);
 
   if (!root.classList.contains('theme-transitions')) {
     requestAnimationFrame(() => {

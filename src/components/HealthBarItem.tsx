@@ -440,6 +440,10 @@ export function HealthBarItem({
   const resources = (bar.resources ?? []).filter(
     (resource) => !onlyShared || resource.shared,
   );
+  // Le misure verticali sono tarate su 0-2 risorse; oltre (fino a 10) l'indice
+  // uscirebbe dagli array e darebbe una classe `undefined`. Lo blocco all'ultima
+  // misura: in verticale con molte risorse è stretto, ma non si rompe.
+  const verticalSlot = Math.min(resources.length, VERTICAL_SIZE.length - 1);
   const statusEffects = (bar.statusEffects ?? []).filter(
     (effect) => !onlyShared || effect.shared,
   );
@@ -540,7 +544,7 @@ export function HealthBarItem({
   if (isVertical) {
     return (
       <div
-        className={`relative flex ${VERTICAL_SIZE[resources.length]} shrink-0 flex-row items-stretch gap-1 rounded-xl border border-bento-border bg-bento-bg p-1.5 transition-colors duration-200 ${
+        className={`relative flex ${VERTICAL_SIZE[verticalSlot]} shrink-0 flex-row items-stretch gap-1 rounded-xl border border-bento-border bg-bento-bg p-1.5 transition-colors duration-200 ${
           readOnly ? '' : 'hover:border-slate-600'
         } ${shaking ? 'health-shake' : ''}`}
       >
@@ -557,7 +561,7 @@ export function HealthBarItem({
         </div>
 
         <div
-          className={`flex ${VERTICAL_COLUMN[resources.length]} shrink-0 flex-col items-center`}
+          className={`flex ${VERTICAL_COLUMN[verticalSlot]} shrink-0 flex-col items-center`}
         >
           {/* In verticale gli effetti non hanno spazio per un nome: solo le
               iniziali colorate, in cima. */}

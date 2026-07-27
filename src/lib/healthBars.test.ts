@@ -165,14 +165,14 @@ describe('soglia dei segmenti', () => {
 });
 
 describe('clampResources', () => {
-  it('non ne accetta più di due', () => {
-    const list = clampResources([
-      resource({ id: 'a' }),
-      resource({ id: 'b' }),
-      resource({ id: 'c' }),
-    ]);
+  it('taglia oltre il massimo consentito', () => {
+    const many = Array.from({ length: MAX_RESOURCES + 3 }, (_, i) => resource({ id: `r${i}` }));
+    const list = clampResources(many);
     expect(list).toHaveLength(MAX_RESOURCES);
-    expect(list?.map((r) => r.id)).toEqual(['a', 'b']);
+    // Tiene le prime e scarta le eccedenti.
+    expect(list?.map((r) => r.id)).toEqual(
+      Array.from({ length: MAX_RESOURCES }, (_, i) => `r${i}`),
+    );
   });
 
   it('riporta i valori entro i limiti della risorsa', () => {

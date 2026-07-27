@@ -16,9 +16,11 @@ import { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   BarChart3,
+  ChevronDown,
   Coins,
   Download,
   ExternalLink,
+  Heart,
   History,
   Home,
   LayoutTemplate,
@@ -28,6 +30,7 @@ import {
   Rows3,
   Settings,
   Sparkles,
+  SlidersHorizontal,
   Trash2,
   Undo2,
   Upload,
@@ -37,10 +40,12 @@ import {
 } from 'lucide-react';
 import {
   ANIMATED_THEMES,
+  BAR_STYLES,
   LOGO_VARIANTS,
   SOLID_THEMES,
   STYLES,
   isLightStyle,
+  type BarStyle,
   type CampaignStyle,
   type CampaignTheme,
   type LogoVariant,
@@ -58,6 +63,8 @@ interface DashboardHeaderProps {
   onThemeChange: (theme: CampaignTheme) => void;
   style: CampaignStyle;
   onStyleChange: (style: CampaignStyle) => void;
+  barStyle: BarStyle;
+  onBarStyleChange: (barStyle: BarStyle) => void;
   logoVariant: LogoVariant;
   onLogoVariantChange: (variant: LogoVariant) => void;
   isMuted: boolean;
@@ -111,11 +118,44 @@ const TOOL_BUTTON =
 const TOOL_BUTTON_ACCENT =
   `flex ${TOOL_HEIGHT} shrink-0 items-center gap-1.5 rounded-xl border border-theme-500 bg-theme-600 px-4 text-xs font-bold text-white shadow-raised transition-colors duration-200 hover:bg-theme-500 active:scale-[0.98]`;
 
+/**
+ * Sezione richiudibile del pannello impostazioni.
+ *
+ * Con l'aumentare delle voci il pannello era diventato un lungo scorrimento:
+ * raccogliendole in `<details>` a fisarmonica si vede una cosa per volta.
+ * `<details>` nativo = zero stato React e accessibile da tastiera.
+ */
+function SettingsSection({
+  title,
+  icon: Icon,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <details open={defaultOpen} className="settings-acc border-t border-bento-border pt-3">
+      <summary className="flex cursor-pointer select-none items-center justify-between gap-2 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400 transition-colors duration-200 hover:text-slate-200">
+        <span className="flex items-center gap-1.5">
+          <Icon className="h-3.5 w-3.5 text-theme-500" /> {title}
+        </span>
+        <ChevronDown className="acc-chevron h-3.5 w-3.5 shrink-0 text-slate-600 transition-transform duration-200" />
+      </summary>
+      <div className="space-y-3 pt-3">{children}</div>
+    </details>
+  );
+}
+
 export function DashboardHeader({
   theme,
   onThemeChange,
   style,
   onStyleChange,
+  barStyle,
+  onBarStyleChange,
   logoVariant,
   onLogoVariantChange,
   isMuted,
@@ -310,11 +350,11 @@ export function DashboardHeader({
               <span className="font-mono text-xs font-bold uppercase tracking-widest text-slate-300">
                 Impostazioni
               </span>
-              <span className="font-mono text-[10px] text-slate-500">v4.0</span>
+              <span className="font-mono text-[10px] text-slate-500">v5.0</span>
             </div>
 
-            {/* Colore e design sono due assi indipendenti: 16 tinte × 11 design. */}
-            <div className="space-y-3">
+            {/* Colore, design e marchio: gli assi dell'aspetto, richiudibili. */}
+            <SettingsSection title="Aspetto" icon={Palette} defaultOpen>
               <label className="block space-y-1.5">
                 <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   <Palette className="h-3.5 w-3.5 text-theme-500" /> Colore
@@ -402,6 +442,24 @@ export function DashboardHeader({
                 </select>
               </label>
 
+              {/* Design delle sole barre: asse a parte dal design generale. */}
+              <label className="block space-y-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <Heart className="h-3.5 w-3.5 text-theme-500" /> Design barre
+                </span>
+                <select
+                  value={barStyle}
+                  onChange={(event) => onBarStyleChange(event.target.value as BarStyle)}
+                  className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                >
+                  {BAR_STYLES.map((definition) => (
+                    <option key={definition.id} value={definition.id}>
+                      {definition.label} — {definition.hint}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
               <div className="space-y-1.5">
                 <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   <Sparkles className="h-3.5 w-3.5 text-theme-500" /> Marchio
@@ -441,14 +499,9 @@ export function DashboardHeader({
                   </p>
                 )}
               </div>
-            </div>
+            </SettingsSection>
 
-            {/* --------------------------------------------------- Meccaniche */}
-            <div className="space-y-3 border-t border-bento-border pt-3">
-              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Meccaniche
-              </span>
-
+            <SettingsSection title="Meccaniche" icon={SlidersHorizontal}>
               <label className="flex cursor-pointer items-start gap-2.5 select-none">
                 <input
                   type="checkbox"
@@ -521,7 +574,7 @@ export function DashboardHeader({
                   ))}
                 </div>
               </div>
-            </div>
+            </SettingsSection>
 
             <MediaSettings
               media={mediaControls.local}

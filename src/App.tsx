@@ -108,8 +108,8 @@ export default function App() {
   // Il tema è un attributo su <html>: le classi `bg-theme-*` dei componenti
   // si ricolorano da sole, con una dissolvenza.
   useEffect(
-    () => applyTheme(displayed.theme, displayed.style),
-    [displayed.theme, displayed.style],
+    () => applyTheme(displayed.theme, displayed.style, displayed.barStyle),
+    [displayed.theme, displayed.style, displayed.barStyle],
   );
 
   /**
@@ -543,6 +543,8 @@ export default function App() {
         onThemeChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
         style={state.style}
         onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
+        barStyle={state.barStyle}
+        onBarStyleChange={(barStyle) => dispatch({ type: 'SET_BAR_STYLE', barStyle })}
         logoVariant={state.logoVariant}
         onLogoVariantChange={(variant) => dispatch({ type: 'SET_LOGO_VARIANT', variant })}
         isMuted={isMuted}

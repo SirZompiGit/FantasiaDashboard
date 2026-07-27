@@ -5,6 +5,7 @@ import {
   parseImportedCampaign,
   serializeState,
 } from './migrations';
+import { MAX_RESOURCES } from '../lib/healthBars';
 
 /**
  * Prima l'import controllava solo `title` e `players` e poi salvava tutto: un
@@ -116,14 +117,11 @@ describe('risorse delle barre', () => {
     });
   });
 
-  it('non ne tiene più di due', () => {
-    const bar = withResources([
-      { name: 'Uno' },
-      { name: 'Due' },
-      { name: 'Tre' },
-      { name: 'Quattro' },
-    ]);
-    expect(bar.resources).toHaveLength(2);
+  it('non ne tiene più del massimo consentito', () => {
+    const bar = withResources(
+      Array.from({ length: MAX_RESOURCES + 3 }, (_, i) => ({ name: `R${i}` })),
+    );
+    expect(bar.resources).toHaveLength(MAX_RESOURCES);
   });
 
   it('scarta quelle senza nome o non leggibili, senza lanciare', () => {
