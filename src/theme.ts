@@ -20,7 +20,9 @@ export type CampaignTheme =
   | 'amethyst'
   | 'abyss'
   | 'rose'
-  | 'obsidian';
+  | 'obsidian'
+  | 'lime'
+  | 'indigo';
 
 export const DEFAULT_THEME: CampaignTheme = 'crimson';
 
@@ -48,13 +50,24 @@ export const THEMES: ThemeDefinition[] = [
   // Chiave invariata per compatibilità; il colore è magenta, non più rosa.
   { id: 'rose', label: 'Bardo', swatch: '#d946ef', accent: '#d946ef' },
   { id: 'obsidian', label: 'Ladro', swatch: '#94a3b8', accent: '#94a3b8' },
+  // Due tinte nuove, in gamme non ancora usate: verde acido e indaco.
+  { id: 'lime', label: 'Alchimista', swatch: '#84cc16', accent: '#84cc16' },
+  { id: 'indigo', label: 'Illusionista', swatch: '#6366f1', accent: '#6366f1' },
 ];
 
 /**
  * Asse indipendente dal colore: cambia forme, densità e tipografia, non la
- * palette. I due assi si combinano liberamente (8 colori × 3 design).
+ * palette. I due assi si combinano liberamente (10 colori × 8 design).
  */
-export type CampaignStyle = 'grimorio' | 'arcano' | 'runico' | 'white' | 'retro';
+export type CampaignStyle =
+  | 'grimorio'
+  | 'arcano'
+  | 'runico'
+  | 'white'
+  | 'retro'
+  | 'pergamena'
+  | 'neon'
+  | 'ferro';
 
 export const DEFAULT_STYLE: CampaignStyle = 'grimorio';
 
@@ -75,7 +88,18 @@ export const STYLES: StyleDefinition[] = [
   { id: 'runico', label: 'Runico', hint: 'Piatto, monospace, nessuna curva' },
   { id: 'white', label: 'White', hint: 'Chiaro, pulito, testo scuro' },
   { id: 'retro', label: 'Retro', hint: 'Pixel, scanline, cornici spesse' },
+  { id: 'pergamena', label: 'Pergamena', hint: 'Carta antica, sepia, serif caldo' },
+  { id: 'neon', label: 'Neon', hint: 'Contorni luminosi, griglia, sci-fi' },
+  { id: 'ferro', label: 'Ferro', hint: 'Acciaio, smussi, condensato industriale' },
 ];
+
+/**
+ * Design su fondo chiaro: il marchio dorato non si legge e va usato quello nero.
+ * White e Pergamena sono gli unici due.
+ */
+export function isLightStyle(style: CampaignStyle): boolean {
+  return style === 'white' || style === 'pergamena';
+}
 
 /**
  * Variante del marchio.

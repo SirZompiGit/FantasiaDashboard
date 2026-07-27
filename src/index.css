@@ -98,6 +98,25 @@
   --theme-rgb: 148, 163, 184;
 }
 
+/* Verde acido: sta nel vuoto fra l'ambra e lo smeraldo, non confondibile con
+   nessuno dei due. */
+[data-theme="lime"] {
+  --theme-400: #a3e635;
+  --theme-500: #84cc16;
+  --theme-600: #65a30d;
+  --theme-950: #1a2e05;
+  --theme-rgb: 132, 204, 22;
+}
+
+/* Indaco: il blu-viola fra lo zaffiro e l'ametista. */
+[data-theme="indigo"] {
+  --theme-400: #818cf8;
+  --theme-500: #6366f1;
+  --theme-600: #4f46e5;
+  --theme-950: #1e1b4b;
+  --theme-rgb: 99, 102, 241;
+}
+
 /* La transizione si attiva solo dopo il primo paint (classe aggiunta da
    applyTheme), così all'avvio non si vede una dissolvenza dal colore iniziale. */
 html.theme-transitions {
@@ -625,6 +644,255 @@ html.theme-transitions {
       transparent 55%,
       rgb(0 0 0 / 0.35) 100%
     );
+}
+
+/* ==========================================================================
+   PERGAMENA — carta antica.
+   Il secondo design chiaro, ma caldo dove White è freddo: fondo di carta
+   ingiallita, testo bruno, serif da manoscritto. La scala tipografica si
+   ribalta come per White, ma verso i marroni.
+   ========================================================================== */
+
+[data-style='pergamena'] {
+  --radius-sm: 0.3rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.7rem;
+  --radius-xl: 0.9rem;
+  --radius-2xl: 1.2rem;
+  --radius-3xl: 1.6rem;
+
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bento-void: #efe4c9;
+  --color-bento-bg: #e7d8b6;
+  --color-bento-panel: #f7f0dd;
+  --color-bento-item: #efe6cd;
+  --color-bento-button: #e3d5b2;
+  --color-bento-border: #cbb787;
+}
+
+/* Fondo di carta: vignettatura calda e una trama fibrosa appena percettibile. */
+[data-style='pergamena'] body {
+  background-image:
+    radial-gradient(130% 130% at 50% 0, transparent 55%, rgb(90 60 20 / 0.14) 100%),
+    repeating-linear-gradient(0deg, rgb(120 90 40 / 0.03) 0 2px, transparent 2px 4px);
+  background-attachment: fixed;
+}
+
+[data-style='pergamena'] .shadow-panel {
+  box-shadow: 0 1px 2px rgb(74 52 20 / 0.1), 0 3px 10px rgb(74 52 20 / 0.08);
+}
+[data-style='pergamena'] .shadow-raised {
+  box-shadow: 0 2px 4px rgb(74 52 20 / 0.12), 0 8px 20px rgb(74 52 20 / 0.12);
+}
+[data-style='pergamena'] .shadow-overlay {
+  box-shadow: 0 10px 22px rgb(74 52 20 / 0.16), 0 30px 60px rgb(74 52 20 / 0.2);
+}
+
+[data-style='pergamena'] .font-display {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Inversione della scala tipografica, verso i bruni. */
+[data-style='pergamena'] .text-white { color: #2c2110; }
+[data-style='pergamena'] .text-slate-100 { color: #352814; }
+[data-style='pergamena'] .text-slate-200 { color: #443619; }
+[data-style='pergamena'] .text-slate-300 { color: #574727; }
+[data-style='pergamena'] .text-slate-400 { color: #776540; }
+[data-style='pergamena'] .text-slate-500 { color: #8f7d56; }
+[data-style='pergamena'] .text-slate-600 { color: #a6946b; }
+[data-style='pergamena'] .text-slate-700 { color: #bca882; }
+
+[data-style='pergamena'] .hover\:text-slate-100:hover,
+[data-style='pergamena'] .hover\:text-white:hover { color: #2c2110; }
+[data-style='pergamena'] .hover\:text-slate-200:hover { color: #443619; }
+[data-style='pergamena'] .hover\:text-slate-300:hover { color: #574727; }
+
+[data-style='pergamena'] .placeholder-slate-500::placeholder,
+[data-style='pergamena'] .placeholder-slate-600::placeholder,
+[data-style='pergamena'] .placeholder\:text-slate-600::placeholder { color: #a89670; }
+
+[data-style='pergamena'] .bg-slate-700 { background-color: #ddceac; }
+[data-style='pergamena'] .bg-slate-800 { background-color: #e6dabb; }
+[data-style='pergamena'] .bg-slate-900 { background-color: #efe6cd; }
+[data-style='pergamena'] .bg-slate-800\/50 { background-color: rgb(230 218 187 / 0.7); }
+[data-style='pergamena'] .bg-slate-900\/50 { background-color: rgb(215 200 165 / 0.5); }
+[data-style='pergamena'] .hover\:bg-slate-600:hover,
+[data-style='pergamena'] .hover\:bg-slate-700:hover { background-color: #d3c39c; }
+
+[data-style='pergamena'] .border-slate-700,
+[data-style='pergamena'] .border-slate-800,
+[data-style='pergamena'] .border-slate-700\/50 { border-color: #d3c096; }
+[data-style='pergamena'] .hover\:border-slate-500:hover,
+[data-style='pergamena'] .hover\:border-slate-600:hover { border-color: #b09a6d; }
+
+/* Colore del tema scurito per restare leggibile sul chiaro. */
+[data-style='pergamena'] .text-theme-400,
+[data-style='pergamena'] .text-theme-500 { color: var(--theme-600); }
+
+/* Barra della vita: solco inciso nella carta. */
+[data-style='pergamena'] .hp-track {
+  background-color: #ddcda6;
+  border-color: #c3af80;
+  box-shadow: inset 0 1px 2px rgb(74 52 20 / 0.14);
+}
+
+/* ==========================================================================
+   NEON — insegna al buio.
+   Fondo quasi nero, contorni luminosi nel colore del tema e una griglia
+   prospettica appena accennata. Niente vetro sfocato (quello è Arcano): qui i
+   bordi sono nitidi e brillano.
+   ========================================================================== */
+
+[data-style='neon'] {
+  --radius-sm: 0.25rem;
+  --radius-md: 0.4rem;
+  --radius-lg: 0.55rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.95rem;
+  --radius-3xl: 1.2rem;
+
+  --font-display: 'Orbitron', 'Inter', sans-serif;
+
+  --color-bento-void: #04050b;
+  --color-bento-bg: #070912;
+  --color-bento-panel: #0b0e1b;
+  --color-bento-item: #0f1424;
+  --color-bento-button: #161d33;
+  --color-bento-border: #232c45;
+}
+
+/* Griglia prospettica + alone alto nel colore del tema. */
+[data-style='neon'] body {
+  background-image:
+    radial-gradient(
+      80rem 55rem at 50% -15%,
+      color-mix(in oklab, var(--theme-600) 12%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(color-mix(in oklab, var(--theme-500) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--theme-500) 5%, transparent) 1px, transparent 1px);
+  background-size: auto, 42px 42px, 42px 42px;
+  background-attachment: fixed;
+}
+
+/* Il bordo diventa un filo di luce. */
+[data-style='neon'] .border-bento-border {
+  border-color: color-mix(in oklab, var(--theme-500) 38%, transparent);
+}
+
+[data-style='neon'] .shadow-panel {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-500) 18%, transparent),
+    0 0 16px color-mix(in oklab, var(--theme-500) 10%, transparent),
+    0 10px 30px rgb(0 0 0 / 0.5);
+}
+[data-style='neon'] .shadow-raised {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-400) 30%, transparent),
+    0 0 22px color-mix(in oklab, var(--theme-500) 22%, transparent),
+    0 12px 36px rgb(0 0 0 / 0.6);
+}
+[data-style='neon'] .shadow-overlay {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-500) 22%, transparent),
+    0 0 60px color-mix(in oklab, var(--theme-500) 20%, transparent),
+    0 28px 70px rgb(0 0 0 / 0.7);
+}
+
+[data-style='neon'] .font-display {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 12px color-mix(in oklab, var(--theme-500) 45%, transparent);
+}
+
+/* Barra della vita: tubo scuro da cui la luce filtra. */
+[data-style='neon'] .hp-track {
+  background-color: #05070f;
+  border-color: color-mix(in oklab, var(--theme-500) 30%, transparent);
+  box-shadow:
+    inset 0 0 10px rgb(0 0 0 / 0.7),
+    0 0 8px color-mix(in oklab, var(--theme-500) 12%, transparent);
+}
+
+/* ==========================================================================
+   FERRO — acciaio industriale.
+   Piastre metalliche con smusso in alto e ombra dura in basso, bordi netti,
+   condensato. Freddo e pesante, l'opposto della carta di Pergamena.
+   ========================================================================== */
+
+[data-style='ferro'] {
+  --radius-sm: 0.2rem;
+  --radius-md: 0.3rem;
+  --radius-lg: 0.4rem;
+  --radius-xl: 0.55rem;
+  --radius-2xl: 0.7rem;
+  --radius-3xl: 0.9rem;
+
+  --font-display: 'Oswald', 'Inter', sans-serif;
+
+  --color-bento-void: #0b0d10;
+  --color-bento-bg: #15181d;
+  --color-bento-panel: #1e2229;
+  --color-bento-item: #252a32;
+  --color-bento-button: #2d333c;
+  --color-bento-border: #454e5a;
+}
+
+/* Lamiera spazzolata: righe verticali finissime su un fondo freddo. */
+[data-style='ferro'] body {
+  background-image:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #16191e, #0f1115);
+  background-attachment: fixed;
+}
+
+/* Le piastre prendono uno smusso: luce in alto, ombra sotto. */
+[data-style='ferro'] .bg-bento-panel {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(0 0 0 / 0.12));
+}
+[data-style='ferro'] .bg-bento-item {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(0 0 0 / 0.08));
+}
+
+[data-style='ferro'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 -1px 0 rgb(0 0 0 / 0.4),
+    0 3px 0 rgb(0 0 0 / 0.35),
+    0 8px 18px rgb(0 0 0 / 0.45);
+}
+[data-style='ferro'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 3px 0 rgb(0 0 0 / 0.4),
+    0 10px 24px rgb(0 0 0 / 0.5);
+}
+[data-style='ferro'] .shadow-overlay {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 6px 0 rgb(0 0 0 / 0.45),
+    0 28px 60px rgb(0 0 0 / 0.6);
+}
+
+[data-style='ferro'] .font-display {
+  font-weight: 600;
+  letter-spacing: 0.09em;
+}
+
+/* Barra della vita: canale d'acciaio inciso. */
+[data-style='ferro'] .hp-track {
+  background-color: #0f1216;
+  border-color: #3a424e;
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06);
+}
+[data-style='ferro'] .hp-segment {
+  border-radius: 2px;
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.18), rgb(0 0 0 / 0) 55%);
 }
 
 /* ==========================================================================

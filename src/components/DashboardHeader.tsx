@@ -39,6 +39,7 @@ import {
   LOGO_VARIANTS,
   STYLES,
   THEMES,
+  isLightStyle,
   type CampaignStyle,
   type CampaignTheme,
   type LogoVariant,
@@ -398,9 +399,9 @@ export function DashboardHeader({
                   ))}
                 </div>
 
-                {style === 'white' && logoVariant === 'normal' && (
+                {isLightStyle(style) && logoVariant === 'normal' && (
                   <p className="text-[10px] leading-snug text-slate-600">
-                    Sul design chiaro il marchio normale usa la versione nera: l&apos;oro non si
+                    Sui design chiari il marchio normale usa la versione nera: l&apos;oro non si
                     leggerebbe.
                   </p>
                 )}

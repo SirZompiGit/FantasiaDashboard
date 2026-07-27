@@ -177,20 +177,20 @@ export function WelcomeScreen({
         <section
           className={`${TILE} ${
             invited
-              ? 'border-amber-400/50 ring-1 ring-amber-400/20'
-              : 'border-bento-border hover:border-amber-400/40'
+              ? 'border-theme-500/50 ring-1 ring-theme-500/20'
+              : 'border-bento-border hover:border-theme-500/40'
           }`}
         >
           <div
-            className={`pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-amber-500/10 blur-3xl transition-opacity duration-200 ${
+            className={`pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-theme-500/10 blur-3xl transition-opacity duration-200 ${
               invited ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           />
 
-          <div className={`${ICON_BOX} border-amber-400/20 bg-amber-400/10 text-amber-300`}>
+          <div className={`${ICON_BOX} border-theme-500/20 bg-theme-500/10 text-theme-400`}>
             <LogIn className="h-7 w-7" />
           </div>
-          <p className={`${KICKER} text-amber-300/90`}>Online · sei un giocatore</p>
+          <p className={`${KICKER} text-theme-400/90`}>Online · sei un giocatore</p>
           <h2 className={TITLE}>Entra con un PIN</h2>
 
           {!multiplayerAvailable ? (
@@ -198,7 +198,7 @@ export function WelcomeScreen({
           ) : (
             <div className="mt-auto space-y-2.5 pt-2">
               {invited && (
-                <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs leading-snug text-amber-300 animate-fade-in">
+                <p className="rounded-lg border border-theme-500/30 bg-theme-500/10 px-3 py-2 text-xs leading-snug text-theme-400 animate-fade-in">
                   Sei stato invitato alla stanza <strong className="text-white">{pin}</strong>.
                   Scrivi il tuo nome ed entra.
                 </p>
@@ -213,7 +213,7 @@ export function WelcomeScreen({
                   maxLength={24}
                   aria-label="Il tuo nome"
                   autoFocus={invited}
-                  className="w-full rounded-xl border border-bento-border bg-bento-item px-4 py-3 text-slate-200 transition-colors duration-200 placeholder:text-slate-600 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+                  className="w-full rounded-xl border border-bento-border bg-bento-item px-4 py-3 text-slate-200 transition-colors duration-200 placeholder:text-slate-600 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/30"
                 />
 
                 <div className="flex gap-2">
@@ -225,7 +225,7 @@ export function WelcomeScreen({
                     onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 6))}
                     maxLength={6}
                     aria-label="PIN della stanza"
-                    className="min-w-0 flex-1 rounded-xl border border-bento-border bg-bento-item px-4 py-3 font-mono tracking-widest text-slate-200 transition-colors duration-200 placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-600 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+                    className="min-w-0 flex-1 rounded-xl border border-bento-border bg-bento-item px-4 py-3 font-mono tracking-widest text-slate-200 transition-colors duration-200 placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-600 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/30"
                   />
                   <button
                     type="submit"

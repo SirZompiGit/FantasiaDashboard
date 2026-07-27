@@ -5,6 +5,7 @@ import {
   LOGO_VARIANTS,
   STYLES,
   THEMES,
+  isLightStyle,
   normalizeLogoVariant,
   normalizeStyle,
   normalizeTheme,
@@ -22,6 +23,13 @@ describe('temi di colore', () => {
     expect(normalizeTheme('boh')).toBe('crimson');
     expect(normalizeTheme(null)).toBe('crimson');
     expect(normalizeTheme(42)).toBe('crimson');
+  });
+
+  it('include i due colori nuovi', () => {
+    for (const id of ['lime', 'indigo']) {
+      expect(THEMES.some((t) => t.id === id)).toBe(true);
+      expect(normalizeTheme(id)).toBe(id);
+    }
   });
 
   /**
@@ -47,6 +55,25 @@ describe('design', () => {
   it('accetta quelli in elenco', () => {
     for (const style of STYLES) {
       expect(normalizeStyle(style.id)).toBe(style.id);
+    }
+  });
+
+  it('include i tre design nuovi', () => {
+    for (const id of ['pergamena', 'neon', 'ferro']) {
+      expect(STYLES.some((s) => s.id === id)).toBe(true);
+      expect(normalizeStyle(id)).toBe(id);
+    }
+  });
+
+  /**
+   * Solo i design su fondo chiaro impongono il marchio nero: White e Pergamena.
+   * Neon e Ferro sono scuri nonostante il carattere diverso.
+   */
+  it('segna come chiari solo White e Pergamena', () => {
+    expect(isLightStyle('white')).toBe(true);
+    expect(isLightStyle('pergamena')).toBe(true);
+    for (const dark of ['grimorio', 'arcano', 'runico', 'retro', 'neon', 'ferro'] as const) {
+      expect(isLightStyle(dark)).toBe(false);
     }
   });
 

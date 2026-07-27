@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { resolveWordmark } from './Wordmark';
-import { STYLES } from '../../theme';
+import { STYLES, isLightStyle } from '../../theme';
 
-const DARK_STYLES = STYLES.map((s) => s.id).filter((id) => id !== 'white');
+const DARK_STYLES = STYLES.map((s) => s.id).filter((id) => !isLightStyle(id));
+const LIGHT_STYLES = STYLES.map((s) => s.id).filter((id) => isLightStyle(id));
 
 describe('variante Normale', () => {
   it('usa l oro su tutti i design scuri', () => {
@@ -14,12 +15,15 @@ describe('variante Normale', () => {
     }
   });
 
-  /** È l'unico caso in cui serve la versione nera: l'oro su chiaro sparisce. */
-  it('usa il nero solo sul design chiaro', () => {
-    expect(resolveWordmark('white', 'normal')).toEqual({
-      mode: 'image',
-      src: '/logo-fantasia-black.png',
-    });
+  /** L'oro su fondo chiaro sparirebbe: White e Pergamena usano il nero. */
+  it('usa il nero sui design chiari', () => {
+    expect(LIGHT_STYLES.length).toBeGreaterThanOrEqual(2);
+    for (const style of LIGHT_STYLES) {
+      expect(resolveWordmark(style, 'normal')).toEqual({
+        mode: 'image',
+        src: '/logo-fantasia-black.png',
+      });
+    }
   });
 });
 

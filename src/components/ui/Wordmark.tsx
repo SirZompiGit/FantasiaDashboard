@@ -18,7 +18,7 @@
  */
 
 import { useState } from 'react';
-import type { CampaignStyle, LogoVariant } from '../../theme';
+import { isLightStyle, type CampaignStyle, type LogoVariant } from '../../theme';
 
 const LOGO_GOLD = '/logo-fantasia.png';
 const LOGO_BLACK = '/logo-fantasia-black.png';
@@ -42,7 +42,7 @@ export interface WordmarkChoice {
  */
 export function resolveWordmark(style: CampaignStyle, variant: LogoVariant): WordmarkChoice {
   if (variant === 'colored') return { mode: 'masked', src: LOGO_WHITE };
-  return { mode: 'image', src: style === 'white' ? LOGO_BLACK : LOGO_GOLD };
+  return { mode: 'image', src: isLightStyle(style) ? LOGO_BLACK : LOGO_GOLD };
 }
 
 interface WordmarkProps {
