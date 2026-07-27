@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ANIMATED_THEMES,
   DEFAULT_LOGO_VARIANT,
   DEFAULT_STYLE,
   LOGO_VARIANTS,
+  SOLID_THEMES,
   STYLES,
   THEMES,
   isLightStyle,
@@ -32,13 +34,27 @@ describe('temi di colore', () => {
     }
   });
 
+  it('include il set animato, marcato come tale', () => {
+    const ids = ANIMATED_THEMES.map((t) => t.id);
+    expect(ids).toEqual(['arcobaleno', 'aurora', 'tramonto', 'oceano', 'magma']);
+    for (const def of ANIMATED_THEMES) {
+      expect(def.animated).toBe(true);
+      expect(normalizeTheme(def.id)).toBe(def.id);
+    }
+    // Le due liste partizionano THEMES: pieni + animati = tutto, senza overlap.
+    expect(SOLID_THEMES.length + ANIMATED_THEMES.length).toBe(THEMES.length);
+    expect(SOLID_THEMES.every((t) => !t.animated)).toBe(true);
+  });
+
   /**
    * Vampiro e Bardo erano entrambi rossi e distavano 10° sulla ruota dei
    * colori: a schermo risultavano indistinguibili.
    */
   it('non ha due colori confondibili', () => {
-    const swatches = THEMES.map((t) => t.swatch);
-    expect(new Set(swatches).size).toBe(THEMES.length);
+    // Solo le tinte piene devono avere swatch distinti: gli swatch degli
+    // animati sono solo un'anteprima a gradiente e possono ripetere un colore.
+    const swatches = SOLID_THEMES.map((t) => t.swatch);
+    expect(new Set(swatches).size).toBe(SOLID_THEMES.length);
 
     const bardo = THEMES.find((t) => t.id === 'rose');
     const vampiro = THEMES.find((t) => t.id === 'crimson');

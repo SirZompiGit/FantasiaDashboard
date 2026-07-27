@@ -117,14 +117,134 @@
   --theme-rgb: 99, 102, 241;
 }
 
-/* Oro: giallo pieno nel vuoto fra l'arancio dell'ambra e il verde acido del
-   lime. Il 600 resta abbastanza scuro da leggersi anche sui design chiari. */
+/* Oro: giallo limone, spostato più su rispetto all'ambra. Il 600 resta un oro
+   più scuro così i bottoni e il testo d'accento si leggono anche sul chiaro,
+   mentre 400/500 (icone, swatch) sono nettamente gialli. */
 [data-theme="gold"] {
-  --theme-400: #facc15;
-  --theme-500: #eab308;
+  --theme-400: #fde047;
+  --theme-500: #facc15;
   --theme-600: #ca8a04;
+  --theme-950: #3a1d05;
+  --theme-rgb: 250, 204, 21;
+}
+
+/* --------------------------------------------------------------------------
+   2-bis. Temi animati
+   La palette scorre nel tempo. Le quattro variabili sono registrate con
+   @property come <color>, quindi i fotogrammi si interpolano da soli: basta
+   un'animazione, nessun JavaScript. Ogni blocco porta anche una palette
+   STATICA di base — è ciò che si vede con "riduci animazioni" attivo e prima
+   del primo fotogramma. Le stesse regole valgono per lo swatch nel selettore
+   (anch'esso porta l'attributo data-theme), che così si anima in anteprima.
+   -------------------------------------------------------------------------- */
+
+[data-theme="arcobaleno"] {
+  --theme-400: #f87171;
+  --theme-500: #ef4444;
+  --theme-600: #dc2626;
+  --theme-950: #450a0a;
+  --theme-rgb: 239, 68, 68;
+  animation: theme-arcobaleno 15s linear infinite;
+}
+
+[data-theme="aurora"] {
+  --theme-400: #34d399;
+  --theme-500: #10b981;
+  --theme-600: #059669;
+  --theme-950: #022c22;
+  --theme-rgb: 16, 185, 129;
+  animation: theme-aurora 16s linear infinite;
+}
+
+[data-theme="tramonto"] {
+  --theme-400: #fbbf24;
+  --theme-500: #f59e0b;
+  --theme-600: #d97706;
+  --theme-950: #451a03;
+  --theme-rgb: 245, 158, 11;
+  animation: theme-tramonto 16s linear infinite;
+}
+
+[data-theme="oceano"] {
+  --theme-400: #22d3ee;
+  --theme-500: #06b6d4;
+  --theme-600: #0891b2;
+  --theme-950: #083344;
+  --theme-rgb: 6, 182, 212;
+  animation: theme-oceano 14s linear infinite;
+}
+
+[data-theme="magma"] {
+  --theme-400: #fde047;
+  --theme-500: #facc15;
+  --theme-600: #eab308;
   --theme-950: #422006;
-  --theme-rgb: 234, 179, 8;
+  --theme-rgb: 250, 204, 21;
+  animation: theme-magma 9s linear infinite;
+}
+
+@keyframes theme-arcobaleno {
+  0%   { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
+  14%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
+  28%  { --theme-400: #fde047; --theme-500: #facc15; --theme-600: #eab308; --theme-950: #422006; }
+  43%  { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  57%  { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  71%  { --theme-400: #60a5fa; --theme-500: #3b82f6; --theme-600: #2563eb; --theme-950: #172554; }
+  86%  { --theme-400: #e879f9; --theme-500: #d946ef; --theme-600: #c026d3; --theme-950: #4a044e; }
+  100% { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
+}
+
+@keyframes theme-aurora {
+  0%   { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  20%  { --theme-400: #2dd4bf; --theme-500: #14b8a6; --theme-600: #0d9488; --theme-950: #042f2e; }
+  40%  { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  60%  { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
+  80%  { --theme-400: #a78bfa; --theme-500: #8b5cf6; --theme-600: #7c3aed; --theme-950: #2e1065; }
+  100% { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+}
+
+@keyframes theme-tramonto {
+  0%   { --theme-400: #fbbf24; --theme-500: #f59e0b; --theme-600: #d97706; --theme-950: #451a03; }
+  20%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
+  40%  { --theme-400: #fb7185; --theme-500: #f43f5e; --theme-600: #e11d48; --theme-950: #4c0519; }
+  60%  { --theme-400: #e879f9; --theme-500: #d946ef; --theme-600: #c026d3; --theme-950: #4a044e; }
+  80%  { --theme-400: #a78bfa; --theme-500: #8b5cf6; --theme-600: #7c3aed; --theme-950: #2e1065; }
+  100% { --theme-400: #fbbf24; --theme-500: #f59e0b; --theme-600: #d97706; --theme-950: #451a03; }
+}
+
+@keyframes theme-oceano {
+  0%   { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  25%  { --theme-400: #38bdf8; --theme-500: #0ea5e9; --theme-600: #0284c7; --theme-950: #082f49; }
+  50%  { --theme-400: #60a5fa; --theme-500: #3b82f6; --theme-600: #2563eb; --theme-950: #172554; }
+  75%  { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
+  100% { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+}
+
+@keyframes theme-magma {
+  0%   { --theme-400: #fde047; --theme-500: #facc15; --theme-600: #eab308; --theme-950: #422006; }
+  25%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
+  50%  { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
+  75%  { --theme-400: #fb7185; --theme-500: #e11d48; --theme-600: #be123c; --theme-950: #4c0519; }
+  100% { --theme-400: #fde047; --theme-500: #facc15; --theme-600: #eab308; --theme-950: #422006; }
+}
+
+/* Rispetto delle preferenze di movimento: chi le riduce vede la palette
+   statica di base (l'animazione viene spenta, restano le variabili del blocco). */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="arcobaleno"],
+  [data-theme="aurora"],
+  [data-theme="tramonto"],
+  [data-theme="oceano"],
+  [data-theme="magma"] {
+    animation: none;
+  }
+}
+
+/* Swatch dei temi animati: un gradiente delle variabili vive. Il pulsante
+   porta il proprio data-theme, quindi riceve la stessa animazione e il
+   gradiente scorre come anteprima. */
+.swatch-anim {
+  background-image: linear-gradient(135deg, var(--theme-400), var(--theme-500) 50%, var(--theme-600));
 }
 
 /* La transizione si attiva solo dopo il primo paint (classe aggiunta da

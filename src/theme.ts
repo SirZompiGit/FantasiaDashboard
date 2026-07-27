@@ -23,7 +23,13 @@ export type CampaignTheme =
   | 'obsidian'
   | 'lime'
   | 'indigo'
-  | 'gold';
+  | 'gold'
+  // Temi animati: la palette scorre nel tempo (vedi @keyframes in index.css).
+  | 'arcobaleno'
+  | 'aurora'
+  | 'tramonto'
+  | 'oceano'
+  | 'magma';
 
 export const DEFAULT_THEME: CampaignTheme = 'crimson';
 
@@ -35,6 +41,13 @@ export interface ThemeDefinition {
   swatch: string;
   /** Esadecimale del colore d'accento, per canvas/particelle che non usano CSS. */
   accent: string;
+  /**
+   * Tema animato: la palette cambia nel tempo via CSS (@keyframes). Nel
+   * selettore lo swatch mostra un gradiente animato invece di un colore pieno,
+   * e questi temi vivono su una riga a parte. `accent` resta un colore fisso
+   * rappresentativo, per le particelle su canvas che leggono l'esadecimale.
+   */
+  animated?: boolean;
 }
 
 /**
@@ -54,9 +67,23 @@ export const THEMES: ThemeDefinition[] = [
   // Tinte nuove, in gamme non ancora usate: verde acido, indaco e oro.
   { id: 'lime', label: 'Alchimista', swatch: '#84cc16', accent: '#84cc16' },
   { id: 'indigo', label: 'Illusionista', swatch: '#6366f1', accent: '#6366f1' },
-  // Giallo pieno: nel vuoto fra l'arancio dell'Oste e il verde acido.
-  { id: 'gold', label: 'Paladino', swatch: '#eab308', accent: '#eab308' },
+  // Giallo pieno, spostato verso il limone: distinto dall'arancio dell'Oste.
+  { id: 'gold', label: 'Paladino', swatch: '#facc15', accent: '#facc15' },
+
+  // Temi animati — un set a parte, su una seconda riga nel selettore. Lo swatch
+  // è un gradiente animato; il colore qui sotto serve solo alle particelle.
+  { id: 'arcobaleno', label: 'Arcobaleno', swatch: '#a855f7', accent: '#a855f7', animated: true },
+  { id: 'aurora', label: 'Aurora', swatch: '#22d3ee', accent: '#22d3ee', animated: true },
+  { id: 'tramonto', label: 'Tramonto', swatch: '#fb7185', accent: '#fb7185', animated: true },
+  { id: 'oceano', label: 'Oceano', swatch: '#38bdf8', accent: '#38bdf8', animated: true },
+  { id: 'magma', label: 'Magma', swatch: '#f97316', accent: '#f97316', animated: true },
 ];
+
+/** Solo i temi a colore pieno: prima riga di swatch e default sicuri. */
+export const SOLID_THEMES: ThemeDefinition[] = THEMES.filter((t) => !t.animated);
+
+/** I temi animati, resi su una riga a parte con swatch a gradiente. */
+export const ANIMATED_THEMES: ThemeDefinition[] = THEMES.filter((t) => t.animated);
 
 /**
  * Asse indipendente dal colore: cambia forme, densità e tipografia, non la

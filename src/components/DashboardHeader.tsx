@@ -36,9 +36,10 @@ import {
   Wand2,
 } from 'lucide-react';
 import {
+  ANIMATED_THEMES,
   LOGO_VARIANTS,
+  SOLID_THEMES,
   STYLES,
-  THEMES,
   isLightStyle,
   type CampaignStyle,
   type CampaignTheme,
@@ -312,7 +313,7 @@ export function DashboardHeader({
               <span className="font-mono text-[10px] text-slate-500">v4.0</span>
             </div>
 
-            {/* Colore e design sono due assi indipendenti: 8 × 3 combinazioni. */}
+            {/* Colore e design sono due assi indipendenti: 16 tinte × 11 design. */}
             <div className="space-y-3">
               <label className="block space-y-1.5">
                 <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -323,31 +324,61 @@ export function DashboardHeader({
                   onChange={(event) => onThemeChange(event.target.value as CampaignTheme)}
                   className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
                 >
-                  {THEMES.map((definition) => (
+                  {SOLID_THEMES.map((definition) => (
                     <option key={definition.id} value={definition.id}>
                       {definition.label}
                     </option>
                   ))}
+                  <optgroup label="Animati">
+                    {ANIMATED_THEMES.map((definition) => (
+                      <option key={definition.id} value={definition.id}>
+                        {definition.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </label>
 
-              <div className="flex flex-wrap gap-1.5">
-                {THEMES.map((definition) => (
-                  <button
-                    key={definition.id}
-                    type="button"
-                    onClick={() => onThemeChange(definition.id)}
-                    aria-label={definition.label}
-                    aria-pressed={theme === definition.id}
-                    title={definition.label}
-                    style={{ backgroundColor: definition.swatch }}
-                    className={`h-5 w-5 rounded-full border-2 transition-transform duration-200 ${
-                      theme === definition.id
-                        ? 'scale-110 border-white'
-                        : 'border-transparent hover:scale-105'
-                    }`}
-                  />
-                ))}
+              {/* Prima riga: le tinte piene. Seconda riga: il set animato, con
+                  swatch a gradiente che scorre (il pulsante porta il proprio
+                  data-theme, quindi riceve la stessa animazione CSS). */}
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-1">
+                  {SOLID_THEMES.map((definition) => (
+                    <button
+                      key={definition.id}
+                      type="button"
+                      onClick={() => onThemeChange(definition.id)}
+                      aria-label={definition.label}
+                      aria-pressed={theme === definition.id}
+                      title={definition.label}
+                      style={{ backgroundColor: definition.swatch }}
+                      className={`h-5 w-5 rounded-full border-2 transition-transform duration-200 ${
+                        theme === definition.id
+                          ? 'scale-110 border-white'
+                          : 'border-transparent hover:scale-105'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {ANIMATED_THEMES.map((definition) => (
+                    <button
+                      key={definition.id}
+                      type="button"
+                      data-theme={definition.id}
+                      onClick={() => onThemeChange(definition.id)}
+                      aria-label={definition.label}
+                      aria-pressed={theme === definition.id}
+                      title={definition.label}
+                      className={`swatch-anim h-5 w-5 rounded-full border-2 transition-transform duration-200 ${
+                        theme === definition.id
+                          ? 'scale-110 border-white'
+                          : 'border-transparent hover:scale-105'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
 
               <label className="block space-y-1.5">
