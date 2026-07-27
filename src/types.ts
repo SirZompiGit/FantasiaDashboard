@@ -1,4 +1,4 @@
-import type { CampaignStyle, CampaignTheme, LogoVariant } from './theme';
+import type { BarStyle, CampaignStyle, CampaignTheme, LogoVariant } from './theme';
 
 export interface InventoryItem {
   id: string;
@@ -160,6 +160,11 @@ export interface CampaignState {
    * 'bento' tramite la normalizzazione, quindi il database resta compatibile.
    */
   style: CampaignStyle;
+  /**
+   * Aspetto delle barre della vita ('classico' o 'circolare'). Campo additivo:
+   * le campagne salvate prima ricadono su 'classico'.
+   */
+  barStyle: BarStyle;
   /** Variante del marchio. Campo additivo, come `style`. */
   logoVariant: LogoVariant;
   healthGroups: string[];

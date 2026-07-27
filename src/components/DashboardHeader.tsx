@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   BarChart3,
   ChevronDown,
+  CircleDot,
   Coins,
   Download,
   ExternalLink,
@@ -39,10 +40,12 @@ import {
 } from 'lucide-react';
 import {
   ANIMATED_THEMES,
+  BAR_STYLES,
   LOGO_VARIANTS,
   SOLID_THEMES,
   STYLES,
   isLightStyle,
+  type BarStyle,
   type CampaignStyle,
   type CampaignTheme,
   type LogoVariant,
@@ -60,6 +63,8 @@ interface DashboardHeaderProps {
   onThemeChange: (theme: CampaignTheme) => void;
   style: CampaignStyle;
   onStyleChange: (style: CampaignStyle) => void;
+  barStyle: BarStyle;
+  onBarStyleChange: (barStyle: BarStyle) => void;
   logoVariant: LogoVariant;
   onLogoVariantChange: (variant: LogoVariant) => void;
   isMuted: boolean;
@@ -149,6 +154,8 @@ export function DashboardHeader({
   onThemeChange,
   style,
   onStyleChange,
+  barStyle,
+  onBarStyleChange,
   logoVariant,
   onLogoVariantChange,
   isMuted,
@@ -428,6 +435,24 @@ export function DashboardHeader({
                   className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
                 >
                   {STYLES.map((definition) => (
+                    <option key={definition.id} value={definition.id}>
+                      {definition.label} — {definition.hint}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {/* Aspetto delle sole barre della vita: lineari o ad anelli. */}
+              <label className="block space-y-1.5">
+                <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <CircleDot className="h-3.5 w-3.5 text-theme-500" /> Barre
+                </span>
+                <select
+                  value={barStyle}
+                  onChange={(event) => onBarStyleChange(event.target.value as BarStyle)}
+                  className="w-full cursor-pointer rounded-lg border border-bento-border bg-bento-panel px-2.5 py-2 text-xs text-slate-200 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                >
+                  {BAR_STYLES.map((definition) => (
                     <option key={definition.id} value={definition.id}>
                       {definition.label} — {definition.hint}
                     </option>

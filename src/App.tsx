@@ -543,6 +543,8 @@ export default function App() {
         onThemeChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
         style={state.style}
         onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
+        barStyle={state.barStyle}
+        onBarStyleChange={(barStyle) => dispatch({ type: 'SET_BAR_STYLE', barStyle })}
         logoVariant={state.logoVariant}
         onLogoVariantChange={(variant) => dispatch({ type: 'SET_LOGO_VARIANT', variant })}
         isMuted={isMuted}
@@ -620,6 +622,7 @@ export default function App() {
               healthGroups={state.healthGroups}
               dispatch={dispatch}
               compactBars={state.compactBars}
+              barStyle={state.barStyle}
             />
           </div>
 

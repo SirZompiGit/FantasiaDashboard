@@ -163,6 +163,31 @@ export function isLightStyle(style: CampaignStyle): boolean {
 }
 
 /**
+ * Aspetto delle barre della vita. Unico asse a parte, con due sole scelte:
+ *  `classico`  — le barre lineari di sempre (predefinito)
+ *  `circolare` — anelli: la barra principale grande, le risorse piccole a fianco
+ *
+ * Non è una skin CSS ma un layout reso dal componente; il colore resta quello
+ * di ogni barra, quindi si adatta a qualunque design generale.
+ */
+export type BarStyle = 'classico' | 'circolare';
+
+export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
+
+export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
+  { id: 'classico', label: 'Classico', hint: 'Barre lineari (predefinito)' },
+  { id: 'circolare', label: 'Circolare', hint: 'Anelli: principale grande, risorse piccole' },
+];
+
+const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));
+
+export function normalizeBarStyle(value: unknown): BarStyle {
+  return typeof value === 'string' && BAR_STYLE_IDS.has(value)
+    ? (value as BarStyle)
+    : DEFAULT_BAR_STYLE;
+}
+
+/**
  * Variante del marchio.
  *
  * `normal`  — il logo dorato originale

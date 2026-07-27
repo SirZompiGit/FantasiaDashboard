@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   ANIMATED_THEMES,
+  BAR_STYLES,
+  DEFAULT_BAR_STYLE,
   DEFAULT_LOGO_VARIANT,
   DEFAULT_STYLE,
   LOGO_VARIANTS,
@@ -8,6 +10,7 @@ import {
   STYLES,
   THEMES,
   isLightStyle,
+  normalizeBarStyle,
   normalizeLogoVariant,
   normalizeStyle,
   normalizeTheme,
@@ -138,6 +141,21 @@ describe('design', () => {
       expect(normalizeStyle(removed)).toBe(DEFAULT_STYLE);
     }
     expect(normalizeStyle(undefined)).toBe(DEFAULT_STYLE);
+  });
+});
+
+describe('aspetto delle barre', () => {
+  it('offre solo Classico (predefinito) e Circolare', () => {
+    expect(BAR_STYLES.map((b) => b.id)).toEqual(['classico', 'circolare']);
+    expect(DEFAULT_BAR_STYLE).toBe('classico');
+  });
+
+  it('accetta i valori previsti e ricade sul classico', () => {
+    expect(normalizeBarStyle('circolare')).toBe('circolare');
+    expect(normalizeBarStyle('classico')).toBe('classico');
+    expect(normalizeBarStyle('boh')).toBe(DEFAULT_BAR_STYLE);
+    expect(normalizeBarStyle(undefined)).toBe(DEFAULT_BAR_STYLE);
+    expect(normalizeBarStyle(42)).toBe(DEFAULT_BAR_STYLE);
   });
 });
 

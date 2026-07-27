@@ -12,7 +12,7 @@
  */
 
 import type { CampaignState, HealthBar, Player, RollResult } from '../types';
-import type { CampaignStyle, CampaignTheme, LogoVariant } from '../theme';
+import type { BarStyle, CampaignStyle, CampaignTheme, LogoVariant } from '../theme';
 import { MAX_ROLL_HISTORY, normalizeCampaign } from './migrations';
 import { DEFAULT_STAT_LABELS } from '../lib/stats';
 import { createEmptyCampaign } from './defaults';
@@ -29,6 +29,7 @@ export type CampaignAction =
   | { type: 'SET_CAMPAIGN_NOTES'; text: string }
   | { type: 'SET_THEME'; theme: CampaignTheme }
   | { type: 'SET_STYLE'; style: CampaignStyle }
+  | { type: 'SET_BAR_STYLE'; barStyle: BarStyle }
   | { type: 'SET_LOGO_VARIANT'; variant: LogoVariant }
   | { type: 'SET_STATS_ENABLED'; enabled: boolean }
   | { type: 'SET_STAT_LABEL'; index: number; label: string }
@@ -178,6 +179,9 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
     case 'SET_STYLE':
       return { ...state, style: action.style };
+
+    case 'SET_BAR_STYLE':
+      return { ...state, barStyle: action.barStyle };
 
     case 'SET_LOGO_VARIANT':
       return { ...state, logoVariant: action.variant };

@@ -241,6 +241,7 @@ export function SharedView({
       // sua anteprima: qui vede esattamente ciò che vedono i giocatori.
       onlyShared
       compact={state.compactBars}
+      barStyle={state.barStyle}
       readOnly
       layout={effectiveLayout}
     />

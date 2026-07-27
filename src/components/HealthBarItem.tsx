@@ -24,6 +24,7 @@
 
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import type { HealthBar, Resource } from '../types';
+import type { BarStyle } from '../theme';
 import {
   ChevronDown,
   ChevronUp,
@@ -88,6 +89,8 @@ interface HealthBarItemProps {
   reorder?: ReorderControls;
   /** Versione più sottile e densa della barra (impostazione di campagna). */
   compact?: boolean;
+  /** Aspetto delle barre: 'circolare' rende anelli invece di tracce lineari. */
+  barStyle?: BarStyle;
   readOnly?: boolean;
   layout?: 'horizontal' | 'vertical';
 }
@@ -363,6 +366,139 @@ function BarTrack({
   );
 }
 
+interface RadialBarProps {
+  value: number;
+  max: number;
+  color: string;
+  /** Diametro dell'anello, in px. */
+  diameter: number;
+  /** Spessore dell'anello, in px. */
+  thickness: number;
+  readOnly?: boolean;
+  onChange?: (value: number) => void;
+  label: string;
+  /** Contenuto al centro dell'anello (numero, sigla…). */
+  center?: React.ReactNode;
+}
+
+/**
+ * Barra ad ANELLO, per il design 'circolare'.
+ *
+ * Un arco conico nel colore reale della barra, bucato al centro da una mask
+ * radiale — quindi si adatta a qualunque design generale (il colore è quello
+ * della barra, il fondo è la stessa tinta molto trasparente). Interattiva come
+ * la traccia lineare: trascinando si imposta il valore in base all'ANGOLO (0 in
+ * cima, senso orario), e le frecce lo spostano da tastiera.
+ */
+function RadialBar({
+  value,
+  max,
+  color,
+  diameter,
+  thickness,
+  readOnly = false,
+  onChange,
+  label,
+  center,
+}: RadialBarProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+  const interactive = !readOnly && Boolean(onChange);
+  const ratio = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  const deg = ratio * 360;
+
+  const commit = (next: number) => {
+    if (!onChange) return;
+    const clamped = Math.max(0, Math.min(max, Math.round(next)));
+    if (clamped !== value) onChange(clamped);
+  };
+
+  const valueFromPointer = (event: ReactPointerEvent<HTMLDivElement>): number => {
+    const el = ref.current;
+    if (!el) return value;
+    const rect = el.getBoundingClientRect();
+    const dx = event.clientX - (rect.left + rect.width / 2);
+    const dy = event.clientY - (rect.top + rect.height / 2);
+    // atan2(dx, -dy): zero in cima, cresce in senso orario.
+    let theta = Math.atan2(dx, -dy);
+    if (theta < 0) theta += Math.PI * 2;
+    return (theta / (Math.PI * 2)) * max;
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!interactive || event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    draggingRef.current = true;
+    playClickSound();
+    commit(valueFromPointer(event));
+  };
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return;
+    commit(valueFromPointer(event));
+  };
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!interactive) return;
+    const step = event.shiftKey ? 5 : 1;
+    const actions: Record<string, number> = {
+      ArrowRight: value + step,
+      ArrowUp: value + step,
+      ArrowLeft: value - step,
+      ArrowDown: value - step,
+      Home: 0,
+      End: max,
+    };
+    const next = actions[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    commit(next);
+  };
+
+  return (
+    <div
+      ref={ref}
+      role={interactive ? 'slider' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? label : undefined}
+      aria-valuemin={interactive ? 0 : undefined}
+      aria-valuemax={interactive ? max : undefined}
+      aria-valuenow={interactive ? value : undefined}
+      aria-valuetext={interactive ? `${value} di ${max}` : undefined}
+      title={`${label}: ${value}/${max}`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onKeyDown={handleKeyDown}
+      style={{ width: `${diameter}px`, height: `${diameter}px` }}
+      className={`relative shrink-0 rounded-full select-none ${
+        interactive ? 'cursor-pointer touch-none' : ''
+      }`}
+    >
+      <div
+        className="absolute inset-0 rounded-full transition-[background] duration-200"
+        style={{
+          background: `conic-gradient(${color} 0deg ${deg}deg, ${color}1f ${deg}deg 360deg)`,
+          WebkitMask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px))`,
+          mask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px))`,
+          filter: `drop-shadow(0 0 4px ${color}55)`,
+        }}
+      />
+      {center !== undefined && (
+        <div className="absolute inset-0 flex items-center justify-center text-center leading-none">
+          {center}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function HealthBarItem({
   bar,
   onChangeValue,
@@ -372,6 +508,7 @@ export function HealthBarItem({
   onDelete,
   reorder,
   compact = false,
+  barStyle = 'classico',
   readOnly = false,
   layout = 'horizontal',
 }: HealthBarItemProps) {
@@ -454,6 +591,10 @@ export function HealthBarItem({
   }, [bar]);
 
   const isVertical = layout === 'vertical';
+  // Il design 'circolare' rende anelli invece di tracce: barra principale grande
+  // a sinistra, risorse piccole a fianco. Ha la precedenza sull'orientamento
+  // verticale, che per gli anelli non ha senso.
+  const isCircular = barStyle === 'circolare';
   const percentage = healthRatio(bar) * 100;
   const activeColor = getBarColor(bar);
   const inAlert = isLowHp(bar);
@@ -572,7 +713,7 @@ export function HealthBarItem({
     </div>
   ));
 
-  if (isVertical) {
+  if (isVertical && !isCircular) {
     return (
       <div
         className={`relative flex ${VERTICAL_SIZE[verticalSlot]} shrink-0 flex-row items-stretch gap-1 rounded-xl border border-bento-border bg-bento-bg p-1.5 transition-colors duration-200 ${
@@ -797,14 +938,76 @@ export function HealthBarItem({
         </div>
       </div>
 
-      <div className="relative">
-        {mainTrack}
-        {particleNodes}
-      </div>
+      {isCircular ? (
+        // Anelli: la barra principale grande a sinistra, le risorse piccole a
+        // seguire (vanno a capo se sono tante).
+        <div className="flex items-center gap-4 pt-1">
+          <div className="relative">
+            <RadialBar
+              value={bar.currentValue}
+              max={bar.maxValue}
+              color={activeColor}
+              diameter={compact ? 64 : 76}
+              thickness={compact ? 7 : 9}
+              readOnly={readOnly}
+              onChange={(value) => onChangeValue(bar, value)}
+              label={`Punti ferita di ${bar.name}`}
+              center={
+                <div className="flex flex-col items-center leading-none">
+                  <span className="font-display text-lg font-black text-slate-100">
+                    {bar.currentValue}
+                  </span>
+                  <span className="font-mono text-[9px] text-slate-500">/{bar.maxValue}</span>
+                </div>
+              }
+            />
+            {particleNodes}
+          </div>
+
+          {resources.length > 0 && (
+            <div className="flex flex-1 flex-wrap items-start gap-x-3 gap-y-2">
+              {resources.map((resource) => (
+                <div key={resource.id} className="flex flex-col items-center gap-0.5">
+                  <RadialBar
+                    value={resource.currentValue}
+                    max={resource.maxValue}
+                    color={getBarColor(resource)}
+                    diameter={34}
+                    thickness={4}
+                    readOnly={readOnly || !onChangeResource}
+                    onChange={
+                      onChangeResource
+                        ? (value) => onChangeResource(bar, resource, value)
+                        : undefined
+                    }
+                    label={`${resource.name} di ${bar.name}`}
+                    center={
+                      <span className="font-mono text-[9px] font-bold text-slate-200">
+                        {resource.currentValue}
+                      </span>
+                    }
+                  />
+                  <span
+                    className="max-w-[3.5rem] truncate font-mono text-[8px] font-bold uppercase tracking-wider text-slate-500"
+                    title={resource.name}
+                  >
+                    {resource.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="relative">
+          {mainTrack}
+          {particleNodes}
+        </div>
+      )}
 
       {effectPills}
 
-      {resources.length > 0 && (
+      {!isCircular && resources.length > 0 && (
         <div className="mt-1.5 space-y-0.5">
           {resources.map((resource) => (
             <div key={resource.id} className="flex items-center gap-2">
