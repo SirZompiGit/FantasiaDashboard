@@ -148,7 +148,7 @@
   --theme-600: #dc2626;
   --theme-950: #450a0a;
   --theme-rgb: 239, 68, 68;
-  animation: theme-arcobaleno 12s linear infinite;
+  animation: theme-arcobaleno 10s linear infinite;
 }
 
 [data-theme="aurora"] {
@@ -157,7 +157,7 @@
   --theme-600: #059669;
   --theme-950: #022c22;
   --theme-rgb: 16, 185, 129;
-  animation: theme-aurora 12s ease-in-out infinite alternate;
+  animation: theme-aurora 10s ease-in-out infinite alternate;
 }
 
 [data-theme="tramonto"] {
@@ -166,7 +166,7 @@
   --theme-600: #d97706;
   --theme-950: #451a03;
   --theme-rgb: 245, 158, 11;
-  animation: theme-tramonto 12s linear infinite;
+  animation: theme-tramonto 10s linear infinite;
 }
 
 [data-theme="oceano"] {
@@ -175,7 +175,7 @@
   --theme-600: #0891b2;
   --theme-950: #083344;
   --theme-rgb: 6, 182, 212;
-  animation: theme-oceano 10s ease-in-out infinite alternate;
+  animation: theme-oceano 8.5s ease-in-out infinite alternate;
 }
 
 [data-theme="magma"] {
@@ -184,7 +184,7 @@
   --theme-600: #eab308;
   --theme-950: #422006;
   --theme-rgb: 250, 204, 21;
-  animation: theme-magma 6.5s ease-in-out infinite;
+  animation: theme-magma 5.5s ease-in-out infinite;
 }
 
 [data-theme="veleno"] {
@@ -193,7 +193,7 @@
   --theme-600: #65a30d;
   --theme-950: #1a2e05;
   --theme-rgb: 132, 204, 22;
-  animation: theme-veleno 5s ease-in-out infinite alternate;
+  animation: theme-veleno 4.2s ease-in-out infinite alternate;
 }
 
 [data-theme="spettro"] {
@@ -202,7 +202,7 @@
   --theme-600: #4f46e5;
   --theme-950: #1e1b4b;
   --theme-rgb: 99, 102, 241;
-  animation: theme-spettro 8s linear infinite;
+  animation: theme-spettro 6.5s linear infinite;
 }
 
 [data-theme="brace"] {
@@ -211,7 +211,7 @@
   --theme-600: #b91c1c;
   --theme-950: #450a0a;
   --theme-rgb: 239, 68, 68;
-  animation: theme-brace 4.5s ease-in-out infinite alternate;
+  animation: theme-brace 3.8s ease-in-out infinite alternate;
 }
 
 [data-theme="bosco"] {
@@ -220,7 +220,7 @@
   --theme-600: #16a34a;
   --theme-950: #052e16;
   --theme-rgb: 34, 197, 94;
-  animation: theme-bosco 11s ease-in-out infinite alternate;
+  animation: theme-bosco 9s ease-in-out infinite alternate;
 }
 
 [data-theme="ghiaccio"] {
@@ -229,7 +229,7 @@
   --theme-600: #0891b2;
   --theme-950: #083344;
   --theme-rgb: 34, 211, 238;
-  animation: theme-ghiaccio 8s linear infinite;
+  animation: theme-ghiaccio 6.5s linear infinite;
 }
 
 [data-theme="cromia"] {
@@ -238,7 +238,7 @@
   --theme-600: #c026d3;
   --theme-950: #4a044e;
   --theme-rgb: 217, 70, 239;
-  animation: theme-cromia 7s linear infinite;
+  animation: theme-cromia 6s linear infinite;
 }
 
 @keyframes theme-arcobaleno {
@@ -352,9 +352,15 @@
 
 /* Swatch dei temi animati: un gradiente delle variabili vive. Il pulsante
    porta il proprio data-theme, quindi riceve la stessa animazione e il
-   gradiente scorre come anteprima. */
+   gradiente scorre come anteprima.
+
+   L'anteprima però va MOLTO più veloce dell'app: forzando qui la sola durata
+   (il nome e il verso dell'animazione restano quelli del tema, definiti prima
+   nella cascata) ogni swatch mostra in un paio di secondi il carattere
+   dell'animazione che ti aspetta, senza dover fissare il pallino a lungo. */
 .swatch-anim {
   background-image: linear-gradient(135deg, var(--theme-400), var(--theme-500) 50%, var(--theme-600));
+  animation-duration: 2.5s !important;
 }
 
 /* La transizione si attiva solo dopo il primo paint (classe aggiunta da

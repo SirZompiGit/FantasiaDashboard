@@ -371,9 +371,11 @@ export function DashboardHeader({
                       aria-label={definition.label}
                       aria-pressed={theme === definition.id}
                       title={definition.label}
-                      // Quadrati: distinguono a colpo d'occhio i temi animati
-                      // dalle tinte piene (tonde) della riga sopra.
-                      className={`swatch-anim h-5 w-5 rounded-md border-2 transition-transform duration-200 ${
+                      // Quadrati SEMPRE, a prescindere dal design: raggio fisso
+                      // e letterale (non `rounded-md`, che è un token che ogni
+                      // design ridefinisce e arrotonderebbe lo swatch). Le tinte
+                      // piene restano tonde nella riga sopra.
+                      className={`swatch-anim h-5 w-5 rounded-[4px] border-2 transition-transform duration-200 ${
                         theme === definition.id
                           ? 'scale-110 border-white'
                           : 'border-transparent hover:scale-105'
