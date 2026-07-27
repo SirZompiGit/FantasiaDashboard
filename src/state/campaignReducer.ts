@@ -384,7 +384,13 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
       }
       const bars = [...state.healthBars];
       const [moved] = bars.splice(from, 1);
-      bars.splice(bars.findIndex((b) => b.id === action.toId), 0, moved);
+      // Dopo la rimozione gli indici oltre `from` scalano di uno. Trascinando
+      // verso il BASSO (from < to) la barra va inserita DOPO il bersaglio,
+      // altrimenti resta esattamente dov'era: era il motivo per cui, con due
+      // sole barre, trascinare la prima sulla seconda non le scambiava.
+      const target = bars.findIndex((b) => b.id === action.toId);
+      const insertAt = from < to ? target + 1 : target;
+      bars.splice(insertAt, 0, moved);
       return { ...state, healthBars: bars };
     }
 

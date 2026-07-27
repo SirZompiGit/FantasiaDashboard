@@ -138,13 +138,17 @@
    (anch'esso porta l'attributo data-theme), che così si anima in anteprima.
    -------------------------------------------------------------------------- */
 
+/* Ogni tema animato ha un'animazione PROPRIA: colori, durata e andamento
+   diversi. Alcuni percorrono lo spettro in ciclo continuo (linear), altri
+   "respirano" fra due o tre tinte con `alternate` ed easing morbido. */
+
 [data-theme="arcobaleno"] {
   --theme-400: #f87171;
   --theme-500: #ef4444;
   --theme-600: #dc2626;
   --theme-950: #450a0a;
   --theme-rgb: 239, 68, 68;
-  animation: theme-arcobaleno 15s linear infinite;
+  animation: theme-arcobaleno 12s linear infinite;
 }
 
 [data-theme="aurora"] {
@@ -153,7 +157,7 @@
   --theme-600: #059669;
   --theme-950: #022c22;
   --theme-rgb: 16, 185, 129;
-  animation: theme-aurora 16s linear infinite;
+  animation: theme-aurora 12s ease-in-out infinite alternate;
 }
 
 [data-theme="tramonto"] {
@@ -162,7 +166,7 @@
   --theme-600: #d97706;
   --theme-950: #451a03;
   --theme-rgb: 245, 158, 11;
-  animation: theme-tramonto 16s linear infinite;
+  animation: theme-tramonto 12s linear infinite;
 }
 
 [data-theme="oceano"] {
@@ -171,7 +175,7 @@
   --theme-600: #0891b2;
   --theme-950: #083344;
   --theme-rgb: 6, 182, 212;
-  animation: theme-oceano 14s linear infinite;
+  animation: theme-oceano 10s ease-in-out infinite alternate;
 }
 
 [data-theme="magma"] {
@@ -180,7 +184,61 @@
   --theme-600: #eab308;
   --theme-950: #422006;
   --theme-rgb: 250, 204, 21;
-  animation: theme-magma 9s linear infinite;
+  animation: theme-magma 6.5s ease-in-out infinite;
+}
+
+[data-theme="veleno"] {
+  --theme-400: #a3e635;
+  --theme-500: #84cc16;
+  --theme-600: #65a30d;
+  --theme-950: #1a2e05;
+  --theme-rgb: 132, 204, 22;
+  animation: theme-veleno 5s ease-in-out infinite alternate;
+}
+
+[data-theme="spettro"] {
+  --theme-400: #818cf8;
+  --theme-500: #6366f1;
+  --theme-600: #4f46e5;
+  --theme-950: #1e1b4b;
+  --theme-rgb: 99, 102, 241;
+  animation: theme-spettro 8s linear infinite;
+}
+
+[data-theme="brace"] {
+  --theme-400: #f87171;
+  --theme-500: #ef4444;
+  --theme-600: #b91c1c;
+  --theme-950: #450a0a;
+  --theme-rgb: 239, 68, 68;
+  animation: theme-brace 4.5s ease-in-out infinite alternate;
+}
+
+[data-theme="bosco"] {
+  --theme-400: #86efac;
+  --theme-500: #22c55e;
+  --theme-600: #16a34a;
+  --theme-950: #052e16;
+  --theme-rgb: 34, 197, 94;
+  animation: theme-bosco 11s ease-in-out infinite alternate;
+}
+
+[data-theme="ghiaccio"] {
+  --theme-400: #a5f3fc;
+  --theme-500: #22d3ee;
+  --theme-600: #0891b2;
+  --theme-950: #083344;
+  --theme-rgb: 34, 211, 238;
+  animation: theme-ghiaccio 8s linear infinite;
+}
+
+[data-theme="cromia"] {
+  --theme-400: #e879f9;
+  --theme-500: #d946ef;
+  --theme-600: #c026d3;
+  --theme-950: #4a044e;
+  --theme-rgb: 217, 70, 239;
+  animation: theme-cromia 7s linear infinite;
 }
 
 @keyframes theme-arcobaleno {
@@ -194,13 +252,13 @@
   100% { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
 }
 
+/* Deriva lenta a senso unico: `alternate` la fa poi tornare indietro sola. */
 @keyframes theme-aurora {
   0%   { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
-  20%  { --theme-400: #2dd4bf; --theme-500: #14b8a6; --theme-600: #0d9488; --theme-950: #042f2e; }
-  40%  { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
-  60%  { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
-  80%  { --theme-400: #a78bfa; --theme-500: #8b5cf6; --theme-600: #7c3aed; --theme-950: #2e1065; }
-  100% { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  25%  { --theme-400: #2dd4bf; --theme-500: #14b8a6; --theme-600: #0d9488; --theme-950: #042f2e; }
+  50%  { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  75%  { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
+  100% { --theme-400: #a78bfa; --theme-500: #8b5cf6; --theme-600: #7c3aed; --theme-950: #2e1065; }
 }
 
 @keyframes theme-tramonto {
@@ -214,18 +272,64 @@
 
 @keyframes theme-oceano {
   0%   { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
-  25%  { --theme-400: #38bdf8; --theme-500: #0ea5e9; --theme-600: #0284c7; --theme-950: #082f49; }
-  50%  { --theme-400: #60a5fa; --theme-500: #3b82f6; --theme-600: #2563eb; --theme-950: #172554; }
-  75%  { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
-  100% { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  33%  { --theme-400: #38bdf8; --theme-500: #0ea5e9; --theme-600: #0284c7; --theme-950: #082f49; }
+  66%  { --theme-400: #60a5fa; --theme-500: #3b82f6; --theme-600: #2563eb; --theme-950: #172554; }
+  100% { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
 }
 
+/* Andamento irregolare = tremolio di fiamma. */
 @keyframes theme-magma {
   0%   { --theme-400: #fde047; --theme-500: #facc15; --theme-600: #eab308; --theme-950: #422006; }
-  25%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
-  50%  { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
-  75%  { --theme-400: #fb7185; --theme-500: #e11d48; --theme-600: #be123c; --theme-950: #4c0519; }
+  18%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
+  34%  { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
+  50%  { --theme-400: #fb7185; --theme-500: #e11d48; --theme-600: #be123c; --theme-950: #4c0519; }
+  66%  { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #dc2626; --theme-950: #450a0a; }
+  82%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
   100% { --theme-400: #fde047; --theme-500: #facc15; --theme-600: #eab308; --theme-950: #422006; }
+}
+
+/* Respiro tossico fra tre verdi (alternate). */
+@keyframes theme-veleno {
+  0%   { --theme-400: #a3e635; --theme-500: #84cc16; --theme-600: #65a30d; --theme-950: #1a2e05; }
+  50%  { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  100% { --theme-400: #2dd4bf; --theme-500: #14b8a6; --theme-600: #0d9488; --theme-950: #042f2e; }
+}
+
+@keyframes theme-spettro {
+  0%   { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
+  33%  { --theme-400: #a78bfa; --theme-500: #8b5cf6; --theme-600: #7c3aed; --theme-950: #2e1065; }
+  66%  { --theme-400: #e879f9; --theme-500: #d946ef; --theme-600: #c026d3; --theme-950: #4a044e; }
+  100% { --theme-400: #818cf8; --theme-500: #6366f1; --theme-600: #4f46e5; --theme-950: #1e1b4b; }
+}
+
+/* Pulsazione della brace: dal rosso cupo all'ambra viva (alternate). */
+@keyframes theme-brace {
+  0%   { --theme-400: #f87171; --theme-500: #ef4444; --theme-600: #b91c1c; --theme-950: #450a0a; }
+  50%  { --theme-400: #fb923c; --theme-500: #f97316; --theme-600: #ea580c; --theme-950: #431407; }
+  100% { --theme-400: #fbbf24; --theme-500: #f59e0b; --theme-600: #d97706; --theme-950: #451a03; }
+}
+
+@keyframes theme-bosco {
+  0%   { --theme-400: #86efac; --theme-500: #4ade80; --theme-600: #22c55e; --theme-950: #052e16; }
+  50%  { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  100% { --theme-400: #a3e635; --theme-500: #84cc16; --theme-600: #4d7c0f; --theme-950: #1a2e05; }
+}
+
+@keyframes theme-ghiaccio {
+  0%   { --theme-400: #a5f3fc; --theme-500: #22d3ee; --theme-600: #0891b2; --theme-950: #083344; }
+  33%  { --theme-400: #7dd3fc; --theme-500: #38bdf8; --theme-600: #0284c7; --theme-950: #082f49; }
+  66%  { --theme-400: #93c5fd; --theme-500: #60a5fa; --theme-600: #2563eb; --theme-950: #172554; }
+  100% { --theme-400: #a5f3fc; --theme-500: #22d3ee; --theme-600: #0891b2; --theme-950: #083344; }
+}
+
+/* Spettro completo ma in verso opposto all'Arcobaleno: parte dal magenta. */
+@keyframes theme-cromia {
+  0%   { --theme-400: #e879f9; --theme-500: #d946ef; --theme-600: #c026d3; --theme-950: #4a044e; }
+  20%  { --theme-400: #60a5fa; --theme-500: #3b82f6; --theme-600: #2563eb; --theme-950: #172554; }
+  40%  { --theme-400: #22d3ee; --theme-500: #06b6d4; --theme-600: #0891b2; --theme-950: #083344; }
+  60%  { --theme-400: #34d399; --theme-500: #10b981; --theme-600: #059669; --theme-950: #022c22; }
+  80%  { --theme-400: #fbbf24; --theme-500: #f59e0b; --theme-600: #d97706; --theme-950: #451a03; }
+  100% { --theme-400: #e879f9; --theme-500: #d946ef; --theme-600: #c026d3; --theme-950: #4a044e; }
 }
 
 /* Rispetto delle preferenze di movimento: chi le riduce vede la palette
@@ -235,7 +339,13 @@
   [data-theme="aurora"],
   [data-theme="tramonto"],
   [data-theme="oceano"],
-  [data-theme="magma"] {
+  [data-theme="magma"],
+  [data-theme="veleno"],
+  [data-theme="spettro"],
+  [data-theme="brace"],
+  [data-theme="bosco"],
+  [data-theme="ghiaccio"],
+  [data-theme="cromia"] {
     animation: none;
   }
 }
@@ -1032,10 +1142,11 @@ html.theme-transitions {
 }
 
 /* ==========================================================================
-   OMBRA — nero pieno, gotico.
-   Superfici quasi nere, testo molto chiaro, un filo del colore del tema sui
-   bordi e serif Cinzel pesante. Il massimo contrasto: niente aloni (quello è
-   Neon) né vetro (quello è Arcano), solo nero e luce.
+   OMBRA — cattedrale nera.
+   Pietra nera e oro cesellato: superfici quasi nere, un alone del colore del
+   tema che filtra dai bordi come una vetrata, titoli serif che si accendono
+   come rune. Non è il neon (che è tutto contorno luminoso) né il vetro di
+   Arcano: qui la luce è calda e trattenuta, gotica.
    ========================================================================== */
 
 [data-style='ombra'] {
@@ -1068,31 +1179,39 @@ html.theme-transitions {
   background-attachment: fixed;
 }
 
-/* Il bordo è un filo netto, appena tinto dal tema. */
+/* Il bordo è un filo d'oro brunito: appena più acceso di prima. */
 [data-style='ombra'] .border-bento-border {
-  border-color: color-mix(in oklab, var(--theme-500) 22%, #26262e);
+  border-color: color-mix(in oklab, var(--theme-500) 30%, #26262e);
 }
 
-/* Ombre nere profonde con un filetto di luce in cima: superficie incisa. */
+/* Superficie incisa: filo di luce in cima e alone del tema attorno, come una
+   vetrata che filtra da dietro la pietra. È la firma del design. */
 [data-style='ombra'] .shadow-panel {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.05),
-    0 2px 10px rgb(0 0 0 / 0.7);
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-500) 14%, transparent),
+    0 2px 10px rgb(0 0 0 / 0.7),
+    0 0 30px color-mix(in oklab, var(--theme-600) 12%, transparent);
 }
 [data-style='ombra'] .shadow-raised {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.07),
-    0 8px 28px rgb(0 0 0 / 0.8);
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    inset 0 0 0 1px color-mix(in oklab, var(--theme-500) 18%, transparent),
+    0 8px 28px rgb(0 0 0 / 0.8),
+    0 0 40px color-mix(in oklab, var(--theme-500) 16%, transparent);
 }
 [data-style='ombra'] .shadow-overlay {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 24px 70px rgb(0 0 0 / 0.85);
+    0 24px 70px rgb(0 0 0 / 0.85),
+    0 0 60px color-mix(in oklab, var(--theme-500) 18%, transparent);
 }
 
+/* Titoli come rune incise: il serif si accende del colore del tema. */
 [data-style='ombra'] .font-display {
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 16px color-mix(in oklab, var(--theme-500) 45%, transparent);
 }
 
 /* Contrasto spinto: i toni chiari tendono al bianco puro, i muti restano
@@ -1103,132 +1222,125 @@ html.theme-transitions {
 [data-style='ombra'] .text-slate-300 { color: #cfd3dd; }
 [data-style='ombra'] .text-slate-400 { color: #aab0be; }
 
-/* Barra della vita: solco nero da cui affiora il colore. */
+/* L'accento del tema brilla, come brace sotto la cenere. */
+[data-style='ombra'] .text-theme-400,
+[data-style='ombra'] .text-theme-500 {
+  text-shadow: 0 0 12px color-mix(in oklab, var(--theme-500) 40%, transparent);
+}
+
+/* Barra della vita: solco nero da cui affiora il colore, con un alone. */
 [data-style='ombra'] .hp-track {
   background-color: #000000;
-  border-color: color-mix(in oklab, var(--theme-500) 25%, #26262e);
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.9);
+  border-color: color-mix(in oklab, var(--theme-500) 32%, #26262e);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.9),
+    0 0 12px color-mix(in oklab, var(--theme-500) 14%, transparent);
 }
 
 /* ==========================================================================
-   CRISTALLO — vetro ghiacciato.
-   Il terzo design chiaro, ma freddo e traslucido dove White è opaco e
-   Pergamena è caldo: fondo di ghiaccio, pannelli di vetro smerigliato, angoli
-   ampi. La scala tipografica si ribalta verso lo slate bluastro.
+   FUMETTO — tavola a china.
+   Carta chiara con retino di mezzatinta, contorni d'inchiostro spessi e ombre
+   dure e nette (nessuna sfocatura), titoli in Bangers. Fa il verso alle
+   graphic novel: nessun altro design ha questa faccia. Design chiaro → marchio
+   nero.
    ========================================================================== */
 
-[data-style='cristallo'] {
-  --radius-sm: 0.35rem;
-  --radius-md: 0.55rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.3rem;
-  --radius-3xl: 1.8rem;
+[data-style='fumetto'] {
+  --radius-sm: 0.15rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.35rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.65rem;
+  --radius-3xl: 0.85rem;
 
-  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bangers', 'Cinzel', cursive;
 
-  --color-bento-void: #e9f1f8;
-  --color-bento-bg: #d3e2f0;
-  /* Superfici traslucide: sfocando lo sfondo diventano vetro smerigliato. */
-  --color-bento-panel: rgb(255 255 255 / 0.74);
-  --color-bento-item: rgb(255 255 255 / 0.55);
-  --color-bento-button: rgb(255 255 255 / 0.85);
-  --color-bento-border: #b7cbde;
-
-  --color-indigo-glow: rgba(79, 70, 229, 0.06);
+  --color-bento-void: #fdf9ee;
+  --color-bento-bg: #f4ecd8;
+  --color-bento-panel: #fffdf5;
+  --color-bento-item: #fbf5e6;
+  --color-bento-button: #ffefcc;
+  /* L'inchiostro: bordi quasi neri, la cifra del fumetto. */
+  --color-bento-border: #16130d;
 }
 
-/* Fondo di ghiaccio: due aloni freddi diffusi. */
-[data-style='cristallo'] body {
-  background-image:
-    radial-gradient(60rem 40rem at 12% -10%, rgb(255 255 255 / 0.9), transparent 60%),
-    radial-gradient(70rem 50rem at 100% 0, rgb(186 214 240 / 0.7), transparent 55%),
-    linear-gradient(180deg, #dfeaf5, #c9dcee);
+/* Retino di mezzatinta: puntini d'inchiostro fissi dietro tutta la tavola. */
+[data-style='fumetto'] body {
+  background-color: #f4ecd8;
+  background-image: radial-gradient(rgb(22 19 13 / 0.09) 1.4px, transparent 1.6px);
+  background-size: 10px 10px;
   background-attachment: fixed;
 }
 
-/* Vetro smerigliato: le superfici traslucide sfocano ciò che sta dietro. */
-[data-style='cristallo'] .bg-bento-panel,
-[data-style='cristallo'] .bg-bento-item,
-[data-style='cristallo'] .bg-bento-button {
-  backdrop-filter: blur(12px) saturate(1.15);
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+/* Ombre dure e piene, spostate in diagonale: le vignette sembrano adesivi
+   ritagliati e incollati sulla pagina. Niente blur, mai. */
+[data-style='fumetto'] .shadow-panel {
+  box-shadow: 3px 3px 0 0 #16130d;
+}
+[data-style='fumetto'] .shadow-raised {
+  box-shadow: 4px 4px 0 0 #16130d;
+}
+[data-style='fumetto'] .shadow-overlay {
+  box-shadow: 6px 6px 0 0 rgb(22 19 13 / 0.9);
 }
 
-/* Ombre fredde e morbide, con un filo di luce interno sul bordo alto. */
-[data-style='cristallo'] .shadow-panel {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.8),
-    0 1px 2px rgb(30 58 95 / 0.06),
-    0 8px 24px rgb(30 58 95 / 0.1);
-}
-[data-style='cristallo'] .shadow-raised {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.85),
-    0 4px 10px rgb(30 58 95 / 0.1),
-    0 14px 36px rgb(30 58 95 / 0.14);
-}
-[data-style='cristallo'] .shadow-overlay {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.85),
-    0 16px 40px rgb(30 58 95 / 0.18),
-    0 36px 80px rgb(30 58 95 / 0.22);
+/* Bangers è già maiuscolo e spavaldo: basta un filo di spazio. */
+[data-style='fumetto'] .font-display {
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
-[data-style='cristallo'] .font-display {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
+/* Scala tipografica a china: nero pieno sui titoli, seppia scura sui muti. */
+[data-style='fumetto'] .text-white { color: #16130d; }
+[data-style='fumetto'] .text-slate-100 { color: #16130d; }
+[data-style='fumetto'] .text-slate-200 { color: #241f16; }
+[data-style='fumetto'] .text-slate-300 { color: #38311f; }
+[data-style='fumetto'] .text-slate-400 { color: #574b32; }
+[data-style='fumetto'] .text-slate-500 { color: #6d5f40; }
+[data-style='fumetto'] .text-slate-600 { color: #84754f; }
+[data-style='fumetto'] .text-slate-700 { color: #9a8a63; }
 
-/* Inversione della scala tipografica, verso lo slate freddo. */
-[data-style='cristallo'] .text-white { color: #0b1a28; }
-[data-style='cristallo'] .text-slate-100 { color: #0f2233; }
-[data-style='cristallo'] .text-slate-200 { color: #1b3245; }
-[data-style='cristallo'] .text-slate-300 { color: #2b4459; }
-[data-style='cristallo'] .text-slate-400 { color: #3d566b; }
-[data-style='cristallo'] .text-slate-500 { color: #4e6478; }
-[data-style='cristallo'] .text-slate-600 { color: #62778c; }
-[data-style='cristallo'] .text-slate-700 { color: #78899c; }
+[data-style='fumetto'] .hover\:text-slate-100:hover,
+[data-style='fumetto'] .hover\:text-white:hover { color: #16130d; }
+[data-style='fumetto'] .hover\:text-slate-200:hover { color: #241f16; }
+[data-style='fumetto'] .hover\:text-slate-300:hover { color: #38311f; }
 
-[data-style='cristallo'] .hover\:text-slate-100:hover,
-[data-style='cristallo'] .hover\:text-white:hover { color: #0b1a28; }
-[data-style='cristallo'] .hover\:text-slate-200:hover { color: #1b3245; }
-[data-style='cristallo'] .hover\:text-slate-300:hover { color: #2b4459; }
+[data-style='fumetto'] .placeholder-slate-500::placeholder,
+[data-style='fumetto'] .placeholder-slate-600::placeholder,
+[data-style='fumetto'] .placeholder\:text-slate-600::placeholder { color: #9a8a63; }
 
-[data-style='cristallo'] .placeholder-slate-500::placeholder,
-[data-style='cristallo'] .placeholder-slate-600::placeholder,
-[data-style='cristallo'] .placeholder\:text-slate-600::placeholder { color: #74889b; }
+[data-style='fumetto'] .bg-slate-700 { background-color: #e7dcc2; }
+[data-style='fumetto'] .bg-slate-800 { background-color: #efe6d0; }
+[data-style='fumetto'] .bg-slate-900 { background-color: #f6efdd; }
+[data-style='fumetto'] .bg-slate-800\/50 { background-color: rgb(239 230 208 / 0.75); }
+[data-style='fumetto'] .bg-slate-900\/50 { background-color: rgb(230 218 190 / 0.55); }
+[data-style='fumetto'] .hover\:bg-slate-600:hover,
+[data-style='fumetto'] .hover\:bg-slate-700:hover { background-color: #ddd0b1; }
 
-[data-style='cristallo'] .bg-slate-700 { background-color: rgb(255 255 255 / 0.55); }
-[data-style='cristallo'] .bg-slate-800 { background-color: rgb(255 255 255 / 0.4); }
-[data-style='cristallo'] .bg-slate-900 { background-color: rgb(255 255 255 / 0.28); }
-[data-style='cristallo'] .bg-slate-800\/50 { background-color: rgb(255 255 255 / 0.35); }
-[data-style='cristallo'] .bg-slate-900\/50 { background-color: rgb(200 219 238 / 0.4); }
-[data-style='cristallo'] .hover\:bg-slate-600:hover,
-[data-style='cristallo'] .hover\:bg-slate-700:hover { background-color: rgb(255 255 255 / 0.7); }
+/* Ogni bordo è inchiostro nero: è ciò che tiene insieme il fumetto. */
+[data-style='fumetto'] .border-slate-700,
+[data-style='fumetto'] .border-slate-800,
+[data-style='fumetto'] .border-slate-700\/50 { border-color: #16130d; }
+[data-style='fumetto'] .border-white { border-color: #16130d; }
+[data-style='fumetto'] .hover\:border-slate-500:hover,
+[data-style='fumetto'] .hover\:border-slate-600:hover { border-color: #16130d; }
 
-[data-style='cristallo'] .border-slate-700,
-[data-style='cristallo'] .border-slate-800,
-[data-style='cristallo'] .border-slate-700\/50 { border-color: #b7cbde; }
-[data-style='cristallo'] .hover\:border-slate-500:hover,
-[data-style='cristallo'] .hover\:border-slate-600:hover { border-color: #93aecb; }
+/* L'accento del tema resta il tono scuro per leggersi sulla carta. */
+[data-style='fumetto'] .text-theme-400,
+[data-style='fumetto'] .text-theme-500 { color: var(--theme-600); }
 
-/* Il colore del tema va scurito per restare leggibile sul ghiaccio. */
-[data-style='cristallo'] .text-theme-400,
-[data-style='cristallo'] .text-theme-500 { color: var(--theme-600); }
-
-/* Barra della vita: lastra di ghiaccio incisa. */
-[data-style='cristallo'] .hp-track {
-  background-color: rgb(255 255 255 / 0.5);
-  border-color: #a8c1d8;
-  box-shadow: inset 0 1px 3px rgb(30 58 95 / 0.1);
+/* Barra della vita: riquadro bianco con contorno d'inchiostro e ombra dura. */
+[data-style='fumetto'] .hp-track {
+  background-color: #fffdf5;
+  border-color: #16130d;
+  box-shadow: 2px 2px 0 0 #16130d;
 }
 
 /* ==========================================================================
-   TAVERNA — legno e cuoio.
-   Scuro come Ferro ma caldo dove Ferro è freddo: assito di legno, pannelli di
-   cuoio, filo d'ottone. La scala tipografica vira verso la crema e il tabacco.
+   TAVERNA — legno, cuoio e ottone.
+   Scuro come Ferro ma caldo dove Ferro è freddo: un bancone di assi di legno
+   con le fughe in vista, pannelli di cuoio incorniciati d'ottone, testo color
+   crema e tabacco. Più materico e riconoscibile della prima stesura.
    ========================================================================== */
 
 [data-style='taverna'] {
@@ -1249,43 +1361,60 @@ html.theme-transitions {
   --color-bento-border: #4a3620;
 }
 
-/* Assito di legno: venatura verticale calda e una vignettatura scura. */
+/* Assito di legno: assi orizzontali separate da fughe scure, sopra una
+   venatura verticale calda e una vignettatura. Le fughe sono la novità. */
 [data-style='taverna'] body {
+  background-color: #140c05;
   background-image:
     repeating-linear-gradient(
-      90deg,
-      rgb(0 0 0 / 0.14) 0 3px,
-      rgb(255 190 120 / 0.02) 3px 7px,
-      transparent 7px 11px
+      0deg,
+      rgb(0 0 0 / 0.32) 0 2px,
+      rgb(255 190 120 / 0.015) 2px 5px,
+      transparent 5px 92px,
+      rgb(0 0 0 / 0.22) 92px 96px
     ),
-    radial-gradient(120% 120% at 50% -10%, transparent 55%, rgb(0 0 0 / 0.4)),
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.12) 0 3px,
+      rgb(255 190 120 / 0.02) 3px 7px,
+      transparent 7px 12px
+    ),
+    radial-gradient(120% 120% at 50% -10%, transparent 55%, rgb(0 0 0 / 0.45)),
     linear-gradient(180deg, #20150a, #140c05);
   background-attachment: fixed;
 }
 
-/* Il cuoio dei pannelli prende un filo d'ottone in alto. */
+/* Cuoio dei pannelli: luce calda dall'alto e una leggera bombatura. */
 [data-style='taverna'] .bg-bento-panel {
-  background-image: linear-gradient(180deg, rgb(255 200 130 / 0.05), rgb(0 0 0 / 0.14));
+  background-image:
+    radial-gradient(130% 150% at 50% 0, rgb(255 210 150 / 0.07), transparent 62%),
+    linear-gradient(180deg, rgb(255 200 130 / 0.05), rgb(0 0 0 / 0.18));
 }
 [data-style='taverna'] .bg-bento-item {
-  background-image: linear-gradient(180deg, rgb(255 200 130 / 0.03), rgb(0 0 0 / 0.1));
+  background-image: linear-gradient(180deg, rgb(255 200 130 / 0.03), rgb(0 0 0 / 0.12));
 }
 
+/* Cornice d'ottone: un filo caldo tutt'intorno, luce sopra e ombra incisa
+   sotto, poi l'ombra portata. Dà ai pannelli l'aria di borchie inchiodate. */
 [data-style='taverna'] .shadow-panel {
   box-shadow:
-    inset 0 1px 0 rgb(255 200 130 / 0.1),
-    0 2px 4px rgb(0 0 0 / 0.4),
-    0 8px 20px rgb(0 0 0 / 0.45);
+    inset 0 0 0 1px rgb(120 82 40 / 0.55),
+    inset 0 1px 0 rgb(255 205 140 / 0.2),
+    inset 0 -2px 5px rgb(0 0 0 / 0.4),
+    0 3px 6px rgb(0 0 0 / 0.4),
+    0 10px 22px rgb(0 0 0 / 0.48);
 }
 [data-style='taverna'] .shadow-raised {
   box-shadow:
-    inset 0 1px 0 rgb(255 200 130 / 0.12),
-    0 8px 26px rgb(0 0 0 / 0.55);
+    inset 0 0 0 1px rgb(140 96 48 / 0.6),
+    inset 0 1px 0 rgb(255 205 140 / 0.24),
+    0 10px 28px rgb(0 0 0 / 0.58);
 }
 [data-style='taverna'] .shadow-overlay {
   box-shadow:
-    inset 0 1px 0 rgb(255 200 130 / 0.1),
-    0 24px 64px rgb(0 0 0 / 0.65);
+    inset 0 0 0 1px rgb(140 96 48 / 0.5),
+    inset 0 1px 0 rgb(255 205 140 / 0.2),
+    0 26px 66px rgb(0 0 0 / 0.68);
 }
 
 [data-style='taverna'] .font-display {
@@ -1333,6 +1462,206 @@ html.theme-transitions {
   box-shadow:
     inset 0 2px 4px rgb(0 0 0 / 0.6),
     inset 0 -1px 0 rgb(255 200 130 / 0.06);
+}
+
+/* ==========================================================================
+   OLOGRAFICO — vetro iridescente.
+   Sulla scia di Arcano (vetro scuro + sfocatura), ma cangiante: i pannelli
+   traslucidi prendono un velo iridescente ciano/viola/rosa e un alone del
+   tema. Fondo blu notte con aurore colorate. Trasparenza spinta.
+   ========================================================================== */
+
+[data-style='olografico'] {
+  --radius-sm: 0.4rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.85rem;
+  --radius-xl: 1.1rem;
+  --radius-2xl: 1.4rem;
+  --radius-3xl: 1.9rem;
+
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bento-void: #05060f;
+  --color-bento-bg: #090c1a;
+  --color-bento-panel: rgb(255 255 255 / 0.06);
+  --color-bento-item: rgb(255 255 255 / 0.045);
+  --color-bento-button: rgb(255 255 255 / 0.1);
+  --color-bento-border: rgb(255 255 255 / 0.16);
+}
+
+/* Fondo blu notte con tre aurore: ciano, viola, rosa. */
+[data-style='olografico'] body {
+  background-color: #05060f;
+  background-image:
+    radial-gradient(60rem 42rem at 12% -12%, rgb(34 211 238 / 0.16), transparent 60%),
+    radial-gradient(58rem 44rem at 92% 4%, rgb(168 85 247 / 0.16), transparent 60%),
+    radial-gradient(64rem 50rem at 50% 118%, rgb(244 114 182 / 0.14), transparent 60%),
+    linear-gradient(180deg, #090c1a, #05060f);
+  background-attachment: fixed;
+}
+
+/* Vetro cangiante: forte sfocatura + un velo iridescente in diagonale. */
+[data-style='olografico'] .bg-bento-panel,
+[data-style='olografico'] .bg-bento-item,
+[data-style='olografico'] .bg-bento-button {
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+[data-style='olografico'] .bg-bento-panel {
+  background-image: linear-gradient(
+    135deg,
+    rgb(34 211 238 / 0.12),
+    rgb(168 85 247 / 0.08) 50%,
+    rgb(244 114 182 / 0.1)
+  );
+}
+
+/* Rima di luce interna + alone del tema: il pannello sembra galleggiare. */
+[data-style='olografico'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 8px 30px rgb(4 6 16 / 0.6),
+    0 0 26px color-mix(in oklab, var(--theme-500) 14%, transparent);
+}
+[data-style='olografico'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08),
+    0 14px 40px rgb(4 6 16 / 0.7),
+    0 0 36px color-mix(in oklab, var(--theme-500) 20%, transparent);
+}
+[data-style='olografico'] .shadow-overlay {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 30px 80px rgb(4 6 16 / 0.75),
+    0 0 50px color-mix(in oklab, var(--theme-500) 22%, transparent);
+}
+
+[data-style='olografico'] .font-display {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* Su vetro scuro i muti vanno schiariti per non sparire. */
+[data-style='olografico'] .text-slate-400 { color: #aeb8cc; }
+[data-style='olografico'] .text-slate-500 { color: #8f9ab0; }
+
+[data-style='olografico'] .hp-track {
+  background-color: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.18);
+  box-shadow:
+    inset 0 1px 6px rgb(0 0 0 / 0.5),
+    0 0 14px color-mix(in oklab, var(--theme-500) 12%, transparent);
+}
+
+/* ==========================================================================
+   NEBBIA — foschia chiara.
+   L'altra faccia della trasparenza: vetro CHIARO e soffice invece che scuro.
+   Foschia grigio-azzurra, pannelli di vetro smerigliato bianco molto sfocati,
+   bordi tenui e ombre morbide e diffuse. Design chiaro → marchio nero.
+   ========================================================================== */
+
+[data-style='nebbia'] {
+  --radius-sm: 0.45rem;
+  --radius-md: 0.65rem;
+  --radius-lg: 0.85rem;
+  --radius-xl: 1.1rem;
+  --radius-2xl: 1.45rem;
+  --radius-3xl: 1.9rem;
+
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bento-void: #eef1f6;
+  --color-bento-bg: #e3e8f0;
+  --color-bento-panel: rgb(255 255 255 / 0.55);
+  --color-bento-item: rgb(255 255 255 / 0.4);
+  --color-bento-button: rgb(255 255 255 / 0.72);
+  --color-bento-border: rgb(148 163 184 / 0.4);
+
+  --color-indigo-glow: rgba(79, 70, 229, 0.05);
+}
+
+/* Foschia: aloni bianchi diffusi su un cielo grigio-azzurro. */
+[data-style='nebbia'] body {
+  background-color: #e6ebf1;
+  background-image:
+    radial-gradient(72rem 52rem at 18% -12%, rgb(255 255 255 / 0.9), transparent 60%),
+    radial-gradient(72rem 52rem at 90% 8%, rgb(214 224 236 / 0.85), transparent 58%),
+    linear-gradient(180deg, #eef2f7, #dbe3ee);
+  background-attachment: fixed;
+}
+
+/* Vetro smerigliato molto sfocato: la foschia mangia i contorni dietro. */
+[data-style='nebbia'] .bg-bento-panel,
+[data-style='nebbia'] .bg-bento-item,
+[data-style='nebbia'] .bg-bento-button {
+  backdrop-filter: blur(20px) saturate(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.05);
+}
+
+/* Ombre morbide e diffuse, senza spigoli: tutto sfuma. */
+[data-style='nebbia'] .shadow-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    0 6px 24px rgb(100 116 139 / 0.14);
+}
+[data-style='nebbia'] .shadow-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    0 12px 40px rgb(100 116 139 / 0.18);
+}
+[data-style='nebbia'] .shadow-overlay {
+  box-shadow: 0 24px 70px rgb(100 116 139 / 0.24);
+}
+
+[data-style='nebbia'] .font-display {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Scala tipografica ribaltata, verso uno slate freddo e tenue. */
+[data-style='nebbia'] .text-white { color: #1a2632; }
+[data-style='nebbia'] .text-slate-100 { color: #1f2c39; }
+[data-style='nebbia'] .text-slate-200 { color: #2b3a49; }
+[data-style='nebbia'] .text-slate-300 { color: #3b4c5d; }
+[data-style='nebbia'] .text-slate-400 { color: #4f6376; }
+[data-style='nebbia'] .text-slate-500 { color: #647689; }
+[data-style='nebbia'] .text-slate-600 { color: #7b8a9c; }
+[data-style='nebbia'] .text-slate-700 { color: #909fb0; }
+
+[data-style='nebbia'] .hover\:text-slate-100:hover,
+[data-style='nebbia'] .hover\:text-white:hover { color: #1a2632; }
+[data-style='nebbia'] .hover\:text-slate-200:hover { color: #2b3a49; }
+[data-style='nebbia'] .hover\:text-slate-300:hover { color: #3b4c5d; }
+
+[data-style='nebbia'] .placeholder-slate-500::placeholder,
+[data-style='nebbia'] .placeholder-slate-600::placeholder,
+[data-style='nebbia'] .placeholder\:text-slate-600::placeholder { color: #8695a6; }
+
+[data-style='nebbia'] .bg-slate-700 { background-color: rgb(255 255 255 / 0.5); }
+[data-style='nebbia'] .bg-slate-800 { background-color: rgb(255 255 255 / 0.38); }
+[data-style='nebbia'] .bg-slate-900 { background-color: rgb(255 255 255 / 0.26); }
+[data-style='nebbia'] .bg-slate-800\/50 { background-color: rgb(255 255 255 / 0.32); }
+[data-style='nebbia'] .bg-slate-900\/50 { background-color: rgb(210 220 232 / 0.4); }
+[data-style='nebbia'] .hover\:bg-slate-600:hover,
+[data-style='nebbia'] .hover\:bg-slate-700:hover { background-color: rgb(255 255 255 / 0.65); }
+
+[data-style='nebbia'] .border-slate-700,
+[data-style='nebbia'] .border-slate-800,
+[data-style='nebbia'] .border-slate-700\/50 { border-color: rgb(148 163 184 / 0.45); }
+[data-style='nebbia'] .hover\:border-slate-500:hover,
+[data-style='nebbia'] .hover\:border-slate-600:hover { border-color: rgb(100 116 139 / 0.55); }
+
+/* Accento del tema scurito per leggersi sulla foschia. */
+[data-style='nebbia'] .text-theme-400,
+[data-style='nebbia'] .text-theme-500 { color: var(--theme-600); }
+
+[data-style='nebbia'] .hp-track {
+  background-color: rgb(255 255 255 / 0.5);
+  border-color: rgb(148 163 184 / 0.5);
+  box-shadow: inset 0 1px 4px rgb(100 116 139 / 0.16);
 }
 
 /* ==========================================================================

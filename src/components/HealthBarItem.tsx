@@ -239,14 +239,16 @@ function BarTrack({
   };
 
   const hitPadding = thin ? (vertical ? 'px-1' : 'py-1') : '';
-  // Compatta: 20px, a metà strada fra la barra piena (32px) e una risorsa (10px).
+  // Due densità per la barra della vita: Compatta (24px, il default) e
+  // Ultra-compatta (16px, col toggle). La vecchia barra piena da 32px non c'è
+  // più: l'app parte già stretta.
   const trackSize = vertical
     ? 'h-full w-full'
     : thin
       ? 'h-2.5 w-full'
       : compact
-        ? 'h-5 w-full'
-        : 'h-8 w-full';
+        ? 'h-4 w-full'
+        : 'h-6 w-full';
   const trackRounding = thin ? 'rounded-md' : 'rounded-lg';
   const trackPadding = thin ? 'p-px' : 'p-[3px]';
   const segmentGap = thin ? 'gap-px' : max > 30 ? 'gap-[1px]' : 'gap-[2px]';
@@ -599,7 +601,7 @@ export function HealthBarItem({
       }
       onDragEnd={reorder?.onDragEnd}
       className={`group relative rounded-xl border bg-bento-bg transition-colors duration-200 ${
-        compact ? 'p-2 sm:p-2.5' : 'p-3 sm:p-4'
+        compact ? 'p-1.5 sm:p-2' : 'p-2.5 sm:p-3'
       } ${readOnly ? 'border-bento-border' : 'border-bento-border hover:border-slate-600'} ${
         reorder?.dragging ? 'opacity-30' : ''
       } ${reorder?.dragOver ? 'border-theme-500 ring-1 ring-theme-500/30' : ''} ${
@@ -608,7 +610,7 @@ export function HealthBarItem({
     >
       <div
         className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${
-          compact ? 'mb-1.5' : 'mb-2.5'
+          compact ? 'mb-1' : 'mb-2'
         }`}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -620,12 +622,18 @@ export function HealthBarItem({
               draggable
               onDragStart={reorder.onDragStart}
               aria-hidden
-              className="touch-visible hidden shrink-0 cursor-grab text-slate-600 opacity-0 transition-opacity duration-200 hover:text-slate-300 active:cursor-grabbing group-hover:opacity-100 sm:block"
+              // Sempre visibile (non solo all'hover): con poche barre la
+              // maniglia nascosta era difficile da trovare e afferrare.
+              className="hidden shrink-0 cursor-grab text-slate-500 opacity-60 transition-opacity duration-200 hover:text-slate-300 active:cursor-grabbing group-hover:opacity-100 sm:block"
             >
               <GripVertical className="h-4 w-4" />
             </span>
           )}
-          <span className="truncate font-display text-sm font-bold tracking-wide text-slate-200 md:text-base">
+          <span
+            className={`truncate font-display font-bold tracking-wide text-slate-200 ${
+              compact ? 'text-xs md:text-sm' : 'text-sm md:text-base'
+            }`}
+          >
             {bar.name}
           </span>
           {/* Solo il master la vede: promemoria che la barra è nascosta ai
@@ -737,7 +745,10 @@ export function HealthBarItem({
             <span className="text-sm font-bold text-slate-100">{bar.currentValue}</span>
             <span className="mx-1 text-slate-600">/</span>
             <span>{bar.maxValue}</span>
-            <span className="ml-1.5 text-slate-500">({Math.round(percentage)}%)</span>
+            {/* Ultra-compatta: via la percentuale, per restare minimale. */}
+            {!compact && (
+              <span className="ml-1.5 text-slate-500">({Math.round(percentage)}%)</span>
+            )}
           </div>
         </div>
       </div>

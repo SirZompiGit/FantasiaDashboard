@@ -207,23 +207,40 @@ export function RoomPanel({
                 return assigned ? assigned.name : user.name;
               });
 
+              // L'ultimo tiro (indice 0) è sempre evidenziato con chiarezza:
+              // cornice e alone del tema, barra in cima e chip "Ultimo".
+              const isLatest = index === 0;
               return (
                 <div
                   key={`${roll.timestamp}-${index}`}
-                  className={`flex min-w-0 flex-1 flex-col rounded-lg border bg-bento-bg p-3 transition-colors duration-200 hover:border-slate-600 ${
-                    index === 0 ? 'border-theme-500/40' : 'border-slate-700/50'
+                  className={`relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border bg-bento-bg p-3 transition-colors duration-200 ${
+                    isLatest
+                      ? 'border-theme-500 bg-theme-500/10 ring-1 ring-theme-500/30'
+                      : 'border-slate-700/50 hover:border-slate-600'
                   }`}
                 >
+                  {isLatest && (
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-theme-500" />
+                  )}
                   <div className="mb-2 flex items-center justify-between gap-2 border-b border-slate-800 pb-1">
                     <span
-                      className="min-w-0 truncate font-mono text-[11px] font-bold text-slate-300"
+                      className={`min-w-0 truncate font-mono text-[11px] font-bold ${
+                        isLatest ? 'text-theme-400' : 'text-slate-300'
+                      }`}
                       title={name}
                     >
                       {name}
                     </span>
-                    <span className="shrink-0 rounded bg-bento-void px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
-                      {roll.diceType}
-                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {isLatest && (
+                        <span className="rounded bg-theme-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                          Ultimo
+                        </span>
+                      )}
+                      <span className="rounded bg-bento-void px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+                        {roll.diceType}
+                      </span>
+                    </div>
                   </div>
 
                   <span

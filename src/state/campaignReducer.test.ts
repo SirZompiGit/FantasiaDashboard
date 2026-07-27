@@ -253,6 +253,27 @@ describe('riordino delle barre', () => {
     expect(moved.healthBars.map((b) => b.id)).toEqual([ids[0], ids[2], ids[1]]);
   });
 
+  // Il caso che prima era rotto: con due sole barre, trascinare la prima sulla
+  // seconda non le scambiava (l'inserimento la rimetteva al suo posto).
+  it('trascinando la prima barra sulla seconda le scambia', () => {
+    const { state, ids } = build(['Nemici', 'Nemici']);
+    const moved = campaignReducer(state, { type: 'REORDER_HEALTH_BAR', id: ids[0], toId: ids[1] });
+    expect(moved.healthBars.map((b) => b.id)).toEqual([ids[1], ids[0]]);
+  });
+
+  it('trascinando la seconda barra sulla prima le scambia', () => {
+    const { state, ids } = build(['Nemici', 'Nemici']);
+    const moved = campaignReducer(state, { type: 'REORDER_HEALTH_BAR', id: ids[1], toId: ids[0] });
+    expect(moved.healthBars.map((b) => b.id)).toEqual([ids[1], ids[0]]);
+  });
+
+  // Trascinare in basso oltre più barre: la barra atterra dopo il bersaglio.
+  it('trascinando in basso su un bersaglio distante, atterra dopo di esso', () => {
+    const { state, ids } = build(['Nemici', 'Nemici', 'Nemici', 'Nemici']);
+    const moved = campaignReducer(state, { type: 'REORDER_HEALTH_BAR', id: ids[0], toId: ids[2] });
+    expect(moved.healthBars.map((b) => b.id)).toEqual([ids[1], ids[2], ids[0], ids[3]]);
+  });
+
   it('non attraversa i gruppi anche se le barre sono interlacciate', () => {
     // Array: [Nemici, Alleati, Nemici]. Il primo Nemici non ha vicini Nemici
     // sopra, ma "giù" trova il secondo Nemici saltando l'Alleato in mezzo.

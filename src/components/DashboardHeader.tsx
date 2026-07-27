@@ -371,7 +371,9 @@ export function DashboardHeader({
                       aria-label={definition.label}
                       aria-pressed={theme === definition.id}
                       title={definition.label}
-                      className={`swatch-anim h-5 w-5 rounded-full border-2 transition-transform duration-200 ${
+                      // Quadrati: distinguono a colpo d'occhio i temi animati
+                      // dalle tinte piene (tonde) della riga sopra.
+                      className={`swatch-anim h-5 w-5 rounded-md border-2 transition-transform duration-200 ${
                         theme === definition.id
                           ? 'scale-110 border-white'
                           : 'border-transparent hover:scale-105'
@@ -488,11 +490,11 @@ export function DashboardHeader({
                 />
                 <span className="min-w-0">
                   <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <Rows3 className="h-3.5 w-3.5 text-theme-500" /> Barre compatte
+                    <Rows3 className="h-3.5 w-3.5 text-theme-500" /> Barre ultra-compatte
                   </span>
                   <span className="block text-[11px] leading-snug text-slate-500">
-                    Barre della vita più sottili e dense, per starci in più a schermo. Vale anche
-                    nella condivisione.
+                    Le barre sono già compatte di default: qui diventano ultra-compatte, ancora più
+                    sottili e minimali. Vale anche nella condivisione.
                   </span>
                 </span>
               </label>

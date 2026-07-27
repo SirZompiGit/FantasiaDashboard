@@ -60,6 +60,13 @@ const COLLAPSED_KEY = 'fantasia_shared_collapsed_groups';
 /** Lanci dei giocatori mostrati: una striscia, senza andare a capo. */
 const MAX_VISIBLE_ROLLS = 4;
 
+/**
+ * Quanto dura il rotolamento del dado del master sullo schermo dei giocatori,
+ * prima che il numero si riveli. Poco più dell'animazione della dashboard, così
+ * i giocatori vedono davvero il dado girare e non solo il risultato.
+ */
+const MASTER_ROLL_DURATION = 850;
+
 type HealthLayout = 'horizontal' | 'vertical';
 
 interface SharedViewProps {
@@ -107,6 +114,8 @@ export function SharedView({
     }
   });
   const [shaking, setShaking] = useState(false);
+  /** Il dado del master sta rotolando: mostra il numero solo alla fine. */
+  const [rolling, setRolling] = useState(false);
   /** Istante dell'ultimo critico: serve a rimontare le scintille. */
   const [critBurst, setCritBurst] = useState<number | null>(null);
   const [expandedNote, setExpandedNote] = useState<'campaign' | 'personal' | null>(null);
@@ -177,17 +186,24 @@ export function SharedView({
       timersRef.current.push(id);
     };
 
+    // Il dado ROTOLA anche qui, non solo nella dashboard del master: parte
+    // l'animazione, poi al termine il numero si rivela e suona l'esito. Così i
+    // giocatori (proiettore o telefono) vivono il tiro, non ne leggono l'esito.
+    setRolling(true);
     setShaking(true);
     playRollSound();
     schedule(() => setShaking(false), 300);
 
-    if (isCritical(lastRoll.result, lastRoll.diceType)) {
-      playCritSuccessSound();
-      setCritBurst(lastRoll.timestamp);
-      schedule(() => setCritBurst(null), 1600);
-    } else if (isFumble(lastRoll.result, lastRoll.diceType)) {
-      playCritFailSound();
-    }
+    schedule(() => {
+      setRolling(false);
+      if (isCritical(lastRoll.result, lastRoll.diceType)) {
+        playCritSuccessSound();
+        setCritBurst(lastRoll.timestamp);
+        schedule(() => setCritBurst(null), 1600);
+      } else if (isFumble(lastRoll.result, lastRoll.diceType)) {
+        playCritFailSound();
+      }
+    }, MASTER_ROLL_DURATION);
   }, [lastRoll]);
 
   // Le barre nascoste dal master non compaiono affatto qui.
@@ -553,21 +569,29 @@ export function SharedView({
                       <DiceShape
                         diceType={lastRoll.diceType}
                         value={lastRoll.result}
-                        state="result"
+                        // Mentre rotola, il dado gira col numero coperto: il
+                        // risultato si scopre solo quando si ferma.
+                        state={rolling ? 'rolling' : 'result'}
                         accent={accent}
-                        reveal={isRollHidden ? 'hidden' : 'full'}
+                        reveal={rolling || isRollHidden ? 'hidden' : 'full'}
                         outcome={
-                          isCritical(lastRoll.result, lastRoll.diceType)
-                            ? 'critical'
-                            : isFumble(lastRoll.result, lastRoll.diceType)
-                              ? 'fumble'
-                              : null
+                          rolling
+                            ? null
+                            : isCritical(lastRoll.result, lastRoll.diceType)
+                              ? 'critical'
+                              : isFumble(lastRoll.result, lastRoll.diceType)
+                                ? 'fumble'
+                                : null
                         }
-                        label={d2FaceText(lastRoll.diceType, lastRoll.result, state.d2Labels)}
+                        label={
+                          rolling
+                            ? undefined
+                            : d2FaceText(lastRoll.diceType, lastRoll.result, state.d2Labels)
+                        }
                         className="h-28 w-28 sm:h-32 sm:w-32 lg:h-40 lg:w-40"
                       />
 
-                      {isRollHidden && (
+                      {isRollHidden && !rolling && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="z-20 rotate-12 rounded-lg border border-amber-500/30 bg-slate-900/80 px-3 py-1 font-mono text-base font-bold uppercase tracking-widest text-amber-500 shadow-overlay backdrop-blur-sm">
                             Nascosto
@@ -575,10 +599,12 @@ export function SharedView({
                         </div>
                       )}
 
-                      {!isRollHidden && critBurst !== null && <CritSparkles key={critBurst} />}
+                      {!isRollHidden && !rolling && critBurst !== null && (
+                        <CritSparkles key={critBurst} />
+                      )}
                     </div>
 
-                    {!isRollHidden && isCritical(lastRoll.result, lastRoll.diceType) && (
+                    {!isRollHidden && !rolling && isCritical(lastRoll.result, lastRoll.diceType) && (
                       <div
                         className="inline-flex animate-pulse items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider"
                         style={{
@@ -591,7 +617,7 @@ export function SharedView({
                       </div>
                     )}
 
-                    {!isRollHidden && isFumble(lastRoll.result, lastRoll.diceType) && (
+                    {!isRollHidden && !rolling && isFumble(lastRoll.result, lastRoll.diceType) && (
                       <div
                         className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider"
                         style={{
@@ -638,16 +664,27 @@ export function SharedView({
                           return assigned ? assigned.name : user.name;
                         });
 
+                        // L'ultimo tiro (indice 0) è sempre marcato in modo
+                        // netto: cornice e alone del tema, barra in cima ed
+                        // etichetta "Ultimo". Non un semplice bordo tenue.
+                        const isLatest = index === 0;
                         return (
                           <div
                             key={`${roll.timestamp}-${index}`}
                             className={`relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border bg-bento-bg p-2 shadow-panel ${
-                              index === 0 ? 'border-theme-500/40' : 'border-bento-border'
+                              isLatest
+                                ? 'border-theme-500 bg-theme-500/10 ring-1 ring-theme-500/30'
+                                : 'border-bento-border'
                             }`}
                           >
+                            {isLatest && (
+                              <span className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-theme-500" />
+                            )}
                             <div className="mb-1 flex items-center justify-between gap-1 border-b border-bento-border pb-1">
                               <span
-                                className="truncate font-mono text-[10px] font-bold text-slate-300"
+                                className={`truncate font-mono text-[10px] font-bold ${
+                                  isLatest ? 'text-theme-400' : 'text-slate-300'
+                                }`}
                                 title={name}
                               >
                                 {name}

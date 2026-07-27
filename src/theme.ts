@@ -25,11 +25,18 @@ export type CampaignTheme =
   | 'indigo'
   | 'gold'
   // Temi animati: la palette scorre nel tempo (vedi @keyframes in index.css).
+  // Sono 11, in rapporto 1:1 con i colori pieni; ognuno ha un'animazione propria.
   | 'arcobaleno'
   | 'aurora'
   | 'tramonto'
   | 'oceano'
-  | 'magma';
+  | 'magma'
+  | 'veleno'
+  | 'spettro'
+  | 'brace'
+  | 'bosco'
+  | 'ghiaccio'
+  | 'cromia';
 
 export const DEFAULT_THEME: CampaignTheme = 'crimson';
 
@@ -70,13 +77,20 @@ export const THEMES: ThemeDefinition[] = [
   // Giallo pieno, spostato verso il limone: distinto dall'arancio dell'Oste.
   { id: 'gold', label: 'Paladino', swatch: '#facc15', accent: '#facc15' },
 
-  // Temi animati — un set a parte, su una seconda riga nel selettore. Lo swatch
-  // è un gradiente animato; il colore qui sotto serve solo alle particelle.
+  // Temi animati — un set a parte, su una riga a sé nel selettore, in numero
+  // pari ai colori pieni (11). Lo swatch è un gradiente animato; il colore qui
+  // sotto è solo il fermo-immagine per le particelle su canvas.
   { id: 'arcobaleno', label: 'Arcobaleno', swatch: '#a855f7', accent: '#a855f7', animated: true },
   { id: 'aurora', label: 'Aurora', swatch: '#22d3ee', accent: '#22d3ee', animated: true },
   { id: 'tramonto', label: 'Tramonto', swatch: '#fb7185', accent: '#fb7185', animated: true },
   { id: 'oceano', label: 'Oceano', swatch: '#38bdf8', accent: '#38bdf8', animated: true },
   { id: 'magma', label: 'Magma', swatch: '#f97316', accent: '#f97316', animated: true },
+  { id: 'veleno', label: 'Veleno', swatch: '#84cc16', accent: '#84cc16', animated: true },
+  { id: 'spettro', label: 'Spettro', swatch: '#8b5cf6', accent: '#8b5cf6', animated: true },
+  { id: 'brace', label: 'Brace', swatch: '#f97316', accent: '#ef4444', animated: true },
+  { id: 'bosco', label: 'Bosco', swatch: '#22c55e', accent: '#16a34a', animated: true },
+  { id: 'ghiaccio', label: 'Ghiaccio', swatch: '#7dd3fc', accent: '#38bdf8', animated: true },
+  { id: 'cromia', label: 'Cromia', swatch: '#ec4899', accent: '#a855f7', animated: true },
 ];
 
 /** Solo i temi a colore pieno: prima riga di swatch e default sicuri. */
@@ -99,8 +113,10 @@ export type CampaignStyle =
   | 'neon'
   | 'ferro'
   | 'ombra'
-  | 'cristallo'
-  | 'taverna';
+  | 'fumetto'
+  | 'taverna'
+  | 'olografico'
+  | 'nebbia';
 
 export const DEFAULT_STYLE: CampaignStyle = 'grimorio';
 
@@ -124,17 +140,26 @@ export const STYLES: StyleDefinition[] = [
   { id: 'pergamena', label: 'Pergamena', hint: 'Carta antica, sepia, serif caldo' },
   { id: 'neon', label: 'Neon', hint: 'Contorni luminosi, griglia, sci-fi' },
   { id: 'ferro', label: 'Ferro', hint: 'Acciaio, smussi, condensato industriale' },
-  { id: 'ombra', label: 'Ombra', hint: 'Nero pieno, contrasto forte, serif gotico' },
-  { id: 'cristallo', label: 'Cristallo', hint: 'Chiaro, vetro ghiacciato, nitido' },
-  { id: 'taverna', label: 'Taverna', hint: 'Legno scuro, cuoio, ottone caldo' },
+  // Ultimi tre, rielaborati per avere personalità netta e non somigliarsi.
+  { id: 'ombra', label: 'Ombra', hint: 'Cattedrale nera, oro cesellato, alone del tema' },
+  { id: 'fumetto', label: 'Fumetto', hint: 'Contorni d’inchiostro, retino, ombre nette' },
+  { id: 'taverna', label: 'Taverna', hint: 'Assi di legno, borchie d’ottone, cuoio' },
+  // Due design nuovi, tutti giocati sulla trasparenza, sulla scia di Arcano.
+  { id: 'olografico', label: 'Olografico', hint: 'Vetro iridescente, riflessi cangianti' },
+  { id: 'nebbia', label: 'Nebbia', hint: 'Foschia chiara, vetri smerigliati e soffici' },
 ];
 
 /**
  * Design su fondo chiaro: il marchio dorato non si legge e va usato quello nero.
- * White, Pergamena e Cristallo sono i tre design chiari.
+ * Sono White, Pergamena, Fumetto (carta bianca) e Nebbia (foschia chiara).
  */
 export function isLightStyle(style: CampaignStyle): boolean {
-  return style === 'white' || style === 'pergamena' || style === 'cristallo';
+  return (
+    style === 'white' ||
+    style === 'pergamena' ||
+    style === 'fumetto' ||
+    style === 'nebbia'
+  );
 }
 
 /**

@@ -36,7 +36,19 @@ describe('temi di colore', () => {
 
   it('include il set animato, marcato come tale', () => {
     const ids = ANIMATED_THEMES.map((t) => t.id);
-    expect(ids).toEqual(['arcobaleno', 'aurora', 'tramonto', 'oceano', 'magma']);
+    expect(ids).toEqual([
+      'arcobaleno',
+      'aurora',
+      'tramonto',
+      'oceano',
+      'magma',
+      'veleno',
+      'spettro',
+      'brace',
+      'bosco',
+      'ghiaccio',
+      'cromia',
+    ]);
     for (const def of ANIMATED_THEMES) {
       expect(def.animated).toBe(true);
       expect(normalizeTheme(def.id)).toBe(def.id);
@@ -44,6 +56,11 @@ describe('temi di colore', () => {
     // Le due liste partizionano THEMES: pieni + animati = tutto, senza overlap.
     expect(SOLID_THEMES.length + ANIMATED_THEMES.length).toBe(THEMES.length);
     expect(SOLID_THEMES.every((t) => !t.animated)).toBe(true);
+  });
+
+  // Requisito V5: gli animati sono in rapporto 1:1 con i colori pieni.
+  it('ha tanti temi animati quanti colori pieni', () => {
+    expect(ANIMATED_THEMES.length).toBe(SOLID_THEMES.length);
   });
 
   /**
@@ -75,18 +92,26 @@ describe('design', () => {
   });
 
   it('include i design nuovi', () => {
-    for (const id of ['pergamena', 'neon', 'ferro', 'ombra', 'cristallo', 'taverna']) {
+    for (const id of ['pergamena', 'neon', 'ferro', 'ombra', 'fumetto', 'taverna', 'olografico', 'nebbia']) {
       expect(STYLES.some((s) => s.id === id)).toBe(true);
       expect(normalizeStyle(id)).toBe(id);
     }
   });
 
+  // 'cristallo' è stato sostituito da 'fumetto': i vecchi salvataggi ricadono
+  // sul predefinito invece di rompersi.
+  it('fa ricadere il design cristallo, ora rimosso, sul predefinito', () => {
+    expect(normalizeStyle('cristallo')).toBe(DEFAULT_STYLE);
+    // `id` non contiene più 'cristallo' nel tipo: confronto via stringa.
+    expect(STYLES.some((s) => (s.id as string) === 'cristallo')).toBe(false);
+  });
+
   /**
-   * Solo i design su fondo chiaro impongono il marchio nero: White, Pergamena
-   * e Cristallo. Ombra e Taverna sono scuri, nonostante siano nuovi.
+   * Solo i design su fondo chiaro impongono il marchio nero: White, Pergamena,
+   * Fumetto (carta) e Nebbia (foschia). Ombra, Taverna e Olografico sono scuri.
    */
-  it('segna come chiari solo White, Pergamena e Cristallo', () => {
-    for (const light of ['white', 'pergamena', 'cristallo'] as const) {
+  it('segna come chiari solo i design su fondo chiaro', () => {
+    for (const light of ['white', 'pergamena', 'fumetto', 'nebbia'] as const) {
       expect(isLightStyle(light)).toBe(true);
     }
     for (const dark of [
@@ -98,6 +123,7 @@ describe('design', () => {
       'ferro',
       'ombra',
       'taverna',
+      'olografico',
     ] as const) {
       expect(isLightStyle(dark)).toBe(false);
     }
