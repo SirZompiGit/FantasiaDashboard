@@ -38,7 +38,7 @@ import {
   clampMaxHp,
 } from '../lib/healthBars';
 import { DEFAULT_STAT, DEFAULT_STAT_LABELS, STAT_COUNT, clampStat } from '../lib/stats';
-import { normalizeBarStyle, normalizeLogoVariant, normalizeStyle, normalizeTheme } from '../theme';
+import { normalizeLogoVariant, normalizeStyle, normalizeTheme } from '../theme';
 import { DEFAULT_DICE_LABELS, createEmptyCampaign } from './defaults';
 
 export const SCHEMA_VERSION = 2;
@@ -294,7 +294,6 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     activePlayerId: players.some((p) => p.id === activePlayerId) ? activePlayerId : null,
     theme: normalizeTheme(raw.theme),
     style: normalizeStyle(raw.style),
-    barStyle: normalizeBarStyle(raw.barStyle),
     logoVariant: normalizeLogoVariant(raw.logoVariant),
     healthGroups,
     diceLabels: asStringList(raw.diceLabels, DEFAULT_DICE_LABELS),

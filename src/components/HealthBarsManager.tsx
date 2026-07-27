@@ -16,7 +16,6 @@
 
 import { useState } from 'react';
 import type { HealthBar } from '../types';
-import type { BarStyle } from '../theme';
 import type { CampaignAction } from '../state/campaignReducer';
 import {
   Check,
@@ -44,7 +43,6 @@ interface HealthBarsManagerProps {
   healthGroups: string[];
   dispatch: React.Dispatch<CampaignAction>;
   compactBars: boolean;
-  barStyle: BarStyle;
 }
 
 export function HealthBarsManager({
@@ -52,7 +50,6 @@ export function HealthBarsManager({
   healthGroups,
   dispatch,
   compactBars,
-  barStyle,
 }: HealthBarsManagerProps) {
   const { notifyUndo } = useToasts();
 
@@ -130,7 +127,6 @@ export function HealthBarsManager({
       }}
       onDelete={handleDeleteBar}
       compact={compactBars}
-      barStyle={barStyle}
       reorder={{
         onMoveUp: () => dispatch({ type: 'MOVE_HEALTH_BAR', id: bar.id, direction: 'up' }),
         onMoveDown: () => dispatch({ type: 'MOVE_HEALTH_BAR', id: bar.id, direction: 'down' }),
