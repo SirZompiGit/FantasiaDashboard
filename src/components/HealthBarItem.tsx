@@ -112,27 +112,35 @@ const PARTICLE_MERGE_WINDOW = 450;
  * classi dal testo sorgente, quindi una stringa composta a runtime non
  * genererebbe alcun CSS.
  */
+/**
+ * Larghezza della scheda verticale, per numero di colonne sottili accanto alla
+ * barra principale. Dimensionata così: barra principale spessa (VERTICAL_MAIN)
+ * + N tracce sottili (VERTICAL_THIN) + i divari + spazio per il nome ruotato.
+ */
 const VERTICAL_SIZE = [
-  'h-[150px] w-[50px] sm:h-[190px] sm:w-[54px] lg:h-[230px] lg:w-[58px] xl:h-[270px]',
-  'h-[150px] w-[70px] sm:h-[190px] sm:w-[74px] lg:h-[230px] lg:w-[78px] xl:h-[270px]',
-  'h-[150px] w-[90px] sm:h-[190px] sm:w-[94px] lg:h-[230px] lg:w-[98px] xl:h-[270px]',
-  'h-[150px] w-[110px] sm:h-[190px] sm:w-[114px] lg:h-[230px] lg:w-[118px] xl:h-[270px]',
-  'h-[150px] w-[130px] sm:h-[190px] sm:w-[134px] lg:h-[230px] lg:w-[138px] xl:h-[270px]',
+  'h-[150px] w-[60px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[76px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[92px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[108px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[124px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
 ];
 
-/** Colonna che contiene le tracce, larga quanto basta per le risorse presenti. */
-const VERTICAL_COLUMN = [
-  'w-[24px] sm:w-[26px]',
-  'w-[44px] sm:w-[46px]',
-  'w-[64px] sm:w-[66px]',
-  'w-[84px] sm:w-[86px]',
-  'w-[104px] sm:w-[106px]',
-];
+/** Colonna che contiene le tracce: barra principale spessa + tracce sottili. */
+const VERTICAL_COLUMN = ['w-[28px]', 'w-[44px]', 'w-[60px]', 'w-[76px]', 'w-[92px]'];
 
 /**
- * Quante risorse affiancare alla barra in verticale. Oltre, la scheda
- * diventerebbe larghissima e sfonderebbe la colonna: le eccedenti si riassumono
- * in un "+N". In orizzontale, invece, restano tutte (sono righe che scorrono).
+ * La barra principale, spessa, riempie ciò che resta della colonna (~28px, in
+ * px come tutto il resto della scheda verticale, così regge lo zoom della
+ * condivisione); le risorse le stanno accanto sottili e fisse.
+ */
+const VERTICAL_MAIN = 'min-w-0 flex-1';
+const VERTICAL_THIN = 'w-[14px] shrink-0';
+
+/**
+ * Quante colonne sottili affiancare alla barra principale in verticale (risorse
+ * + eventuale pastiglia "+N"). Oltre, la scheda sfonderebbe: le risorse
+ * eccedenti si riassumono nel "+N". In orizzontale restano tutte (righe che
+ * scorrono).
  */
 const MAX_VERTICAL_RESOURCES = 4;
 
@@ -455,12 +463,18 @@ export function HealthBarItem({
   const resources = (bar.resources ?? []).filter(
     (resource) => !onlyShared || resource.shared,
   );
-  // In verticale si affiancano al massimo poche risorse: oltre, la scheda
-  // sfonderebbe. Le eccedenti diventano un "+N". In orizzontale restano tutte.
-  const shownResources = isVertical ? resources.slice(0, MAX_VERTICAL_RESOURCES) : resources;
+  // In verticale accanto alla barra principale stanno al massimo poche tracce
+  // sottili. Oltre il limite, le eccedenti si riassumono in un "+N", che però
+  // occupa comunque una colonna: quando c'è, lascia posto a una risorsa in meno.
+  const overflow = isVertical && resources.length > MAX_VERTICAL_RESOURCES;
+  const shownResources =
+    isVertical && overflow ? resources.slice(0, MAX_VERTICAL_RESOURCES - 1) : resources;
   const hiddenResourceCount = resources.length - shownResources.length;
-  // L'indice delle misure resta nei limiti degli array (0..len-1).
-  const verticalSlot = Math.min(shownResources.length, VERTICAL_SIZE.length - 1);
+  // Colonne sottili totali (risorse mostrate + eventuale "+N"): dà l'indice
+  // delle misure, sempre entro i limiti degli array.
+  const thinColumns =
+    (isVertical ? shownResources.length : 0) + (isVertical && hiddenResourceCount > 0 ? 1 : 0);
+  const verticalSlot = Math.min(thinColumns, VERTICAL_SIZE.length - 1);
   const statusEffects = (bar.statusEffects ?? []).filter(
     (effect) => !onlyShared || effect.shared,
   );
@@ -483,7 +497,7 @@ export function HealthBarItem({
       onChange={(value) => onChangeValue(bar, value)}
       label={`Punti ferita di ${bar.name}`}
       alert={inAlert}
-      className={isVertical ? 'min-w-0 flex-1' : 'w-full'}
+      className={isVertical ? VERTICAL_MAIN : 'w-full'}
       trackClassName={flashRing}
     />
   );
@@ -589,11 +603,11 @@ export function HealthBarItem({
               e nell'etichetta accessibile della traccia. */}
           <div className="relative flex min-h-0 w-full flex-1 justify-center gap-[2px]">
             {mainTrack}
-            {shownResources.map((resource) => resourceTrack(resource, 'w-[18px] shrink-0'))}
+            {shownResources.map((resource) => resourceTrack(resource, VERTICAL_THIN))}
             {/* Le risorse che non entrano di fianco si riassumono qui. */}
             {hiddenResourceCount > 0 && (
               <span
-                className="flex w-[18px] shrink-0 items-center justify-center rounded bg-bento-button font-mono text-[9px] font-bold text-slate-400"
+                className="flex w-[14px] shrink-0 items-center justify-center rounded bg-bento-button font-mono text-[8px] font-bold text-slate-400"
                 title={`Altre ${hiddenResourceCount} risorse (visibili nella vista orizzontale)`}
               >
                 +{hiddenResourceCount}
