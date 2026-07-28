@@ -147,12 +147,6 @@ const VERTICAL_THIN = 'w-[14px] shrink-0';
  */
 const MAX_VERTICAL_RESOURCES = 4;
 
-/**
- * Quante risorse per riga nel design circolare. Oltre, si va a capo: con dieci
- * risorse su una riga sola la scheda diventerebbe larghissima.
- */
-const CIRCULAR_COLUMNS = 4;
-
 /** Sigla di un effetto, per le targhette compatte: le prime due lettere. */
 const statusInitials = (name: string): string => name.trim().slice(0, 2).toUpperCase() || '•';
 
@@ -987,25 +981,21 @@ export function HealthBarItem({
           </div>
 
           {resources.length > 0 && (
-            <div
-              className="grid gap-x-4 gap-y-3"
-              // Le colonne sono tante quante le risorse, fino al tetto: con due
-              // risorse non restano tre buchi a destra.
-              style={{
-                gridTemplateColumns: `repeat(${Math.min(
-                  resources.length,
-                  CIRCULAR_COLUMNS,
-                )}, minmax(0, 1fr))`,
-              }}
-            >
+            // Flusso libero, non una griglia a colonne fisse: le risorse stanno
+            // tutte in fila finché c'è spazio — sfruttando la larghezza che la
+            // testata della scheda rende comunque disponibile — e vanno a capo
+            // da sole solo quando il pannello si stringe davvero.
+            <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
               {resources.map((resource) => (
                 <div key={resource.id} className="flex flex-col items-center gap-1">
                   <RadialBar
                     value={resource.currentValue}
                     max={resource.maxValue}
                     color={getBarColor(resource)}
-                    diameter="3.5rem"
-                    thickness="0.4rem"
+                    // Poco più della metà della vita: si leggono bene, ma la
+                    // gerarchia resta evidente a colpo d'occhio.
+                    diameter={compact ? '3.75rem' : '4.5rem'}
+                    thickness={compact ? '0.4rem' : '0.5rem'}
                     readOnly={readOnly || !onChangeResource}
                     onChange={
                       onChangeResource
@@ -1014,13 +1004,13 @@ export function HealthBarItem({
                     }
                     label={`${resource.name} di ${bar.name}`}
                     center={
-                      <span className="font-mono text-[11px] font-bold text-slate-200">
+                      <span className="font-mono text-sm font-bold text-slate-200">
                         {resource.currentValue}
                       </span>
                     }
                   />
                   <span
-                    className="max-w-[4.5rem] truncate font-mono text-[9px] font-bold uppercase tracking-wider text-slate-400"
+                    className="max-w-[5rem] truncate font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400"
                     title={`${resource.name}: ${resource.currentValue}/${resource.maxValue}`}
                   >
                     {resource.name}
