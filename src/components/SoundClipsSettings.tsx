@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { Music, Trash2 } from 'lucide-react';
 import type { SoundClip } from '../types';
-import { MAX_CLIP_NAME, MAX_SOUND_CLIPS, isPlayableUrl } from '../lib/soundClips';
+import { MAX_CLIP_NAME, MAX_SOUND_CLIPS, isPlayableUrl, probeAudio } from '../lib/soundClips';
 import { SettingsSection } from './ui/SettingsSection';
 
 interface SoundClipsSettingsProps {
@@ -33,14 +33,28 @@ export function SoundClipsSettings({
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const full = clips.length >= MAX_SOUND_CLIPS;
 
-  const submit = () => {
-    if (full) return;
+  const submit = async () => {
+    if (full || checking) return;
 
     if (!isPlayableUrl(url)) {
       setError('Serve un indirizzo diretto a un file audio (http, https o /file.mp3).');
+      return;
+    }
+
+    // Si prova ad aprire il file PRIMA di salvarlo: scoprire a metà partita che
+    // una clip non parte è il modo peggiore.
+    setChecking(true);
+    const playable = await probeAudio(url.trim());
+    setChecking(false);
+
+    if (!playable) {
+      setError(
+        'Il browser non riesce a riprodurre questo file. Spesso non dipende dal file ma dal servizio che lo ospita: alcuni (come catbox.moe) non dichiarano che si tratta di audio. Caricalo gratis su Tencent EdgeOne (pages.edgeone.ai/drop) e usa quel link.',
+      );
       return;
     }
 
@@ -138,7 +152,7 @@ export function SoundClipsSettings({
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  submit();
+                  void submit();
                 }
               }}
               placeholder="https://.../suono.mp3"
@@ -147,11 +161,11 @@ export function SoundClipsSettings({
             />
             <button
               type="button"
-              onClick={submit}
-              disabled={!url.trim()}
+              onClick={() => void submit()}
+              disabled={!url.trim() || checking}
               className="shrink-0 rounded-lg bg-theme-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors duration-200 hover:bg-theme-500 disabled:opacity-40"
             >
-              Aggiungi
+              {checking ? 'Provo...' : 'Aggiungi'}
             </button>
           </div>
 
@@ -162,10 +176,24 @@ export function SoundClipsSettings({
           )}
 
           <p className="text-[10px] leading-snug text-slate-500">
-            Serve il link <strong className="text-slate-400">diretto</strong> a un file audio.
-            Il più semplice è caricarlo su <span className="text-slate-400">catbox.moe</span>{' '}
-            (nessun account) e incollare qui l&apos;indirizzo che ti restituisce. Evita Google
-            Drive e Discord: i loro link non funzionano o scadono.
+            Serve il link <strong className="text-slate-400">diretto</strong> a un file{' '}
+            <strong className="text-slate-400">MP3</strong>. Per caricare gli audio gratis usa{' '}
+            <a
+              href="https://pages.edgeone.ai/drop"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-theme-400 underline decoration-theme-500/40 underline-offset-2 transition-colors duration-200 hover:text-theme-500"
+            >
+              Tencent EdgeOne
+            </a>
+            : trascini il file e ti dà subito l&apos;indirizzo, senza account.
+          </p>
+          <p className="text-[10px] leading-snug text-slate-600">
+            Non tutti i servizi vanno bene: <span className="text-slate-500">catbox.moe</span>{' '}
+            consegna i file senza dichiarare che sono audio, e il browser si rifiuta di
+            riprodurli. <span className="text-slate-500">Google Drive</span> non dà un vero link
+            diretto e i link di <span className="text-slate-500">Discord</span> scadono dopo
+            poche ore.
           </p>
         </div>
       )}

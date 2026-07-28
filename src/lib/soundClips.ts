@@ -82,6 +82,44 @@ export function clampClips(value: unknown): SoundClip[] | undefined {
 }
 
 /**
+ * Prova davvero a caricare l'audio prima di accettarlo.
+ *
+ * Un indirizzo può essere formalmente giusto e comunque inservibile: file in un
+ * formato che il browser non sa decodificare, link a una pagina invece che al
+ * file, risorsa irraggiungibile. Meglio scoprirlo subito, mentre si aggiunge la
+ * clip, che a metà sessione premendo il pulsante.
+ *
+ * Non scarica l'intero file: `preload="metadata"` chiede solo l'intestazione.
+ */
+export function probeAudio(url: string, timeoutMs = 8000): Promise<boolean> {
+  if (typeof Audio === 'undefined') return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    let settled = false;
+
+    const done = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      audio.onloadedmetadata = null;
+      audio.onerror = null;
+      // Ferma lo scaricamento: la verifica è finita.
+      audio.src = '';
+      resolve(ok);
+    };
+
+    const timer = window.setTimeout(() => done(false), timeoutMs);
+
+    audio.onloadedmetadata = () => done(true);
+    audio.onerror = () => done(false);
+
+    audio.preload = 'metadata';
+    audio.src = url;
+  });
+}
+
+/**
  * Lo stato di riproduzione condiviso.
  *
  * Vale solo se ha entrambi i campi: un `clipId` senza istante di partenza non
