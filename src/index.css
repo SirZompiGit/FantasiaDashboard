@@ -2082,50 +2082,25 @@ html.theme-transitions .border-bento-border {
   animation-delay: -1.8s;
 }
 
-/* Il campo stellare avanza verso l'osservatore accelerando: è metà del senso di
-   viaggio, l'altra metà la danno le scie. Parte già in corsa (delay negativi) e
-   NON si spegne quando compare il marchio: il cielo resta fino alla fine. */
+/**
+ * Il campo stellare avanza verso l'osservatore: è tutto il movimento della
+ * scena. Parte già in corsa (i ritardi negativi qui sopra), accelera, poi si
+ * POSA — decelera negli ultimi istanti e si ferma esattamente quando il marchio
+ * compare, al 64%. Da lì in poi resta immobile, ma non sparisce: il cielo
+ * accompagna il marchio fino alla fine.
+ *
+ * Fermarsi di colpo alla massima velocità sembrava un'inchiodata, per questo la
+ * corsa si chiude con una curva in uscita invece che con uno stacco.
+ */
 @keyframes intro-sky-breathe {
-  0% { transform: scale(1); opacity: 0.9; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4); }
-  64% { transform: scale(2.1); opacity: 1; animation-timing-function: linear; }
-  100% { transform: scale(3.1); opacity: 0.95; }
+  0% { transform: scale(1); opacity: 0.9; animation-timing-function: cubic-bezier(0.45, 0, 0.75, 0.5); }
+  48% { transform: scale(1.72); opacity: 1; animation-timing-function: cubic-bezier(0.25, 0.75, 0.35, 1); }
+  /* Arrivo del marchio: qui l'avanzamento è finito. */
+  64% { transform: scale(2.16); opacity: 1; }
+  /* Fermo, ma sempre presente. */
+  100% { transform: scale(2.16); opacity: 0.95; }
 }
 
-/* Le scie: nascono al centro e sfrecciano verso i bordi. Angolo, lunghezza e
-   tempi arrivano dal componente, così non ce ne sono due uguali e nessuna
-   resta ferma sullo schermo. */
-.intro-streak {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 1.5px;
-  height: var(--len, 10vmin);
-  margin-left: -0.75px;
-  border-radius: 9999px;
-  transform-origin: 50% 0%;
-  background: linear-gradient(to bottom, transparent 0%, rgb(255 255 255 / 0.92) 100%);
-  /* Invisibile finché la sua animazione non comincia: senza, le scie in attesa
-     restavano disegnate nella posizione di partenza — tutte impilate al centro,
-     verticali e immobili. Era la "riga bianca in mezzo allo schermo". */
-  opacity: 0;
-  animation-name: intro-streak-fly;
-  /* Moto da scoppio: schizza fuori e poi decelera. L'accelerazione progressiva
-     serviva al viaggio, qui darebbe l'effetto opposto. */
-  animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
-  /* `both`, non `forwards`: applica il fotogramma iniziale anche PRIMA di
-     partire, non solo quello finale dopo. */
-  animation-fill-mode: both;
-}
-
-/* Nasce nel punto esatto in cui compare il marchio e si allunga sfuggendo
-   verso il bordo. Restare invisibile prima di partire è ciò che evita la riga
-   ferma al centro (vedi `animation-fill-mode` qui sopra). */
-@keyframes intro-streak-fly {
-  0% { transform: rotate(var(--a)) translateY(0) scaleY(0.12); opacity: 0; }
-  6% { opacity: 1; }
-  70% { opacity: 0.85; }
-  100% { transform: rotate(var(--a)) translateY(96vmin) scaleY(1.6); opacity: 0; }
-}
 
 /* --- L'alone dell'accensione ---------------------------------------------
    Sta dietro il marchio e cresce insieme a lui: al picco è un bagliore d'oro
@@ -2235,13 +2210,9 @@ html.theme-transitions .border-bento-border {
   50% { opacity: 1; }
 }
 
-/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente viaggio
-   fra le stelle, solo il marchio che appare al momento giusto. */
+/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: nessun
+   avanzamento fra le stelle, solo il marchio che appare al momento giusto. */
 @media (prefers-reduced-motion: reduce) {
-  .intro-streak {
-    display: none;
-  }
-
   .intro-stars {
     animation: none;
     opacity: 0.85;
