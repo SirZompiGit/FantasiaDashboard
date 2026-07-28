@@ -15,7 +15,7 @@
  * Le durate qui e i keyframes `intro-*` in index.css devono restare allineati.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getMuted } from '../utils/audio';
 
 /**
@@ -38,6 +38,35 @@ const FADE_OUT = 500;
 
 /** Passo della dissolvenza del volume, quando si salta a musica avviata. */
 const VOLUME_FADE_STEP = 40;
+
+/** Momento della rivelazione, in frazione del brano: l'ottavo dei quattordici. */
+const REVEAL_RATIO = 0.571;
+
+/** Quante scie compongono l'iperguida. */
+const STREAK_COUNT = 26;
+
+/**
+ * Le scie del vortice.
+ *
+ * Gli angoli avanzano di 137,5° — l'angolo aureo, lo stesso con cui le piante
+ * dispongono le foglie — così non si allineano mai fra loro e l'occhio non
+ * riconosce alcun motivo che si ripete. I ritardi crescono con una potenza,
+ * non in modo lineare: le scie si infittiscono via via, e insieme diventano
+ * più rapide. È da qui che nasce il crescendo, senza nessun ciclo.
+ */
+function buildStreaks(durationMs: number) {
+  const window = (durationMs * REVEAL_RATIO) / 1000;
+
+  return Array.from({ length: STREAK_COUNT }, (_, index) => {
+    const progress = index / STREAK_COUNT;
+    return {
+      angle: (index * 137.5) % 360,
+      delay: window * Math.pow(progress, 1.7),
+      // Da lente a rapide: l'iperguida stringe man mano.
+      duration: 2.5 - progress * 1.2,
+    };
+  });
+}
 
 interface IntroSequenceProps {
   /** Chiamata a intro conclusa o saltata: scopre la schermata iniziale. */
@@ -112,6 +141,9 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
    * è in `preload`), quindi l'animazione parte già con il tempo giusto e non
    * subisce riallineamenti a metà corsa.
    */
+  /** Ricalcolate solo se cambia la durata del brano. */
+  const streaks = useMemo(() => buildStreaks(duration), [duration]);
+
   const handleMetadata = useCallback(() => {
     const value = audioRef.current?.duration;
     if (typeof value === 'number' && Number.isFinite(value) && value > 1) {
@@ -159,13 +191,18 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-stars intro-stars--far" />
 
           <div className="intro-vortex">
-            {/* Gli scarti di partenza distribuiscono gli anelli lungo il
-                tunnel: senza, arriverebbero tutti insieme a ondate. */}
-            {[0, 1, 2, 3, 4].map((index) => (
+            <div className="intro-swirl" />
+            {streaks.map((streak, index) => (
               <span
                 key={index}
-                className="intro-ring"
-                style={{ animationDelay: `${index * 0.56}s` }}
+                className="intro-streak"
+                style={
+                  {
+                    '--a': `${streak.angle}deg`,
+                    animationDelay: `${streak.delay}s`,
+                    animationDuration: `${streak.duration}s`,
+                  } as React.CSSProperties
+                }
               />
             ))}
           </div>

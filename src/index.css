@@ -2025,7 +2025,8 @@ html.theme-transitions .border-bento-border {
     radial-gradient(1px 1px at 35% 12%, rgb(255 255 255 / 0.6), transparent),
     radial-gradient(1px 1px at 92% 38%, rgb(255 255 255 / 0.7), transparent);
   background-size: 55% 55%;
-  animation: intro-stars-drift var(--intro-duration, 14s) cubic-bezier(0.4, 0, 0.7, 1) forwards;
+  /* Accelerazione continua: il campo stellare non deve "respirare" a tappe. */
+  animation: intro-stars-drift var(--intro-duration, 14s) cubic-bezier(0.5, 0, 0.85, 0.4) forwards;
 }
 
 /* Livello lontano: più piccolo, più lento, appena tinto dal tema. */
@@ -2039,63 +2040,97 @@ html.theme-transitions .border-bento-border {
 
 @keyframes intro-stars-drift {
   0% { transform: scale(1) rotate(0deg); opacity: 0; }
-  14% { opacity: 0.5; }
-  57% { opacity: 0.85; }
-  86% { opacity: 0.5; }
-  100% { transform: scale(2.1) rotate(6deg); opacity: 0.15; }
+  12% { opacity: 0.5; }
+  57% { transform: scale(2.4) rotate(9deg); opacity: 0.9; animation-timing-function: ease-out; }
+  100% { transform: scale(3) rotate(12deg); opacity: 0.12; }
 }
 
-/* --- Il vortice: anelli concentrici che arrivano addosso --- */
+/* --- Il vortice --------------------------------------------------------------
+   Niente anelli in ciclo: si riconosceva il loop e sembrava un motivo che
+   girava a vuoto. Qui ci sono due cose sole, entrambe in UNA passata:
+
+     .intro-swirl   la nebulosa conica che ruota accelerando di continuo
+     .intro-streak  scie che sfrecciano dal centro verso i bordi, come stelle
+                    in iperguida — angoli mai ripetuti, densità crescente
+
+   Tutto accelera fino alla rivelazione e poi si placa: nessuno scatto, nessuna
+   ripetizione riconoscibile. -------------------------------------------------- */
 
 .intro-vortex {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* Il vortice si placa dopo la rivelazione, non sparisce di colpo. */
-  animation: intro-vortex-calm var(--intro-duration, 14s) ease-out forwards;
+  /* Spinta di camera: la scena si avvicina sempre più in fretta. */
+  animation: intro-vortex-push var(--intro-duration, 14s) cubic-bezier(0.5, 0, 0.85, 0.4) forwards;
 }
 
-@keyframes intro-vortex-calm {
-  0% { opacity: 0; }
-  16% { opacity: 1; }
-  57% { opacity: 1; }
-  80% { opacity: 0.35; }
-  100% { opacity: 0; }
+@keyframes intro-vortex-push {
+  0% { transform: scale(0.85); opacity: 0; }
+  12% { opacity: 1; }
+  57% { transform: scale(1.25); opacity: 1; animation-timing-function: ease-out; }
+  82% { transform: scale(1.32); opacity: 0.25; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 
-.intro-ring {
+/* Nebulosa che gira: un solo giro lungo che accelera, mai un ciclo ripetuto. */
+.intro-swirl {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 34vmin;
-  height: 34vmin;
-  margin: -17vmin 0 0 -17vmin;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
   border-radius: 9999px;
-  /* Il bordo è un arco di nebulosa: il conic-gradient rende visibile la
-     rotazione, che su un cerchio pieno non si noterebbe affatto. */
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    color-mix(in oklab, var(--theme-400) 85%, transparent) 55deg,
-    transparent 130deg,
-    color-mix(in oklab, var(--theme-500) 70%, transparent) 210deg,
-    transparent 285deg,
-    color-mix(in oklab, var(--theme-400) 45%, transparent) 330deg,
-    transparent 360deg
+    color-mix(in oklab, var(--theme-500) 30%, transparent) 40deg,
+    transparent 95deg,
+    color-mix(in oklab, var(--theme-400) 22%, transparent) 165deg,
+    transparent 225deg,
+    color-mix(in oklab, var(--theme-500) 26%, transparent) 290deg,
+    transparent 350deg
   );
-  /* Solo la corona circolare: il centro resta vuoto (stesso trucco delle
-     barre ad anello). */
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-  filter: blur(0.6px);
-  animation: intro-ring-fly 2.8s linear infinite;
+  /* Il centro resta libero: è lì che arriva il marchio. */
+  -webkit-mask: radial-gradient(circle, transparent 0%, #000 22%, #000 55%, transparent 78%);
+  mask: radial-gradient(circle, transparent 0%, #000 22%, #000 55%, transparent 78%);
+  filter: blur(1.5vmin);
+  animation: intro-swirl-spin var(--intro-duration, 14s) cubic-bezier(0.45, 0, 0.9, 0.45) forwards;
 }
 
-@keyframes intro-ring-fly {
-  0% { transform: scale(0.06) rotate(0deg); opacity: 0; }
-  12% { opacity: 0.95; }
-  70% { opacity: 0.5; }
-  100% { transform: scale(3) rotate(170deg); opacity: 0; }
+@keyframes intro-swirl-spin {
+  0% { transform: rotate(0deg) scale(0.35); opacity: 0; }
+  10% { opacity: 0.55; }
+  57% { transform: rotate(520deg) scale(1); opacity: 0.85; animation-timing-function: ease-out; }
+  100% { transform: rotate(650deg) scale(1.3); opacity: 0; }
+}
+
+/* Scia singola: nasce al centro e fugge verso il bordo. L'angolo e i tempi
+   arrivano dal componente, così non ci sono due scie uguali. */
+.intro-streak {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 14vmin;
+  margin-left: -1px;
+  border-radius: 9999px;
+  transform-origin: 50% 0%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in oklab, var(--theme-400) 90%, transparent) 45%,
+    rgb(255 255 255 / 0.85) 100%
+  );
+  animation-name: intro-streak-fly;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.5);
+  animation-fill-mode: forwards;
+}
+
+@keyframes intro-streak-fly {
+  0% { transform: rotate(var(--a)) translateY(1vmin) scaleY(0.25); opacity: 0; }
+  18% { opacity: 0.9; }
+  100% { transform: rotate(var(--a)) translateY(78vmin) scaleY(1.8); opacity: 0; }
 }
 
 /* Scintilla lontana dei primi secondi: il punto da cui nasce il tunnel. */
@@ -2117,13 +2152,12 @@ html.theme-transitions .border-bento-border {
   animation: intro-spark-pulse var(--intro-duration, 14s) ease-out forwards;
 }
 
+/* Cresce insieme a tutto il resto e si spegne nel lampo della rivelazione. */
 @keyframes intro-spark-pulse {
-  0% { transform: scale(0.15); opacity: 0; }
-  8% { opacity: 0.95; }
-  30% { transform: scale(0.5); opacity: 0.55; }
-  50% { opacity: 0.25; }
-  57% { opacity: 0; }
-  100% { opacity: 0; }
+  0% { transform: scale(0.12); opacity: 0; animation-timing-function: ease-out; }
+  8% { transform: scale(0.2); opacity: 0.9; animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35); }
+  57% { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
 /* --- Il marchio: arriva dal fondo del vortice --- */
@@ -2136,19 +2170,43 @@ html.theme-transitions .border-bento-border {
   user-select: none;
   pointer-events: none;
   transform-origin: center;
-  animation: intro-logo-arrive var(--intro-duration, 14s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: intro-logo-arrive var(--intro-duration, 14s) linear forwards;
 }
 
-/* 57% = ottavo secondo: è lì che il marchio si rivela per intero. */
+/**
+ * 57% = ottavo secondo: è lì che il marchio si rivela per intero.
+ *
+ * I passaggi intermedi sono spariti apposta. Prima c'erano quattro tappe, e
+ * con un easing "ease-out" su ognuna il marchio rallentava a ogni tappa: si
+ * vedevano tre scatti invece di un avvicinamento. Ora dal 6% al 57% c'è UN
+ * SOLO segmento con accelerazione continua (`cubic-bezier` di tipo ease-in):
+ * il logo parte lentissimo, prende velocità e arriva addosso di slancio.
+ */
 @keyframes intro-logo-arrive {
-  0% { transform: scale(0.14); opacity: 0; filter: blur(18px); }
-  14% { opacity: 0.14; }
-  38% { transform: scale(0.32); opacity: 0.3; filter: blur(11px); }
-  50% { transform: scale(0.55); opacity: 0.6; filter: blur(6px); }
-  57% { transform: scale(1.07); opacity: 1; filter: blur(0); }
-  63% { transform: scale(1); opacity: 1; filter: blur(0); }
+  0% {
+    transform: scale(0.08);
+    opacity: 0;
+    filter: blur(22px);
+    animation-timing-function: ease-out;
+  }
+  /* Emerge appena dal buio, ancora quasi immobile. */
+  6% {
+    transform: scale(0.1);
+    opacity: 0.16;
+    filter: blur(20px);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35);
+  }
+  /* Un unico slancio, sempre più veloce, fino alla rivelazione. */
+  57% {
+    transform: scale(1.08);
+    opacity: 1;
+    filter: blur(0);
+    animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  /* Assestamento morbido dopo l'impatto. */
+  64% { transform: scale(1); opacity: 1; filter: blur(0); }
   88% { transform: scale(1); opacity: 1; filter: blur(0); }
-  100% { transform: scale(1.05); opacity: 0.85; filter: blur(0); }
+  100% { transform: scale(1.04); opacity: 0.9; filter: blur(0); }
 }
 
 /* --- Il momento della rivelazione: lampo e onda d'urto --- */
@@ -2209,6 +2267,8 @@ html.theme-transitions .border-bento-border {
 @media (prefers-reduced-motion: reduce) {
   .intro-stars,
   .intro-vortex,
+  .intro-swirl,
+  .intro-streak,
   .intro-spark,
   .intro-shock,
   .intro-flash {
