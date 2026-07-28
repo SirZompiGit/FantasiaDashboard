@@ -2021,20 +2021,31 @@ html.theme-transitions .border-bento-border {
 }
 
 /* --- Il cielo -------------------------------------------------------------
-   Tre livelli di stelle: fitte e minute sul fondo, più rade e luminose in
-   primo piano. Si muovono pochissimo — la scena è contemplativa, non un
-   viaggio a tutta velocità — e respirano appena. ------------------------- */
+   Tre livelli di stelle: minute e fittissime sul fondo, più rade e luminose in
+   primo piano. Avanzano insieme verso l'osservatore e si fermano insieme,
+   quando il marchio compare.
+
+   NESSUN `animation-delay`: prima i tre livelli ne avevano di diversi (-2,4s,
+   -3,6s, -1,8s) e questo sfasava le loro timeline, così ognuno arrivava al
+   proprio punto d'arresto in un momento diverso — sembravano due o tre cieli
+   che si fermavano uno dopo l'altro. Ora condividono la stessa timeline: la
+   parallasse la dà QUANTO percorrono (`--sky-to`), non QUANDO partono.
+   -------------------------------------------------------------------------- */
 
 .intro-stars {
   position: absolute;
   inset: -30%;
   pointer-events: none;
+  /* Punto di partenza e di arrivo della corsa, per la profondità. */
+  --sky-from: 1.3;
+  --sky-to: 2.6;
+  animation: intro-sky-drift var(--intro-duration, 14s) both;
 }
 
-/* I `animation-delay` negativi fanno trovare il campo stellare già in corsa al
-   primo fotogramma: senza, si vedeva partire da fermo. */
-
 .intro-stars--near {
+  /* Il primo piano corre di più: è la parallasse. */
+  --sky-from: 1.36;
+  --sky-to: 3.05;
   background-image:
     radial-gradient(1.7px 1.7px at 18% 24%, rgb(255 255 255 / 0.95), transparent),
     radial-gradient(1.5px 1.5px at 72% 16%, rgb(255 255 255 / 0.85), transparent),
@@ -2045,11 +2056,11 @@ html.theme-transitions .border-bento-border {
     radial-gradient(1.3px 1.3px at 30% 91%, rgb(255 255 255 / 0.78), transparent),
     radial-gradient(1.6px 1.6px at 78% 47%, rgb(255 255 255 / 0.86), transparent);
   background-size: 33% 33%;
-  animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
-  animation-delay: -2.4s;
 }
 
 .intro-stars--mid {
+  --sky-from: 1.28;
+  --sky-to: 2.6;
   background-image:
     radial-gradient(1.2px 1.2px at 33% 12%, rgb(255 255 255 / 0.8), transparent),
     radial-gradient(1px 1px at 61% 39%, rgb(255 255 255 / 0.75), transparent),
@@ -2062,11 +2073,12 @@ html.theme-transitions .border-bento-border {
     radial-gradient(1px 1px at 94% 18%, rgb(255 255 255 / 0.68), transparent);
   background-size: 19% 19%;
   opacity: 0.9;
-  animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
-  animation-delay: -3.6s;
 }
 
 .intro-stars--far {
+  /* Il fondo si muove appena: è lontanissimo. */
+  --sky-from: 1.2;
+  --sky-to: 2.15;
   background-image:
     radial-gradient(0.9px 0.9px at 25% 45%, rgb(255 255 255 / 0.65), transparent),
     radial-gradient(0.8px 0.8px at 67% 22%, rgb(255 255 255 / 0.6), transparent),
@@ -2078,27 +2090,30 @@ html.theme-transitions .border-bento-border {
   background-size: 11% 11%;
   opacity: 0.75;
   filter: blur(0.2px);
-  animation: intro-sky-breathe var(--intro-duration, 14s) linear forwards;
-  animation-delay: -1.8s;
 }
 
 /**
- * Il campo stellare avanza verso l'osservatore: è tutto il movimento della
- * scena. Parte già in corsa (i ritardi negativi qui sopra), accelera, poi si
- * POSA — decelera negli ultimi istanti e si ferma esattamente quando il marchio
- * compare, al 64%. Da lì in poi resta immobile, ma non sparisce: il cielo
- * accompagna il marchio fino alla fine.
+ * L'avanzamento fra le stelle: è tutto il movimento della scena.
  *
- * Fermarsi di colpo alla massima velocità sembrava un'inchiodata, per questo la
- * corsa si chiude con una curva in uscita invece che con uno stacco.
+ * Una curva sola dall'inizio al 64% — nessun keyframe intermedio, quindi
+ * nessuno scatto. La curva parte con pendenza alta (al primo fotogramma il
+ * cielo è GIÀ in corsa, senza bisogno di ritardi negativi che sfasavano i
+ * livelli) e arriva con pendenza quasi nulla: la corsa si spegne da sé, in
+ * modo graduale, proprio quando il marchio compare.
+ *
+ * Dal 64% in poi i valori non cambiano più: il cielo è fermo ma resta lì, e
+ * tutti e tre i livelli si fermano nello stesso istante.
  */
-@keyframes intro-sky-breathe {
-  0% { transform: scale(1); opacity: 0.9; animation-timing-function: cubic-bezier(0.45, 0, 0.75, 0.5); }
-  48% { transform: scale(1.72); opacity: 1; animation-timing-function: cubic-bezier(0.25, 0.75, 0.35, 1); }
-  /* Arrivo del marchio: qui l'avanzamento è finito. */
-  64% { transform: scale(2.16); opacity: 1; }
+@keyframes intro-sky-drift {
+  0% {
+    transform: scale(var(--sky-from, 1.3));
+    opacity: 0.9;
+    animation-timing-function: cubic-bezier(0.18, 0.62, 0.32, 1);
+  }
+  /* Nono secondo: l'avanzamento è finito. */
+  64% { transform: scale(var(--sky-to, 2.6)); opacity: 1; }
   /* Fermo, ma sempre presente. */
-  100% { transform: scale(2.16); opacity: 0.95; }
+  100% { transform: scale(var(--sky-to, 2.6)); opacity: 0.95; }
 }
 
 
