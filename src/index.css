@@ -1978,3 +1978,255 @@ html.theme-transitions .border-bento-border {
   );
   animation: skeleton-pulse 1.6s ease-in-out infinite;
 }
+
+/* --------------------------------------------------------------------------
+   7. Introduzione — "Vortice temporale"
+   Un tunnel di anelli che sfrecciano verso l'osservatore mentre il marchio
+   arriva dal fondo e si rivela all'OTTAVO secondo, sul culmine del brano
+   (`public/main_music.mp3`, 14 secondi). Le durate qui e le costanti in
+   IntroSequence.tsx devono restare allineate.
+
+   Il fondo è scuro fisso, non legato al design: il marchio è dorato e su
+   White o Pergamena sparirebbe. Gli accenti invece seguono il tema scelto.
+   -------------------------------------------------------------------------- */
+
+.intro-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  /* Centra il marchio: così la sua animazione muove solo scala, sfocatura e
+     opacità, senza doversi ricentrare a ogni fotogramma. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 100% at 50% 50%, #0a0d18 0%, #05060a 70%);
+  transition: opacity 500ms ease;
+}
+
+/* Uscita: vale sia per la fine naturale sia per il salto. */
+.intro-scene.is-leaving {
+  opacity: 0;
+}
+
+/* --- Campo stellare: due livelli a velocità diverse, per la profondità --- */
+
+.intro-stars {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 75% 15%, rgb(255 255 255 / 0.75), transparent),
+    radial-gradient(1px 1px at 45% 70%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 85% 65%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1px 1px at 12% 80%, rgb(255 255 255 / 0.65), transparent),
+    radial-gradient(1.5px 1.5px at 60% 45%, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(1px 1px at 35% 12%, rgb(255 255 255 / 0.6), transparent),
+    radial-gradient(1px 1px at 92% 38%, rgb(255 255 255 / 0.7), transparent);
+  background-size: 55% 55%;
+  animation: intro-stars-drift var(--intro-duration, 14s) cubic-bezier(0.4, 0, 0.7, 1) forwards;
+}
+
+/* Livello lontano: più piccolo, più lento, appena tinto dal tema. */
+.intro-stars--far {
+  background-size: 32% 32%;
+  opacity: 0.55;
+  filter: blur(0.4px);
+  animation-duration: var(--intro-duration, 14s);
+  animation-timing-function: linear;
+}
+
+@keyframes intro-stars-drift {
+  0% { transform: scale(1) rotate(0deg); opacity: 0; }
+  14% { opacity: 0.5; }
+  57% { opacity: 0.85; }
+  86% { opacity: 0.5; }
+  100% { transform: scale(2.1) rotate(6deg); opacity: 0.15; }
+}
+
+/* --- Il vortice: anelli concentrici che arrivano addosso --- */
+
+.intro-vortex {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Il vortice si placa dopo la rivelazione, non sparisce di colpo. */
+  animation: intro-vortex-calm var(--intro-duration, 14s) ease-out forwards;
+}
+
+@keyframes intro-vortex-calm {
+  0% { opacity: 0; }
+  16% { opacity: 1; }
+  57% { opacity: 1; }
+  80% { opacity: 0.35; }
+  100% { opacity: 0; }
+}
+
+.intro-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34vmin;
+  height: 34vmin;
+  margin: -17vmin 0 0 -17vmin;
+  border-radius: 9999px;
+  /* Il bordo è un arco di nebulosa: il conic-gradient rende visibile la
+     rotazione, che su un cerchio pieno non si noterebbe affatto. */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in oklab, var(--theme-400) 85%, transparent) 55deg,
+    transparent 130deg,
+    color-mix(in oklab, var(--theme-500) 70%, transparent) 210deg,
+    transparent 285deg,
+    color-mix(in oklab, var(--theme-400) 45%, transparent) 330deg,
+    transparent 360deg
+  );
+  /* Solo la corona circolare: il centro resta vuoto (stesso trucco delle
+     barre ad anello). */
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  filter: blur(0.6px);
+  animation: intro-ring-fly 2.8s linear infinite;
+}
+
+@keyframes intro-ring-fly {
+  0% { transform: scale(0.06) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.95; }
+  70% { opacity: 0.5; }
+  100% { transform: scale(3) rotate(170deg); opacity: 0; }
+}
+
+/* Scintilla lontana dei primi secondi: il punto da cui nasce il tunnel. */
+.intro-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8vmin;
+  height: 8vmin;
+  margin: -4vmin 0 0 -4vmin;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgb(255 255 255 / 0.9) 0%,
+    color-mix(in oklab, var(--theme-400) 70%, transparent) 35%,
+    transparent 70%
+  );
+  animation: intro-spark-pulse var(--intro-duration, 14s) ease-out forwards;
+}
+
+@keyframes intro-spark-pulse {
+  0% { transform: scale(0.15); opacity: 0; }
+  8% { opacity: 0.95; }
+  30% { transform: scale(0.5); opacity: 0.55; }
+  50% { opacity: 0.25; }
+  57% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* --- Il marchio: arriva dal fondo del vortice --- */
+
+.intro-logo {
+  position: relative;
+  z-index: 2;
+  width: min(62vw, 44rem);
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  transform-origin: center;
+  animation: intro-logo-arrive var(--intro-duration, 14s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 57% = ottavo secondo: è lì che il marchio si rivela per intero. */
+@keyframes intro-logo-arrive {
+  0% { transform: scale(0.14); opacity: 0; filter: blur(18px); }
+  14% { opacity: 0.14; }
+  38% { transform: scale(0.32); opacity: 0.3; filter: blur(11px); }
+  50% { transform: scale(0.55); opacity: 0.6; filter: blur(6px); }
+  57% { transform: scale(1.07); opacity: 1; filter: blur(0); }
+  63% { transform: scale(1); opacity: 1; filter: blur(0); }
+  88% { transform: scale(1); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1.05); opacity: 0.85; filter: blur(0); }
+}
+
+/* --- Il momento della rivelazione: lampo e onda d'urto --- */
+
+.intro-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(255 255 255 / 0.95) 0%,
+    color-mix(in oklab, var(--theme-400) 60%, transparent) 40%,
+    transparent 70%
+  );
+  animation: intro-flash var(--intro-duration, 14s) linear forwards;
+}
+
+@keyframes intro-flash {
+  0%, 54% { opacity: 0; }
+  57% { opacity: 0.9; }
+  66% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.intro-shock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40vmin;
+  height: 40vmin;
+  margin: -20vmin 0 0 -20vmin;
+  border-radius: 9999px;
+  pointer-events: none;
+  border: 2px solid color-mix(in oklab, var(--theme-400) 75%, transparent);
+  animation: intro-shock var(--intro-duration, 14s) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes intro-shock {
+  0%, 55% { transform: scale(0.15); opacity: 0; }
+  58% { opacity: 0.85; }
+  85% { transform: scale(3.4); opacity: 0; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+
+/* --- Invito iniziale e comando di salto --- */
+
+.intro-prompt-text {
+  animation: intro-prompt-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes intro-prompt-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente
+   tunnel, niente stelle in corsa, solo il marchio che si rivela. */
+@media (prefers-reduced-motion: reduce) {
+  .intro-stars,
+  .intro-vortex,
+  .intro-spark,
+  .intro-shock,
+  .intro-flash {
+    display: none;
+  }
+
+  .intro-logo {
+    animation: intro-logo-quiet var(--intro-duration, 14s) ease-out forwards;
+  }
+
+  @keyframes intro-logo-quiet {
+    0% { transform: scale(0.92); opacity: 0; }
+    57% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .intro-prompt-text {
+    animation: none;
+    opacity: 1;
+  }
+}

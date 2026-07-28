@@ -19,6 +19,7 @@ import { PlayerCards } from './components/PlayerCards';
 import { RoomPanel } from './components/RoomPanel';
 import { SharedView } from './components/SharedView';
 import { ShortcutsPanel } from './components/ShortcutsPanel';
+import { IntroSequence } from './components/IntroSequence';
 import { WelcomeScreen } from './components/WelcomeScreen';
 
 import { type CampaignBackup, restoreBackup, useCampaignState } from './hooks/useCampaignState';
@@ -34,6 +35,13 @@ type LocalMode = 'welcome' | 'lite';
 
 const MODE_KEY = 'fantasia_local_mode';
 const MUTED_KEY = 'fantasia_muted';
+
+/**
+ * L'introduzione si vede una volta per sessione del browser: ricaricare la
+ * pagina durante il gioco non la ripropone, riaprire il browser sì. Stesso
+ * meccanismo di `MODE_KEY`.
+ */
+const INTRO_KEY = 'fantasia_intro_seen';
 
 /** Legge i parametri di apertura come schermo condiviso. */
 function readSharedUrl(): { shared: boolean; pin: string | null } {
@@ -73,6 +81,13 @@ export default function App() {
     }
   });
   const [previewShared, setPreviewShared] = useState(false);
+  const [introDone, setIntroDone] = useState(() => {
+    try {
+      return sessionStorage.getItem(INTRO_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(() => {
     try {
@@ -463,6 +478,25 @@ export default function App() {
   // --- Scelta della modalità ------------------------------------------------
 
   const isMaster = room.session?.role === 'master';
+
+  // --- Introduzione ---------------------------------------------------------
+  // Sta qui e non più in alto apposta: i rami precedenti (schermo condiviso e
+  // giocatore già collegato) escono prima, quindi la proiezione non parte mai
+  // con musica e animazione, e chi è già in partita non le rivede.
+  if (!introDone && localMode === 'welcome' && !isMaster) {
+    return (
+      <IntroSequence
+        onFinish={() => {
+          setIntroDone(true);
+          try {
+            sessionStorage.setItem(INTRO_KEY, 'true');
+          } catch {
+            /* preferenza non essenziale: al più l'intro si rivede */
+          }
+        }}
+      />
+    );
+  }
 
   if (localMode === 'welcome' && !isMaster) {
     return (
