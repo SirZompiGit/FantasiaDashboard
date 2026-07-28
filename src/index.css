@@ -2031,15 +2031,22 @@ html.theme-transitions .border-bento-border {
   pointer-events: none;
 }
 
+/* I `animation-delay` negativi fanno trovare il campo stellare già in corsa al
+   primo fotogramma: senza, si vedeva partire da fermo. */
+
 .intro-stars--near {
   background-image:
     radial-gradient(1.7px 1.7px at 18% 24%, rgb(255 255 255 / 0.95), transparent),
     radial-gradient(1.5px 1.5px at 72% 16%, rgb(255 255 255 / 0.85), transparent),
     radial-gradient(1.6px 1.6px at 43% 68%, rgb(255 255 255 / 0.9), transparent),
     radial-gradient(1.4px 1.4px at 88% 62%, rgb(255 255 255 / 0.8), transparent),
-    radial-gradient(1.7px 1.7px at 9% 82%, rgb(255 255 255 / 0.88), transparent);
-  background-size: 42% 42%;
+    radial-gradient(1.7px 1.7px at 9% 82%, rgb(255 255 255 / 0.88), transparent),
+    radial-gradient(1.5px 1.5px at 58% 34%, rgb(255 255 255 / 0.82), transparent),
+    radial-gradient(1.3px 1.3px at 30% 91%, rgb(255 255 255 / 0.78), transparent),
+    radial-gradient(1.6px 1.6px at 78% 47%, rgb(255 255 255 / 0.86), transparent);
+  background-size: 33% 33%;
   animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
+  animation-delay: -2.4s;
 }
 
 .intro-stars--mid {
@@ -2048,11 +2055,15 @@ html.theme-transitions .border-bento-border {
     radial-gradient(1px 1px at 61% 39%, rgb(255 255 255 / 0.75), transparent),
     radial-gradient(1.2px 1.2px at 84% 77%, rgb(255 255 255 / 0.7), transparent),
     radial-gradient(1px 1px at 15% 55%, rgb(255 255 255 / 0.72), transparent),
-    radial-gradient(1.1px 1.1px at 50% 88%, rgb(255 255 255 / 0.78), transparent);
-  background-size: 26% 26%;
-  opacity: 0.85;
+    radial-gradient(1.1px 1.1px at 50% 88%, rgb(255 255 255 / 0.78), transparent),
+    radial-gradient(1.2px 1.2px at 8% 31%, rgb(255 255 255 / 0.74), transparent),
+    radial-gradient(1px 1px at 71% 64%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1.1px 1.1px at 41% 26%, rgb(255 255 255 / 0.76), transparent),
+    radial-gradient(1px 1px at 94% 18%, rgb(255 255 255 / 0.68), transparent);
+  background-size: 19% 19%;
+  opacity: 0.9;
   animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
-  animation-delay: -1.5s;
+  animation-delay: -3.6s;
 }
 
 .intro-stars--far {
@@ -2060,21 +2071,24 @@ html.theme-transitions .border-bento-border {
     radial-gradient(0.9px 0.9px at 25% 45%, rgb(255 255 255 / 0.65), transparent),
     radial-gradient(0.8px 0.8px at 67% 22%, rgb(255 255 255 / 0.6), transparent),
     radial-gradient(0.9px 0.9px at 46% 79%, rgb(255 255 255 / 0.62), transparent),
-    radial-gradient(0.8px 0.8px at 91% 51%, rgb(255 255 255 / 0.58), transparent);
-  background-size: 15% 15%;
-  opacity: 0.7;
+    radial-gradient(0.8px 0.8px at 91% 51%, rgb(255 255 255 / 0.58), transparent),
+    radial-gradient(0.9px 0.9px at 12% 14%, rgb(255 255 255 / 0.6), transparent),
+    radial-gradient(0.8px 0.8px at 57% 95%, rgb(255 255 255 / 0.56), transparent),
+    radial-gradient(0.9px 0.9px at 79% 68%, rgb(255 255 255 / 0.62), transparent);
+  background-size: 11% 11%;
+  opacity: 0.75;
   filter: blur(0.2px);
   animation: intro-sky-breathe var(--intro-duration, 14s) linear forwards;
+  animation-delay: -1.8s;
 }
 
-/* Il campo stellare avanza verso l'osservatore accelerando: è metà del senso
-   di viaggio, l'altra metà la danno le scie. */
+/* Il campo stellare avanza verso l'osservatore accelerando: è metà del senso di
+   viaggio, l'altra metà la danno le scie. Parte già in corsa (delay negativi) e
+   NON si spegne quando compare il marchio: il cielo resta fino alla fine. */
 @keyframes intro-sky-breathe {
-  0% { transform: scale(1); opacity: 0; animation-timing-function: ease-out; }
-  12% { transform: scale(1.08); opacity: 0.8; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4); }
-  64% { transform: scale(2.1); opacity: 1; animation-timing-function: ease-out; }
-  93% { transform: scale(2.5); opacity: 0.75; }
-  100% { transform: scale(2.55); opacity: 0.4; }
+  0% { transform: scale(1); opacity: 0.9; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4); }
+  64% { transform: scale(2.1); opacity: 1; animation-timing-function: linear; }
+  100% { transform: scale(3.1); opacity: 0.95; }
 }
 
 /* Le scie: nascono al centro e sfrecciano verso i bordi. Angolo, lunghezza e
@@ -2095,10 +2109,14 @@ html.theme-transitions .border-bento-border {
   animation-fill-mode: forwards;
 }
 
+/* La scia nasce GIÀ LONTANA dal centro e invisibile: partendo attaccata al
+   centro, quella diretta verso il basso restava lì per un attimo e si leggeva
+   come una riga bianca ferma in mezzo allo schermo. */
 @keyframes intro-streak-fly {
-  0% { transform: rotate(var(--a)) translateY(2vmin) scaleY(0.2); opacity: 0; }
-  20% { opacity: 0.9; }
-  100% { transform: rotate(var(--a)) translateY(88vmin) scaleY(1.8); opacity: 0; }
+  0% { transform: rotate(var(--a)) translateY(9vmin) scaleY(0.4); opacity: 0; }
+  14% { opacity: 0.9; }
+  88% { opacity: 0.75; }
+  100% { transform: rotate(var(--a)) translateY(96vmin) scaleY(1.7); opacity: 0; }
 }
 
 /* --- L'alone dell'accensione ---------------------------------------------
@@ -2123,18 +2141,17 @@ html.theme-transitions .border-bento-border {
   animation: intro-glow-swell var(--intro-duration, 14s) linear forwards;
 }
 
-/* Nasce e muore con il marchio: prima del nono secondo non esiste, dopo cala
-   con lui e si spegne nello stesso istante. */
+/* Nasce e muore con il marchio: prima del nono secondo non esiste, poi cala con
+   lui e si dissolve negli stessi istanti. */
 @keyframes intro-glow-swell {
   0% { transform: scale(0.6); opacity: 0; }
   60% { transform: scale(0.7); opacity: 0; animation-timing-function: cubic-bezier(0.2, 0.85, 0.3, 1); }
   /* Nono secondo: la vampata. */
   64% { transform: scale(1.5); opacity: 1; animation-timing-function: linear; }
-  /* Tredicesimo: la luce è ormai spenta... */
-  93% { transform: scale(0.85); opacity: 0.06; }
-  /* ...e sparisce di netto, insieme al marchio. */
-  93.01% { opacity: 0; }
-  100% { opacity: 0; }
+  /* Tredicesimo: la luce è ormai quasi spenta... */
+  93% { transform: scale(0.85); opacity: 0.06; animation-timing-function: ease-in; }
+  /* ...e si dissolve del tutto con il marchio. */
+  100% { transform: scale(0.82); opacity: 0; }
 }
 
 /* --- Il marchio ----------------------------------------------------------- */
@@ -2184,10 +2201,15 @@ html.theme-transitions .border-bento-border {
     transform: scale(1);
     opacity: 1;
     filter: brightness(1) blur(0) drop-shadow(0 0 0.4rem rgb(232 176 75 / 0.18));
+    animation-timing-function: ease-in;
   }
-  /* Stacco netto: marchio e bagliore spariscono insieme, all'istante. */
-  93.01% { opacity: 0; }
-  100% { opacity: 0; }
+  /* Dal tredicesimo in poi si dissolve insieme alla musica: lo stacco secco
+     sembrava un errore di riproduzione. */
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    filter: brightness(1) blur(0) drop-shadow(0 0 0.3rem rgb(232 176 75 / 0.1));
+  }
 }
 
 /* --- Invito iniziale ------------------------------------------------------ */
