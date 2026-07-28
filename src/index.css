@@ -1982,20 +1982,23 @@ html.theme-transitions .border-bento-border {
 /* --------------------------------------------------------------------------
    7. Introduzione — "Oltre le nuvole"
 
-   Le nuvole si aprono su un cielo stellato, si spalanca un tunnel di anelli
-   ritagliati e in fondo arriva il marchio, che si rivela sul culmine del brano
-   (`public/main_music.mp3`) e sparisce mentre la musica sfuma.
+   Una coltre di nuvole copre tutto lo schermo e si apre lentamente su un cielo
+   fitto di stelle, mentre il marchio emerge dall'oscurità e si accende fino a
+   brillare del tutto sul culmine del brano (`public/main_music.mp3`). Dopo il
+   picco la luce si placa ma resta un bagliore tenue, e infine il marchio
+   svanisce mentre la musica sfuma.
 
-   Tre regole che valgono per tutto quello che segue:
+   Regole che valgono per tutto ciò che segue:
 
-   1. I COLORI NON SEGUONO IL TEMA. L'introduzione usa solo nero, blu notte,
-      oro e bianco: con il colore della campagna diventava verde acido o rosa,
-      e stonava sia con il marchio dorato sia con la dashboard.
-   2. NESSUN CICLO. Ogni anello e ogni scia attraversano la scena una volta
-      sola: i loop si riconoscono a occhio e sembrano un motivo che gira a vuoto.
-   3. UN SOLO CRESCENDO. L'accelerazione è continua fino alla rivelazione, mai
-      a tappe: gli easing "ease-out" intermedi facevano sembrare l'avvicinamento
-      una serie di scatti.
+   1. I COLORI NON SEGUONO IL TEMA: solo nero, blu notte, oro e bianco. Con il
+      colore della campagna la scena diventava verde acido o rosa e stonava con
+      il marchio dorato.
+   2. UN SOLO CRESCENDO: l'accensione è continua fino al picco, mai a tappe. Gli
+      easing "ease-out" intermedi la facevano sembrare una serie di scatti.
+   3. NIENTE ORPELLI: nessun tunnel, anello o figura. C'è il cielo, ci sono le
+      nuvole, c'è il marchio.
+
+   Il momento chiave è al 57% dei keyframes: l'ottavo secondo su quattordici.
    -------------------------------------------------------------------------- */
 
 .intro-scene {
@@ -2003,12 +2006,11 @@ html.theme-transitions .border-bento-border {
   inset: 0;
   z-index: 100;
   overflow: hidden;
-  /* Centra il marchio: così la sua animazione muove solo scala, sfocatura e
-     opacità, senza doversi ricentrare a ogni fotogramma. */
+  /* Centra il marchio: la sua animazione muove così solo luce e scala. */
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Nero che sfuma nel blu notte: la volta celeste della piattaforma. */
+  /* Notte profonda che si schiarisce appena verso il centro. */
   background: radial-gradient(125% 100% at 50% 50%, #16233f 0%, #0a1224 45%, #04060c 100%);
   transition: opacity 500ms ease;
 }
@@ -2018,146 +2020,91 @@ html.theme-transitions .border-bento-border {
   opacity: 0;
 }
 
-/* --- Cielo stellato -------------------------------------------------------- */
+/* --- Il cielo -------------------------------------------------------------
+   Tre livelli di stelle: fitte e minute sul fondo, più rade e luminose in
+   primo piano. Si muovono pochissimo — la scena è contemplativa, non un
+   viaggio a tutta velocità — e respirano appena. ------------------------- */
 
 .intro-stars {
   position: absolute;
-  inset: -50%;
+  inset: -30%;
   pointer-events: none;
+}
+
+.intro-stars--near {
   background-image:
-    radial-gradient(1.6px 1.6px at 20% 30%, rgb(255 255 255 / 0.95), transparent),
-    radial-gradient(1.4px 1.4px at 75% 15%, rgb(255 255 255 / 0.8), transparent),
-    radial-gradient(1px 1px at 45% 70%, rgb(255 255 255 / 0.85), transparent),
-    radial-gradient(1.6px 1.6px at 85% 65%, rgb(255 255 255 / 0.75), transparent),
-    radial-gradient(1px 1px at 12% 80%, rgb(255 255 255 / 0.7), transparent),
-    radial-gradient(1.4px 1.4px at 60% 45%, rgb(255 255 255 / 0.9), transparent),
-    radial-gradient(1px 1px at 35% 12%, rgb(255 255 255 / 0.65), transparent),
-    radial-gradient(1.2px 1.2px at 92% 38%, rgb(255 255 255 / 0.75), transparent);
-  background-size: 48% 48%;
-  /* Accelerazione continua: il campo stellare non deve "respirare" a tappe. */
-  animation: intro-stars-drift var(--intro-duration, 14s) cubic-bezier(0.5, 0, 0.85, 0.4) forwards;
+    radial-gradient(1.7px 1.7px at 18% 24%, rgb(255 255 255 / 0.95), transparent),
+    radial-gradient(1.5px 1.5px at 72% 16%, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(1.6px 1.6px at 43% 68%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1.4px 1.4px at 88% 62%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.7px 1.7px at 9% 82%, rgb(255 255 255 / 0.88), transparent);
+  background-size: 42% 42%;
+  animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
 }
 
-/* Livello lontano: stelle più piccole e fitte, movimento più lento. */
+.intro-stars--mid {
+  background-image:
+    radial-gradient(1.2px 1.2px at 33% 12%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1px 1px at 61% 39%, rgb(255 255 255 / 0.75), transparent),
+    radial-gradient(1.2px 1.2px at 84% 77%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1px 1px at 15% 55%, rgb(255 255 255 / 0.72), transparent),
+    radial-gradient(1.1px 1.1px at 50% 88%, rgb(255 255 255 / 0.78), transparent);
+  background-size: 26% 26%;
+  opacity: 0.85;
+  animation: intro-sky-breathe var(--intro-duration, 14s) ease-out forwards;
+  animation-delay: -1.5s;
+}
+
 .intro-stars--far {
-  background-size: 27% 27%;
-  opacity: 0.6;
-  filter: blur(0.3px);
-  animation-timing-function: linear;
+  background-image:
+    radial-gradient(0.9px 0.9px at 25% 45%, rgb(255 255 255 / 0.65), transparent),
+    radial-gradient(0.8px 0.8px at 67% 22%, rgb(255 255 255 / 0.6), transparent),
+    radial-gradient(0.9px 0.9px at 46% 79%, rgb(255 255 255 / 0.62), transparent),
+    radial-gradient(0.8px 0.8px at 91% 51%, rgb(255 255 255 / 0.58), transparent);
+  background-size: 15% 15%;
+  opacity: 0.7;
+  filter: blur(0.2px);
+  animation: intro-sky-breathe var(--intro-duration, 14s) linear forwards;
 }
 
-@keyframes intro-stars-drift {
-  0% { transform: scale(1) rotate(0deg); opacity: 0; }
-  10% { opacity: 0.55; }
-  57% { transform: scale(2.3) rotate(8deg); opacity: 0.9; animation-timing-function: ease-out; }
-  100% { transform: scale(2.9) rotate(11deg); opacity: 0.1; }
+@keyframes intro-sky-breathe {
+  0% { transform: scale(1); opacity: 0; }
+  18% { opacity: 0.75; }
+  57% { transform: scale(1.1); opacity: 1; }
+  88% { opacity: 0.9; }
+  100% { transform: scale(1.16); opacity: 0.25; }
 }
 
-/* Scie bianche: il movimento fra le stelle. Nascono al centro e fuggono verso
-   i bordi; angolo, lunghezza e tempi arrivano dal componente, così non ce ne
-   sono due uguali e nessuna resta ferma in mezzo allo schermo. */
-.intro-streak {
+/* --- L'alone dell'accensione ---------------------------------------------
+   Sta dietro il marchio e cresce insieme a lui: al picco è un bagliore d'oro
+   ampio, poi si riduce a un chiarore appena percettibile. ------------------ */
+
+.intro-glow {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1.5px;
-  height: var(--len, 10vmin);
-  margin-left: -0.75px;
-  border-radius: 9999px;
-  transform-origin: 50% 0%;
-  background: linear-gradient(to bottom, transparent 0%, rgb(255 255 255 / 0.9) 100%);
-  animation-name: intro-streak-fly;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.9, 0.5);
-  animation-fill-mode: forwards;
-}
-
-@keyframes intro-streak-fly {
-  0% { transform: rotate(var(--a)) translateY(2vmin) scaleY(0.2); opacity: 0; }
-  20% { opacity: 0.85; }
-  100% { transform: rotate(var(--a)) translateY(85vmin) scaleY(1.7); opacity: 0; }
-}
-
-/* --- Il tunnel di anelli --------------------------------------------------- */
-
-.intro-tunnel {
-  position: absolute;
-  inset: 0;
+  width: 120vmin;
+  height: 120vmin;
+  margin: -60vmin 0 0 -60vmin;
   pointer-events: none;
-  /* Spinta di camera: la scena si avvicina sempre più in fretta. */
-  animation: intro-tunnel-push var(--intro-duration, 14s) cubic-bezier(0.5, 0, 0.85, 0.4) forwards;
+  background: radial-gradient(
+    circle,
+    rgb(255 244 220 / 0.55) 0%,
+    rgb(232 176 75 / 0.28) 22%,
+    rgb(232 176 75 / 0.08) 42%,
+    transparent 65%
+  );
+  animation: intro-glow-swell var(--intro-duration, 14s) linear forwards;
 }
 
-@keyframes intro-tunnel-push {
-  0% { transform: scale(0.9); opacity: 0; }
-  10% { opacity: 1; }
-  57% { transform: scale(1.2); opacity: 1; animation-timing-function: ease-out; }
-  80% { transform: scale(1.28); opacity: 0.2; }
-  100% { transform: scale(1.3); opacity: 0; }
-}
-
-/* Un anello: parte da un punto in fondo e passa oltre l'osservatore. Il bordo
-   è mosso (lo disegna il componente), quindi la rotazione si vede davvero. */
-.intro-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 92vmin;
-  height: 92vmin;
-  margin: -46vmin 0 0 -46vmin;
-  overflow: visible;
-  animation-name: intro-ring-pass;
-  animation-timing-function: cubic-bezier(0.42, 0, 0.9, 0.5);
-  animation-fill-mode: forwards;
-}
-
-@keyframes intro-ring-pass {
-  0% { transform: scale(0.04) rotate(0deg); opacity: 0; }
-  15% { opacity: 0.9; }
-  75% { opacity: 0.75; }
-  100% { transform: scale(2.6) rotate(var(--spin, 20deg)); opacity: 0; }
-}
-
-/* --- Le nuvole che si aprono ---------------------------------------------- */
-
-/* Stanno sopra ogni altro livello: sono il velo che si scosta. Non un cerchio
-   con un bordo netto — quello si vedeva tagliato — ma masse morbide e sfocate
-   che escono di scena ai lati. */
-.intro-cloud {
-  position: absolute;
-  top: -20%;
-  width: 78%;
-  height: 140%;
-  pointer-events: none;
-  filter: blur(28px);
-  background:
-    radial-gradient(closest-side, rgb(236 238 243 / 0.98), transparent 100%) 30% 22% / 70% 45% no-repeat,
-    radial-gradient(closest-side, rgb(226 230 238 / 0.96), transparent 100%) 62% 40% / 80% 52% no-repeat,
-    radial-gradient(closest-side, rgb(214 220 232 / 0.94), transparent 100%) 38% 66% / 76% 48% no-repeat,
-    radial-gradient(closest-side, rgb(240 242 246 / 0.92), transparent 100%) 72% 84% / 66% 42% no-repeat;
-}
-
-.intro-cloud--left {
-  left: -6%;
-  animation: intro-cloud-left var(--intro-duration, 14s) cubic-bezier(0.3, 0, 0.4, 1) forwards;
-}
-
-.intro-cloud--right {
-  right: -6%;
-  animation: intro-cloud-right var(--intro-duration, 14s) cubic-bezier(0.3, 0, 0.4, 1) forwards;
-}
-
-@keyframes intro-cloud-left {
-  0% { transform: translateX(38%) scale(1.1); opacity: 1; }
-  22% { transform: translateX(-72%) scale(1.25); opacity: 0.85; }
-  40% { transform: translateX(-110%) scale(1.35); opacity: 0; }
-  100% { transform: translateX(-110%) scale(1.35); opacity: 0; }
-}
-
-@keyframes intro-cloud-right {
-  0% { transform: translateX(-38%) scale(1.1); opacity: 1; }
-  22% { transform: translateX(72%) scale(1.25); opacity: 0.85; }
-  40% { transform: translateX(110%) scale(1.35); opacity: 0; }
-  100% { transform: translateX(110%) scale(1.35); opacity: 0; }
+@keyframes intro-glow-swell {
+  0% { transform: scale(0.25); opacity: 0; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
+  /* Un unico crescendo fino al picco: nessun gradino. */
+  57% { transform: scale(1); opacity: 1; animation-timing-function: ease-out; }
+  /* Il picco si spegne, ma un chiarore resta. */
+  70% { transform: scale(0.82); opacity: 0.42; }
+  88% { transform: scale(0.8); opacity: 0.34; }
+  100% { transform: scale(0.78); opacity: 0; }
 }
 
 /* --- Il marchio ----------------------------------------------------------- */
@@ -2170,60 +2117,102 @@ html.theme-transitions .border-bento-border {
   user-select: none;
   pointer-events: none;
   transform-origin: center;
-  animation: intro-logo-arrive var(--intro-duration, 14s) linear forwards;
+  animation: intro-logo-shine var(--intro-duration, 14s) linear forwards;
 }
 
 /**
- * 57% = ottavo secondo: è lì che il marchio si rivela per intero.
- *
- * Fra il 6% e il 57% c'è UN SOLO segmento con accelerazione continua: il logo
- * parte lentissimo, prende velocità e arriva addosso di slancio. Alla fine
- * sparisce, mentre il brano va in dissolvenza.
+ * Il marchio non arriva volando: EMERGE. Parte quasi nero e invisibile, si
+ * schiarisce di continuo — un solo segmento accelerante fra il 7% e il 57% —
+ * e all'ottavo secondo è al massimo della luce. Poi il picco si placa, resta
+ * acceso appena, e in chiusura svanisce con la musica.
  */
-@keyframes intro-logo-arrive {
+@keyframes intro-logo-shine {
   0% {
-    transform: scale(0.07);
+    transform: scale(0.94);
     opacity: 0;
-    filter: blur(24px);
+    filter: brightness(0.15) blur(9px);
     animation-timing-function: ease-out;
   }
-  6% {
-    transform: scale(0.09);
-    opacity: 0.14;
-    filter: blur(21px);
+  /* Appena una traccia nel buio. */
+  7% {
+    transform: scale(0.95);
+    opacity: 0.18;
+    filter: brightness(0.3) blur(7px);
     animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35);
   }
+  /* PICCO: massima luce, sul culmine del brano. */
   57% {
-    transform: scale(1.08);
+    transform: scale(1.03);
     opacity: 1;
-    filter: blur(0);
-    animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    filter: brightness(1.85) blur(0) drop-shadow(0 0 4.5rem rgb(232 176 75 / 0.95));
+    animation-timing-function: ease-out;
   }
-  64% { transform: scale(1); opacity: 1; filter: blur(0); }
-  86% { transform: scale(1); opacity: 1; filter: blur(0); }
-  100% { transform: scale(1.06); opacity: 0; filter: blur(2px); }
+  /* La vampata si placa: resta un brillare leggero. */
+  70% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1.14) blur(0) drop-shadow(0 0 1.9rem rgb(232 176 75 / 0.5));
+  }
+  88% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1.08) blur(0) drop-shadow(0 0 1.4rem rgb(232 176 75 / 0.38));
+  }
+  /* Svanisce mentre il brano sfuma. */
+  100% {
+    transform: scale(1.01);
+    opacity: 0;
+    filter: brightness(1) blur(1px) drop-shadow(0 0 0.8rem rgb(232 176 75 / 0.15));
+  }
 }
 
-/* Il lampo della rivelazione: oro, non bianco puro, per restare in palette. */
-.intro-flash {
+/* --- Le nuvole ------------------------------------------------------------
+   Nette ma morbide: i lobi sono cerchi a bordo pieno — non sfumature — e una
+   sfocatura contenuta li ammorbidisce senza trasformarli in una macchia. Ogni
+   metà ha un corpo pieno verso l'esterno e i lobi che sporgono verso il centro,
+   così all'inizio le due metà coprono davvero tutto lo schermo. -------------- */
+
+.intro-cloud {
   position: absolute;
-  inset: 0;
-  z-index: 3;
+  top: -25%;
+  z-index: 5;
+  width: 82%;
+  height: 150%;
   pointer-events: none;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgb(255 250 235 / 0.95) 0%,
-    rgb(232 176 75 / 0.55) 35%,
-    transparent 68%
-  );
-  animation: intro-flash var(--intro-duration, 14s) linear forwards;
+  filter: blur(9px);
 }
 
-@keyframes intro-flash {
-  0%, 54% { opacity: 0; }
-  57% { opacity: 0.85; }
-  67% { opacity: 0; }
-  100% { opacity: 0; }
+.intro-cloud--left {
+  left: -16%;
+  background:
+    radial-gradient(closest-side, #e8ecf4 0 96%, transparent 100%) 96% 14% / 46% 34% no-repeat,
+    radial-gradient(closest-side, #dfe5ef 0 96%, transparent 100%) 88% 38% / 54% 40% no-repeat,
+    radial-gradient(closest-side, #e6ebf3 0 96%, transparent 100%) 99% 60% / 44% 32% no-repeat,
+    radial-gradient(closest-side, #d8dfeb 0 96%, transparent 100%) 86% 84% / 52% 36% no-repeat,
+    linear-gradient(180deg, #e9edf4, #d6dde9) 0 0 / 82% 100% no-repeat;
+  animation: intro-cloud-left var(--intro-duration, 14s) cubic-bezier(0.42, 0, 0.55, 1) forwards;
+}
+
+.intro-cloud--right {
+  right: -16%;
+  background:
+    radial-gradient(closest-side, #e8ecf4 0 96%, transparent 100%) 4% 20% / 46% 34% no-repeat,
+    radial-gradient(closest-side, #dfe5ef 0 96%, transparent 100%) 12% 44% / 54% 40% no-repeat,
+    radial-gradient(closest-side, #e6ebf3 0 96%, transparent 100%) 1% 66% / 44% 32% no-repeat,
+    radial-gradient(closest-side, #d8dfeb 0 96%, transparent 100%) 14% 88% / 52% 36% no-repeat,
+    linear-gradient(180deg, #e9edf4, #d6dde9) 100% 0 / 82% 100% no-repeat;
+  animation: intro-cloud-right var(--intro-duration, 14s) cubic-bezier(0.42, 0, 0.55, 1) forwards;
+}
+
+/* Un'apertura sola, lenta e continua: nessuno strappo, nessuna sosta. */
+@keyframes intro-cloud-left {
+  0% { transform: translateX(18%) scale(1.04); }
+  100% { transform: translateX(-104%) scale(1.12); }
+}
+
+@keyframes intro-cloud-right {
+  0% { transform: translateX(-18%) scale(1.04); }
+  100% { transform: translateX(104%) scale(1.12); }
 }
 
 /* --- Invito iniziale ------------------------------------------------------ */
@@ -2237,26 +2226,16 @@ html.theme-transitions .border-bento-border {
   50% { opacity: 1; }
 }
 
-/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: nessun tunnel,
-   nessuna corsa fra le stelle, solo il marchio che si rivela. */
+/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente nuvole
+   in movimento né stelle che respirano, solo il marchio che si accende. */
 @media (prefers-reduced-motion: reduce) {
-  .intro-stars,
-  .intro-tunnel,
-  .intro-streak,
-  .intro-cloud,
-  .intro-flash {
+  .intro-cloud {
     display: none;
   }
 
-  .intro-logo {
-    animation: intro-logo-quiet var(--intro-duration, 14s) ease-out forwards;
-  }
-
-  @keyframes intro-logo-quiet {
-    0% { transform: scale(0.92); opacity: 0; }
-    57% { transform: scale(1); opacity: 1; }
-    88% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1); opacity: 0; }
+  .intro-stars {
+    animation: none;
+    opacity: 0.85;
   }
 
   .intro-prompt-text {
