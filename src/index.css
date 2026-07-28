@@ -2095,22 +2095,37 @@ html.theme-transitions .border-bento-border {
 /**
  * L'avanzamento fra le stelle: è tutto il movimento della scena.
  *
- * Una curva sola dall'inizio al 64% — nessun keyframe intermedio, quindi
- * nessuno scatto. La curva parte con pendenza alta (al primo fotogramma il
- * cielo è GIÀ in corsa, senza bisogno di ritardi negativi che sfasavano i
- * livelli) e arriva con pendenza quasi nulla: la corsa si spegne da sé, in
- * modo graduale, proprio quando il marchio compare.
+ * Due fasi, e il punto di giunzione è calcolato perché la velocità NON cambi
+ * di colpo:
  *
- * Dal 64% in poi i valori non cambiano più: il cielo è fermo ma resta lì, e
- * tutti e tre i livelli si fermano nello stesso istante.
+ *   0 → 8s   corsa a velocità COSTANTE (`linear`). Una curva unica che si
+ *            appiattiva presto faceva sembrare il cielo già fermo dal quinto
+ *            secondo: quasi tutto il cammino era finito a metà tempo.
+ *   8 → 9s   frenata: decelerazione uniforme fino a velocità zero.
+ *
+ * Il valore all'ottavo secondo è il 94,2% del cammino, non un numero a caso:
+ * è il punto in cui la velocità costante della prima fase equivale al doppio
+ * della velocità media della frenata — cioè la condizione perché le due fasi
+ * si saldino senza strappi.
+ *
+ * Dal 64% (nono secondo) in poi i valori non cambiano più: il cielo è fermo ma
+ * resta lì, e tutti e tre i livelli si arrestano nello stesso istante.
  */
 @keyframes intro-sky-drift {
   0% {
     transform: scale(var(--sky-from, 1.3));
     opacity: 0.9;
-    animation-timing-function: cubic-bezier(0.18, 0.62, 0.32, 1);
+    animation-timing-function: linear;
   }
-  /* Nono secondo: l'avanzamento è finito. */
+  /* Ottavo secondo: fin qui si è viaggiato a velocità piena. */
+  57% {
+    transform: scale(
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.942)
+    );
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
+  }
+  /* Nono secondo: fermo. */
   64% { transform: scale(var(--sky-to, 2.6)); opacity: 1; }
   /* Fermo, ma sempre presente. */
   100% { transform: scale(var(--sky-to, 2.6)); opacity: 0.95; }
