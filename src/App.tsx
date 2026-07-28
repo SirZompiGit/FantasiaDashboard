@@ -20,6 +20,8 @@ import { RoomPanel } from './components/RoomPanel';
 import { SharedView } from './components/SharedView';
 import { ShortcutsPanel } from './components/ShortcutsPanel';
 import { IntroSequence } from './components/IntroSequence';
+import { SoundBoard } from './components/SoundBoard';
+import { useClipPlayer } from './hooks/useClipPlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 
 import { type CampaignBackup, restoreBackup, useCampaignState } from './hooks/useCampaignState';
@@ -126,6 +128,14 @@ export default function App() {
     () => applyTheme(displayed.theme, displayed.style),
     [displayed.theme, displayed.style],
   );
+
+  /**
+   * Le clip suonano per chiunque guardi questa schermata: master, finestra
+   * dello schermo condiviso o giocatore collegato. Sta qui, in cima, perché è
+   * l'unico punto attraversato da tutti e tre — e legge `displayed`, che per il
+   * master è la propria campagna e per gli altri quella della stanza.
+   */
+  useClipPlayer(displayed.soundClips, displayed.clipPlayback);
 
   /**
    * Il master trasmette le proprie immagini alla stanza.
@@ -579,6 +589,15 @@ export default function App() {
         onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
         barStyle={state.barStyle}
         onBarStyleChange={(barStyle) => dispatch({ type: 'SET_BAR_STYLE', barStyle })}
+        soundClips={state.soundClips ?? []}
+        onAddSoundClip={(name, url) => dispatch({ type: 'ADD_SOUND_CLIP', name, url })}
+        onRenameSoundClip={(id, name) =>
+          dispatch({ type: 'UPDATE_SOUND_CLIP', id, changes: { name } })
+        }
+        onSoundClipVolume={(id, volume) =>
+          dispatch({ type: 'UPDATE_SOUND_CLIP', id, changes: { volume } })
+        }
+        onDeleteSoundClip={(id) => dispatch({ type: 'DELETE_SOUND_CLIP', id })}
         logoVariant={state.logoVariant}
         onLogoVariantChange={(variant) => dispatch({ type: 'SET_LOGO_VARIANT', variant })}
         isMuted={isMuted}
@@ -683,6 +702,16 @@ export default function App() {
               onRenameDiceLabel={(from, to) => dispatch({ type: 'RENAME_DICE_LABEL', from, to })}
               onDeleteDiceLabel={(label) => dispatch({ type: 'DELETE_DICE_LABEL', label })}
             />
+
+            {/* Le clip stanno sotto i dadi: è la mano che il master usa già. */}
+            <div className="mt-5 lg:mt-6">
+              <SoundBoard
+                clips={state.soundClips ?? []}
+                playback={state.clipPlayback}
+                onPlay={(id) => dispatch({ type: 'PLAY_SOUND_CLIP', id })}
+                onStop={() => dispatch({ type: 'STOP_SOUND_CLIP' })}
+              />
+            </div>
           </div>
         </div>
 

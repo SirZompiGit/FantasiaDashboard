@@ -38,6 +38,7 @@ import {
   clampMaxHp,
 } from '../lib/healthBars';
 import { DEFAULT_STAT, DEFAULT_STAT_LABELS, STAT_COUNT, clampStat } from '../lib/stats';
+import { clampClips, normalizeClipPlayback } from '../lib/soundClips';
 import { normalizeBarStyle, normalizeLogoVariant, normalizeStyle, normalizeTheme } from '../theme';
 import { DEFAULT_DICE_LABELS, createEmptyCampaign } from './defaults';
 
@@ -270,6 +271,9 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     .map(normalizeHealthBar)
     .filter((b): b is HealthBar => b !== null);
 
+  const soundClips = clampClips(raw.soundClips);
+  const clipPlayback = normalizeClipPlayback(raw.clipPlayback);
+
   const rollHistory = asArray(raw.rollHistory)
     .map(normalizeRoll)
     .filter((r): r is RollResult => r !== null)
@@ -295,6 +299,9 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     theme: normalizeTheme(raw.theme),
     style: normalizeStyle(raw.style),
     barStyle: normalizeBarStyle(raw.barStyle),
+    // Additive: assenti quando non ci sono clip o non sta suonando nulla.
+    ...(soundClips ? { soundClips } : {}),
+    ...(clipPlayback ? { clipPlayback } : {}),
     logoVariant: normalizeLogoVariant(raw.logoVariant),
     healthGroups,
     diceLabels: asStringList(raw.diceLabels, DEFAULT_DICE_LABELS),

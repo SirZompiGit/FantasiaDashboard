@@ -11,13 +11,19 @@
  * frattempo — cosa che invece accadrebbe rimpiazzando l'intero stato.
  */
 
-import type { CampaignState, HealthBar, Player, RollResult } from '../types';
+import type { CampaignState, HealthBar, Player, RollResult, SoundClip } from '../types';
 import type { BarStyle, CampaignStyle, CampaignTheme, LogoVariant } from '../theme';
 import { MAX_ROLL_HISTORY, normalizeCampaign } from './migrations';
 import { DEFAULT_STAT_LABELS } from '../lib/stats';
 import { createEmptyCampaign } from './defaults';
 import { clampHp, clampMaxHp, clampResources, clampStatusEffects } from '../lib/healthBars';
 import { STAT_COUNT, clampStat } from '../lib/stats';
+import {
+  DEFAULT_CLIP_VOLUME,
+  MAX_SOUND_CLIPS,
+  clampVolume,
+  normalizeClip,
+} from '../lib/soundClips';
 import { newId } from '../lib/ids';
 
 export type CampaignAction =
@@ -30,6 +36,11 @@ export type CampaignAction =
   | { type: 'SET_THEME'; theme: CampaignTheme }
   | { type: 'SET_STYLE'; style: CampaignStyle }
   | { type: 'SET_BAR_STYLE'; barStyle: BarStyle }
+  | { type: 'ADD_SOUND_CLIP'; name: string; url: string }
+  | { type: 'UPDATE_SOUND_CLIP'; id: string; changes: Partial<Omit<SoundClip, 'id'>> }
+  | { type: 'DELETE_SOUND_CLIP'; id: string }
+  | { type: 'PLAY_SOUND_CLIP'; id: string }
+  | { type: 'STOP_SOUND_CLIP' }
   | { type: 'SET_LOGO_VARIANT'; variant: LogoVariant }
   | { type: 'SET_STATS_ENABLED'; enabled: boolean }
   | { type: 'SET_STAT_LABEL'; index: number; label: string }
@@ -182,6 +193,66 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
     case 'SET_BAR_STYLE':
       return { ...state, barStyle: action.barStyle };
+
+    case 'ADD_SOUND_CLIP': {
+      const clips = state.soundClips ?? [];
+      if (clips.length >= MAX_SOUND_CLIPS) return state;
+
+      const clip = normalizeClip(
+        { id: newId(), name: action.name, url: action.url, volume: DEFAULT_CLIP_VOLUME },
+        newId(),
+      );
+      // Indirizzo inutilizzabile: si lascia tutto com'era, l'interfaccia avvisa.
+      if (!clip) return state;
+
+      return { ...state, soundClips: [...clips, clip] };
+    }
+
+    case 'UPDATE_SOUND_CLIP': {
+      const clips = state.soundClips;
+      if (!clips) return state;
+
+      return {
+        ...state,
+        soundClips: clips.map((clip) =>
+          clip.id === action.id
+            ? {
+                ...clip,
+                ...action.changes,
+                // Il volume resta nell'intervallo consentito comunque arrivi.
+                volume:
+                  action.changes.volume === undefined
+                    ? clip.volume
+                    : clampVolume(action.changes.volume),
+              }
+            : clip,
+        ),
+      };
+    }
+
+    case 'DELETE_SOUND_CLIP': {
+      const clips = (state.soundClips ?? []).filter((clip) => clip.id !== action.id);
+      const next: CampaignState = { ...state };
+
+      // Assente quando non ne resta nessuna: il salvataggio torna com'era.
+      if (clips.length > 0) next.soundClips = clips;
+      else delete next.soundClips;
+
+      // Se stava suonando proprio quella, il suono si ferma.
+      if (state.clipPlayback?.clipId === action.id) next.clipPlayback = null;
+
+      return next;
+    }
+
+    case 'PLAY_SOUND_CLIP': {
+      if (!(state.soundClips ?? []).some((clip) => clip.id === action.id)) return state;
+      // `startedAt` è il segnale: cambiando fa ripartire la clip anche quando è
+      // la stessa di prima.
+      return { ...state, clipPlayback: { clipId: action.id, startedAt: Date.now() } };
+    }
+
+    case 'STOP_SOUND_CLIP':
+      return state.clipPlayback ? { ...state, clipPlayback: null } : state;
 
     case 'SET_LOGO_VARIANT':
       return { ...state, logoVariant: action.variant };

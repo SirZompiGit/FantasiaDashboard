@@ -16,7 +16,6 @@ import { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   BarChart3,
-  ChevronDown,
   CircleDot,
   Coins,
   Download,
@@ -54,7 +53,10 @@ import { ConfirmInline } from './ui/ConfirmInline';
 import { IconButton } from './ui/IconButton';
 import { Modal } from './ui/Modal';
 import { MediaSettings } from './MediaSettings';
+import { SoundClipsSettings } from './SoundClipsSettings';
+import { SettingsSection } from './ui/SettingsSection';
 import { Wordmark } from './ui/Wordmark';
+import type { SoundClip } from '../types';
 import type { UseMediaResult } from '../hooks/useMedia';
 import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
 
@@ -65,6 +67,11 @@ interface DashboardHeaderProps {
   onStyleChange: (style: CampaignStyle) => void;
   barStyle: BarStyle;
   onBarStyleChange: (barStyle: BarStyle) => void;
+  soundClips: SoundClip[];
+  onAddSoundClip: (name: string, url: string) => void;
+  onRenameSoundClip: (id: string, name: string) => void;
+  onSoundClipVolume: (id: string, volume: number) => void;
+  onDeleteSoundClip: (id: string) => void;
   logoVariant: LogoVariant;
   onLogoVariantChange: (variant: LogoVariant) => void;
   isMuted: boolean;
@@ -118,36 +125,6 @@ const TOOL_BUTTON =
 const TOOL_BUTTON_ACCENT =
   `flex ${TOOL_HEIGHT} shrink-0 items-center gap-1.5 rounded-xl border border-theme-500 bg-theme-600 px-4 text-xs font-bold text-white shadow-raised transition-colors duration-200 hover:bg-theme-500 active:scale-[0.98]`;
 
-/**
- * Sezione richiudibile del pannello impostazioni.
- *
- * Con l'aumentare delle voci il pannello era diventato un lungo scorrimento:
- * raccogliendole in `<details>` a fisarmonica si vede una cosa per volta.
- * `<details>` nativo = zero stato React e accessibile da tastiera.
- */
-function SettingsSection({
-  title,
-  icon: Icon,
-  defaultOpen = false,
-  children,
-}: {
-  title: string;
-  icon: React.ComponentType<{ className?: string }>;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <details open={defaultOpen} className="settings-acc border-t border-bento-border pt-3">
-      <summary className="flex cursor-pointer select-none items-center justify-between gap-2 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400 transition-colors duration-200 hover:text-slate-200">
-        <span className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 text-theme-500" /> {title}
-        </span>
-        <ChevronDown className="acc-chevron h-3.5 w-3.5 shrink-0 text-slate-600 transition-transform duration-200" />
-      </summary>
-      <div className="space-y-3 pt-3">{children}</div>
-    </details>
-  );
-}
 
 export function DashboardHeader({
   theme,
@@ -156,6 +133,11 @@ export function DashboardHeader({
   onStyleChange,
   barStyle,
   onBarStyleChange,
+  soundClips,
+  onAddSoundClip,
+  onRenameSoundClip,
+  onSoundClipVolume,
+  onDeleteSoundClip,
   logoVariant,
   onLogoVariantChange,
   isMuted,
@@ -584,6 +566,14 @@ export function DashboardHeader({
               storageError={mediaControls.error}
               isRemote={mediaControls.isRemote}
               isSharing={sharingMedia}
+            />
+
+            <SoundClipsSettings
+              clips={soundClips}
+              onAdd={onAddSoundClip}
+              onRename={onRenameSoundClip}
+              onVolume={onSoundClipVolume}
+              onDelete={onDeleteSoundClip}
             />
 
             <div className="flex items-center justify-between gap-4 border-t border-bento-border pt-3">

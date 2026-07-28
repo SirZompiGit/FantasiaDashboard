@@ -350,3 +350,67 @@ describe('effetti di stato nel reducer', () => {
     expect(state.healthBars.find((b) => b.id === bar.id)!).not.toHaveProperty('statusEffects');
   });
 });
+
+describe('clip sonore', () => {
+  const URL_A = 'https://esempio.it/tuono.mp3';
+  const URL_B = 'https://esempio.it/campane.mp3';
+
+  const withClip = (state: CampaignState, name: string, url: string) =>
+    campaignReducer(state, { type: 'ADD_SOUND_CLIP', name, url });
+
+  it('aggiunge una clip con il volume predefinito', () => {
+    const state = withClip(seed(), 'Tuono', URL_A);
+    expect(state.soundClips).toHaveLength(1);
+    expect(state.soundClips?.[0]).toMatchObject({ name: 'Tuono', url: URL_A });
+  });
+
+  it('rifiuta un indirizzo inutilizzabile senza toccare lo stato', () => {
+    const before = seed();
+    expect(withClip(before, 'Boh', 'data:audio/mp3;base64,AA')).toBe(before);
+  });
+
+  it('non supera il tetto di tre clip', () => {
+    let state = seed();
+    for (let i = 0; i < 5; i++) state = withClip(state, `Clip ${i}`, `${URL_A}?${i}`);
+    expect(state.soundClips).toHaveLength(3);
+  });
+
+  it('suona una clip alla volta: avviarne un altra sostituisce la precedente', () => {
+    let state = withClip(withClip(seed(), 'Tuono', URL_A), 'Campane', URL_B);
+    const [first, second] = state.soundClips!;
+
+    state = campaignReducer(state, { type: 'PLAY_SOUND_CLIP', id: first.id });
+    expect(state.clipPlayback?.clipId).toBe(first.id);
+
+    state = campaignReducer(state, { type: 'PLAY_SOUND_CLIP', id: second.id });
+    expect(state.clipPlayback?.clipId).toBe(second.id);
+
+    state = campaignReducer(state, { type: 'STOP_SOUND_CLIP' });
+    expect(state.clipPlayback).toBeNull();
+  });
+
+  it('eliminando la clip in riproduzione ferma anche il suono', () => {
+    let state = withClip(seed(), 'Tuono', URL_A);
+    const id = state.soundClips![0].id;
+
+    state = campaignReducer(state, { type: 'PLAY_SOUND_CLIP', id });
+    state = campaignReducer(state, { type: 'DELETE_SOUND_CLIP', id });
+
+    expect(state).not.toHaveProperty('soundClips');
+    expect(state.clipPlayback).toBeNull();
+  });
+
+  it('limita il volume e conserva il resto della clip', () => {
+    let state = withClip(seed(), 'Tuono', URL_A);
+    const id = state.soundClips![0].id;
+
+    state = campaignReducer(state, {
+      type: 'UPDATE_SOUND_CLIP',
+      id,
+      changes: { volume: 5 },
+    });
+
+    expect(state.soundClips?.[0].volume).toBe(1);
+    expect(state.soundClips?.[0].name).toBe('Tuono');
+  });
+});

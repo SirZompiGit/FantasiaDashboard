@@ -82,6 +82,21 @@ export interface StatusEffect {
   shared: boolean;
 }
 
+/**
+ * Una clip sonora richiamabile durante la sessione.
+ *
+ * `url` punta a un file già in rete (o nella cartella pubblica dell'app): nel
+ * database viaggia l'indirizzo, mai l'audio. Il volume lo decide il master e
+ * vale per tutti quelli collegati.
+ */
+export interface SoundClip {
+  id: string;
+  name: string;
+  url: string;
+  /** Da 0 a 1. */
+  volume: number;
+}
+
 export interface HealthBar extends ColoredBar {
   id: string;
   name: string;
@@ -165,6 +180,17 @@ export interface CampaignState {
    * le campagne salvate prima ricadono su 'classico'.
    */
   barStyle: BarStyle;
+  /**
+   * Clip sonore del master (al massimo tre). Assenti quando non ce ne sono,
+   * così il salvataggio resta identico a prima che esistessero.
+   */
+  soundClips?: SoundClip[];
+  /**
+   * Clip in riproduzione adesso, per tutti quelli collegati. `startedAt` è ciò
+   * che fa partire il suono: quando cambia, chi guarda avvia la clip: senza,
+   * riavviare la stessa clip due volte di fila non avrebbe alcun effetto.
+   */
+  clipPlayback?: { clipId: string; startedAt: number } | null;
   /** Variante del marchio. Campo additivo, come `style`. */
   logoVariant: LogoVariant;
   healthGroups: string[];

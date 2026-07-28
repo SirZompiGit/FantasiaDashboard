@@ -11,6 +11,7 @@
 
 import { useRef, useState } from 'react';
 import { Image as ImageIcon, Link2, Projector, Trash2, Upload } from 'lucide-react';
+import { SettingsSection } from './ui/SettingsSection';
 import {
   LARGE_IMAGE_BYTES,
   type MediaSettings as Settings,
@@ -155,18 +156,18 @@ export function MediaSettings({
   );
 
   return (
-    <div className="space-y-4 border-t border-bento-border pt-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          <ImageIcon className="h-3.5 w-3.5 text-theme-500" /> Immagini
-        </span>
-        {isSharing && (
-          <span className="rounded-full bg-theme-600/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-theme-400">
+    <SettingsSection
+      title="Immagini"
+      icon={ImageIcon}
+      // Lo stato "Condivise" va visto anche a sezione chiusa.
+      badge={
+        isSharing ? (
+          <span className="shrink-0 rounded-full bg-theme-600/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-theme-400">
             Condivise
           </span>
-        )}
-      </div>
-
+        ) : null
+      }
+    >
       {isRemote && (
         <p className="rounded-lg border border-bento-border bg-bento-panel/50 px-2 py-1.5 text-[10px] leading-snug text-slate-400">
           Stai vedendo le immagini scelte dal master. Le tue restano salvate e
@@ -308,6 +309,6 @@ export function MediaSettings({
           {warning}
         </p>
       )}
-    </div>
+    </SettingsSection>
   );
 }
