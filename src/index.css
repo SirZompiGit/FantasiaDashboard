@@ -1980,13 +1980,12 @@ html.theme-transitions .border-bento-border {
 }
 
 /* --------------------------------------------------------------------------
-   7. Introduzione — "Oltre le nuvole"
+   7. Introduzione — "Il marchio che si accende"
 
-   Una coltre di nuvole copre tutto lo schermo e si apre lentamente su un cielo
-   fitto di stelle, mentre il marchio emerge dall'oscurità e si accende fino a
-   brillare del tutto sul culmine del brano (`public/main_music.mp3`). Dopo il
-   picco la luce si placa ma resta un bagliore tenue, e infine il marchio
-   svanisce mentre la musica sfuma.
+   Un cielo fitto di stelle, e il marchio che emerge dall'oscurità accendendosi
+   fino a una vampata piena sul culmine del brano (`public/main_music.mp3`).
+   Dopo il picco la luce si placa ma resta un bagliore tenue, e infine il
+   marchio svanisce mentre la musica sfuma.
 
    Regole che valgono per tutto ciò che segue:
 
@@ -1995,10 +1994,11 @@ html.theme-transitions .border-bento-border {
       il marchio dorato.
    2. UN SOLO CRESCENDO: l'accensione è continua fino al picco, mai a tappe. Gli
       easing "ease-out" intermedi la facevano sembrare una serie di scatti.
-   3. NIENTE ORPELLI: nessun tunnel, anello o figura. C'è il cielo, ci sono le
-      nuvole, c'è il marchio.
+   3. UN SOLO COLPO: il pulse avviene una volta sola, non si ripete.
+   4. NIENTE ORPELLI: né tunnel, né anelli, né figure, né nuvole — tutti provati
+      e tutti tolti. C'è il cielo e c'è il marchio.
 
-   Il momento chiave è al 57% dei keyframes: l'ottavo secondo su quattordici.
+   Il momento chiave è al 64% dei keyframes: il nono secondo su quattordici.
    -------------------------------------------------------------------------- */
 
 .intro-scene {
@@ -2070,7 +2070,7 @@ html.theme-transitions .border-bento-border {
 @keyframes intro-sky-breathe {
   0% { transform: scale(1); opacity: 0; }
   18% { opacity: 0.75; }
-  57% { transform: scale(1.1); opacity: 1; }
+  64% { transform: scale(1.1); opacity: 1; }
   88% { opacity: 0.9; }
   100% { transform: scale(1.16); opacity: 0.25; }
 }
@@ -2097,16 +2097,13 @@ html.theme-transitions .border-bento-border {
   animation: intro-glow-swell var(--intro-duration, 14s) linear forwards;
 }
 
-/* Batte insieme al marchio: stessi tempi, stessi due colpi. */
+/* Batte insieme al marchio: stessi tempi, stesso unico colpo. */
 @keyframes intro-glow-swell {
   0% { transform: scale(0.25); opacity: 0; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
-  53% { transform: scale(0.86); opacity: 0.6; animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1); }
-  /* Primo colpo, all'ottavo secondo. */
-  57% { transform: scale(1.45); opacity: 1; animation-timing-function: ease-out; }
-  60% { transform: scale(1); opacity: 0.5; animation-timing-function: ease-in-out; }
-  /* Secondo colpo. */
-  63% { transform: scale(1.22); opacity: 0.78; animation-timing-function: ease-out; }
-  67% { transform: scale(0.94); opacity: 0.42; animation-timing-function: linear; }
+  60% { transform: scale(0.86); opacity: 0.6; animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1); }
+  /* Il colpo, al nono secondo. */
+  64% { transform: scale(1.45); opacity: 1; animation-timing-function: ease-out; }
+  70% { transform: scale(0.94); opacity: 0.42; animation-timing-function: linear; }
   88% { transform: scale(0.9); opacity: 0.3; }
   100% { transform: scale(0.86); opacity: 0; }
 }
@@ -2145,33 +2142,21 @@ html.theme-transitions .border-bento-border {
     animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35);
   }
   /* Carica: la luce sale di continuo fino all'orlo del picco. */
-  53% {
+  60% {
     transform: scale(1);
     opacity: 1;
     filter: brightness(1.3) blur(0) drop-shadow(0 0 1.4rem rgb(232 176 75 / 0.5));
     animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1);
   }
-  /* PICCO — ottavo secondo: vampata piena e battito in fuori. */
-  57% {
+  /* PICCO — nono secondo, uno solo: vampata piena e battito in fuori. */
+  64% {
     transform: scale(1.14);
     opacity: 1;
     filter: brightness(2.5) blur(0) drop-shadow(0 0 6.5rem rgb(255 214 130 / 1));
     animation-timing-function: ease-out;
   }
-  /* Rientro del primo battito. */
-  60% {
-    transform: scale(1.01);
-    filter: brightness(1.5) blur(0) drop-shadow(0 0 2.6rem rgb(232 176 75 / 0.62));
-    animation-timing-function: ease-in-out;
-  }
-  /* Secondo battito, poco dopo il nono secondo: il pulse non è un colpo solo. */
-  63% {
-    transform: scale(1.08);
-    filter: brightness(2) blur(0) drop-shadow(0 0 4.4rem rgb(255 214 130 / 0.85));
-    animation-timing-function: ease-out;
-  }
   /* Da qui in poi si attenua, e resta acceso appena. */
-  67% {
+  70% {
     transform: scale(1);
     opacity: 1;
     filter: brightness(1.24) blur(0) drop-shadow(0 0 2rem rgb(232 176 75 / 0.5));
@@ -2191,104 +2176,6 @@ html.theme-transitions .border-bento-border {
   }
 }
 
-/* --- Le nuvole ------------------------------------------------------------
-   Nette ma morbide: i lobi sono cerchi a bordo pieno — non sfumature — e una
-   sfocatura contenuta li ammorbidisce senza trasformarli in una macchia. Ogni
-   metà ha un corpo pieno verso l'esterno e i lobi che sporgono verso il centro,
-   così all'inizio le due metà coprono davvero tutto lo schermo. -------------- */
-
-.intro-cloud {
-  position: absolute;
-  top: -25%;
-  z-index: 5;
-  width: 82%;
-  height: 150%;
-  pointer-events: none;
-  /* La luminosità parte bassa e sale con l'opacità: un bianco pieno che compare
-     di colpo, subito dopo il clic su schermo nero, acceca. */
-  filter: blur(9px) brightness(0.35);
-}
-
-/* Le due metà NON sono speculari: numero, misura e altezza dei lobi cambiano,
-   e anche i tempi di uscita sono leggermente diversi. Rifletterle a specchio si
-   notava subito e rendeva la coltre finta. */
-
-.intro-cloud--left {
-  left: -16%;
-  background:
-    radial-gradient(closest-side, #e8ecf4 0 96%, transparent 100%) 97% 11% / 44% 30% no-repeat,
-    radial-gradient(closest-side, #dfe5ef 0 96%, transparent 100%) 87% 34% / 56% 42% no-repeat,
-    radial-gradient(closest-side, #e6ebf3 0 96%, transparent 100%) 99% 58% / 40% 28% no-repeat,
-    radial-gradient(closest-side, #d8dfeb 0 96%, transparent 100%) 84% 79% / 54% 38% no-repeat,
-    radial-gradient(closest-side, #e4e9f2 0 96%, transparent 100%) 95% 96% / 38% 26% no-repeat,
-    linear-gradient(180deg, #e9edf4, #d6dde9) 0 0 / 82% 100% no-repeat;
-  animation: intro-cloud-left var(--intro-duration, 14s) linear forwards;
-}
-
-.intro-cloud--right {
-  right: -16%;
-  background:
-    radial-gradient(closest-side, #e6ebf3 0 96%, transparent 100%) 6% 6% / 52% 38% no-repeat,
-    radial-gradient(closest-side, #dde3ee 0 96%, transparent 100%) 15% 27% / 40% 27% no-repeat,
-    radial-gradient(closest-side, #e9edf5 0 96%, transparent 100%) 2% 47% / 58% 44% no-repeat,
-    radial-gradient(closest-side, #d9e0ec 0 96%, transparent 100%) 17% 70% / 42% 30% no-repeat,
-    radial-gradient(closest-side, #e2e8f1 0 96%, transparent 100%) 4% 90% / 50% 34% no-repeat,
-    linear-gradient(180deg, #eaeef5, #d4dbe8) 100% 0 / 82% 100% no-repeat;
-  animation: intro-cloud-right var(--intro-duration, 14s) linear forwards;
-}
-
-/**
- * Le nuvole se ne vanno SUBITO, non accompagnano tutto il brano.
- *
- * Prima un breve fade-in — dal buio del clic a un bianco pieno improvviso si
- * veniva accecati — poi si spalancano accelerando e scivolano via ruotando
- * appena: il moto uniforme di prima sembrava una diapositiva che scorre.
- * A un quinto del brano il cielo è già libero.
- */
-@keyframes intro-cloud-left {
-  0% {
-    transform: translateX(14%) scale(1.06) rotate(0deg);
-    opacity: 0;
-    filter: blur(9px) brightness(0.3);
-    animation-timing-function: ease-out;
-  }
-  6% {
-    transform: translateX(11%) scale(1.05) rotate(-0.4deg);
-    opacity: 1;
-    filter: blur(9px) brightness(1);
-    animation-timing-function: cubic-bezier(0.45, 0, 0.7, 0.95);
-  }
-  21% {
-    transform: translateX(-112%) scale(1.22) rotate(-4deg);
-    opacity: 1;
-    filter: blur(12px) brightness(1);
-  }
-  27% { transform: translateX(-124%) scale(1.24) rotate(-5deg); opacity: 0; }
-  100% { transform: translateX(-124%) scale(1.24) rotate(-5deg); opacity: 0; }
-}
-
-@keyframes intro-cloud-right {
-  0% {
-    transform: translateX(-12%) scale(1.04) rotate(0deg);
-    opacity: 0;
-    filter: blur(9px) brightness(0.3);
-    animation-timing-function: ease-out;
-  }
-  7% {
-    transform: translateX(-8%) scale(1.07) rotate(0.5deg);
-    opacity: 1;
-    filter: blur(9px) brightness(1);
-    animation-timing-function: cubic-bezier(0.38, 0, 0.72, 0.96);
-  }
-  23% {
-    transform: translateX(116%) scale(1.18) rotate(3deg);
-    opacity: 1;
-    filter: blur(13px) brightness(1);
-  }
-  29% { transform: translateX(128%) scale(1.2) rotate(4.5deg); opacity: 0; }
-  100% { transform: translateX(128%) scale(1.2) rotate(4.5deg); opacity: 0; }
-}
-
 /* --- Invito iniziale ------------------------------------------------------ */
 
 .intro-prompt-text {
@@ -2300,13 +2187,9 @@ html.theme-transitions .border-bento-border {
   50% { opacity: 1; }
 }
 
-/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente nuvole
-   in movimento né stelle che respirano, solo il marchio che si accende. */
+/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente stelle
+   che respirano, solo il marchio che si accende. */
 @media (prefers-reduced-motion: reduce) {
-  .intro-cloud {
-    display: none;
-  }
-
   .intro-stars {
     animation: none;
     opacity: 0.85;

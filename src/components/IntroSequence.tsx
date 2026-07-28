@@ -1,5 +1,5 @@
 /**
- * Introduzione della piattaforma — "Oltre le nuvole".
+ * Introduzione della piattaforma — il marchio che si accende.
  *
  * All'avvio non compaiono subito le tre scelte: c'è solo un invito a cliccare.
  * Quel clic non è una formalità, è l'unico modo per far partire l'audio: i
@@ -7,13 +7,13 @@
  * interagisce con la pagina. Da lì in poi anche gli effetti sonori dei dadi
  * (Web Audio) funzionano senza bisogno di un altro gesto.
  *
- * La scena è volutamente essenziale: una coltre di nuvole copre tutto e si apre
- * lentamente su un cielo pieno di stelle, mentre il marchio emerge dall'oscurità
- * e si accende fino a brillare del tutto sul culmine del brano. Poi la luce si
- * placa, resta un bagliore tenue, e mentre la musica sfuma il marchio svanisce.
+ * La scena è volutamente essenziale: un cielo pieno di stelle, e il marchio che
+ * emerge dall'oscurità e si accende fino a una vampata piena sul culmine del
+ * brano. Poi la luce si placa, resta un bagliore tenue, e mentre la musica sfuma
+ * il marchio svanisce.
  *
- * Niente tunnel, anelli o figure: erano rumore, e distraevano dall'unica cosa
- * che conta, cioè il marchio che si accende al momento giusto.
+ * Niente tunnel, anelli, figure o nuvole: erano tutti orpelli che distraevano
+ * dall'unica cosa che conta, cioè il marchio che si accende al momento giusto.
  *
  * I colori NON seguono il tema della campagna: l'introduzione resta su nero,
  * blu notte, oro e bianco, le tinte della piattaforma.
@@ -170,11 +170,6 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-glow" />
 
           <img src="/logo-fantasia.png" alt="Fantasia" className="intro-logo" draggable={false} />
-
-          {/* Le nuvole stanno sopra tutto: all'inizio coprono l'intero schermo
-              e si scostano lentamente, scoprendo cielo e marchio. */}
-          <div className="intro-cloud intro-cloud--left" />
-          <div className="intro-cloud intro-cloud--right" />
         </>
       )}
 
