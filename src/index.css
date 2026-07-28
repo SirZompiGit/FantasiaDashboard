@@ -2104,9 +2104,15 @@ html.theme-transitions .border-bento-border {
   border-radius: 9999px;
   transform-origin: 50% 0%;
   background: linear-gradient(to bottom, transparent 0%, rgb(255 255 255 / 0.92) 100%);
+  /* Invisibile finché la sua animazione non comincia: senza, le scie in attesa
+     restavano disegnate nella posizione di partenza — tutte impilate al centro,
+     verticali e immobili. Era la "riga bianca in mezzo allo schermo". */
+  opacity: 0;
   animation-name: intro-streak-fly;
   animation-timing-function: cubic-bezier(0.4, 0, 0.9, 0.5);
-  animation-fill-mode: forwards;
+  /* `both`, non `forwards`: applica il fotogramma iniziale anche PRIMA di
+     partire, non solo quello finale dopo. */
+  animation-fill-mode: both;
 }
 
 /* La scia nasce GIÀ LONTANA dal centro e invisibile: partendo attaccata al
@@ -2138,7 +2144,8 @@ html.theme-transitions .border-bento-border {
     rgb(232 176 75 / 0.08) 42%,
     transparent 65%
   );
-  animation: intro-glow-swell var(--intro-duration, 14s) linear forwards;
+  opacity: 0;
+  animation: intro-glow-swell var(--intro-duration, 14s) linear both;
 }
 
 /* Nasce e muore con il marchio: prima del nono secondo non esiste, poi cala con
@@ -2164,7 +2171,10 @@ html.theme-transitions .border-bento-border {
   user-select: none;
   pointer-events: none;
   transform-origin: center;
-  animation: intro-logo-shine var(--intro-duration, 14s) linear forwards;
+  /* Invisibile per costruzione: nemmeno un fotogramma di marchio prima che sia
+     il suo momento. */
+  opacity: 0;
+  animation: intro-logo-shine var(--intro-duration, 14s) linear both;
 }
 
 /**
