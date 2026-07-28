@@ -7,13 +7,13 @@
  * interagisce con la pagina. Da lì in poi anche gli effetti sonori dei dadi
  * (Web Audio) funzionano senza bisogno di un altro gesto.
  *
- * La scena è volutamente essenziale: un cielo pieno di stelle, e il marchio che
- * emerge dall'oscurità e si accende fino a una vampata piena sul culmine del
- * brano. Poi la luce si placa, resta un bagliore tenue, e mentre la musica sfuma
- * il marchio svanisce.
+ * La scena è volutamente essenziale: si viaggia dentro un cielo stellato, con
+ * le stelle che sfrecciano incontro, e del marchio non c'è traccia. Al NONO
+ * secondo appare di colpo, brillando fortissimo, poi la luce cala fino al
+ * tredicesimo e lì marchio e bagliore si spengono di netto, insieme.
  *
  * Niente tunnel, anelli, figure o nuvole: erano tutti orpelli che distraevano
- * dall'unica cosa che conta, cioè il marchio che si accende al momento giusto.
+ * dall'unica cosa che conta, cioè il marchio che appare al momento giusto.
  *
  * I colori NON seguono il tema della campagna: l'introduzione resta su nero,
  * blu notte, oro e bianco, le tinte della piattaforma.
@@ -21,7 +21,7 @@
  * Le durate qui e i keyframes `intro-*` in index.css devono restare allineati.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getMuted } from '../utils/audio';
 
 /**
@@ -44,6 +44,40 @@ const FADE_OUT = 500;
 
 /** Passo della dissolvenza del volume, quando si salta a musica avviata. */
 const VOLUME_FADE_STEP = 40;
+
+/**
+ * L'istante in cui il marchio appare, in frazione del brano: il nono secondo
+ * dei quattordici. Le stelle viaggiano fino a lì, e da lì in poi si diradano.
+ */
+const REVEAL_RATIO = 0.643;
+
+/** Quante scie compongono il viaggio fra le stelle. */
+const STREAK_COUNT = 54;
+
+/**
+ * Le scie del viaggio.
+ *
+ * Nascono al centro e fuggono verso i bordi: è ciò che dà la sensazione di
+ * muoversi davvero nel cielo, invece di guardarlo da fermi. Gli angoli avanzano
+ * di 137,5° — l'angolo aureo — così non si allineano mai fra loro e l'occhio non
+ * riconosce alcun motivo che si ripete. I ritardi crescono con una potenza e le
+ * durate calano: le scie si infittiscono e accelerano avvicinandosi al momento
+ * in cui il marchio appare.
+ */
+function buildStreaks(durationMs: number) {
+  const window = (durationMs * REVEAL_RATIO) / 1000;
+
+  return Array.from({ length: STREAK_COUNT }, (_, index) => {
+    const progress = index / STREAK_COUNT;
+    return {
+      angle: (index * 137.5) % 360,
+      delay: window * Math.pow(progress, 1.45),
+      duration: 2.3 - progress * 1.2,
+      // Lunghezze diverse: alcune passano vicine, altre lontanissime.
+      length: 5 + ((index * 7) % 12),
+    };
+  });
+}
 
 interface IntroSequenceProps {
   /** Chiamata a intro conclusa o saltata: scopre la schermata iniziale. */
@@ -113,6 +147,9 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
     schedule(finish, duration + SAFETY_MARGIN);
   }, [duration, finish, phase, schedule]);
 
+  /** Ricalcolate solo se cambia la durata del brano. */
+  const streaks = useMemo(() => buildStreaks(duration), [duration]);
+
   /**
    * Durata reale del brano, letta dai metadati. Arriva prima del clic (il file
    * è in `preload`), quindi l'animazione parte già con il tempo giusto e non
@@ -165,6 +202,22 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-stars intro-stars--near" />
           <div className="intro-stars intro-stars--mid" />
           <div className="intro-stars intro-stars--far" />
+
+          {/* Le scie: è il movimento che fa sembrare di viaggiare. */}
+          {streaks.map((streak, index) => (
+            <span
+              key={index}
+              className="intro-streak"
+              style={
+                {
+                  '--a': `${streak.angle}deg`,
+                  '--len': `${streak.length}vmin`,
+                  animationDelay: `${streak.delay}s`,
+                  animationDuration: `${streak.duration}s`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
 
           {/* L'alone che accompagna l'accensione del marchio. */}
           <div className="intro-glow" />

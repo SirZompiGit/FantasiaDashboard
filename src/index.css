@@ -1980,25 +1980,25 @@ html.theme-transitions .border-bento-border {
 }
 
 /* --------------------------------------------------------------------------
-   7. Introduzione — "Il marchio che si accende"
+   7. Introduzione — "Viaggio fra le stelle"
 
-   Un cielo fitto di stelle, e il marchio che emerge dall'oscurità accendendosi
-   fino a una vampata piena sul culmine del brano (`public/main_music.mp3`).
-   Dopo il picco la luce si placa ma resta un bagliore tenue, e infine il
-   marchio svanisce mentre la musica sfuma.
+   Si viaggia dentro un cielo stellato, con le stelle che sfrecciano incontro;
+   del marchio non c'è traccia. Al NONO secondo appare di colpo, brillando
+   fortissimo, poi la luce cala fino al TREDICESIMO, dove marchio e bagliore si
+   spengono di netto — insieme e all'istante.
 
    Regole che valgono per tutto ciò che segue:
 
    1. I COLORI NON SEGUONO IL TEMA: solo nero, blu notte, oro e bianco. Con il
       colore della campagna la scena diventava verde acido o rosa e stonava con
       il marchio dorato.
-   2. UN SOLO CRESCENDO: l'accensione è continua fino al picco, mai a tappe. Gli
-      easing "ease-out" intermedi la facevano sembrare una serie di scatti.
-   3. UN SOLO COLPO: il pulse avviene una volta sola, non si ripete.
+   2. NESSUN CICLO: ogni scia attraversa la scena una volta sola. I loop si
+      riconoscono a occhio e sembrano un motivo che gira a vuoto.
+   3. UN SOLO COLPO: la vampata avviene una volta sola, non si ripete.
    4. NIENTE ORPELLI: né tunnel, né anelli, né figure, né nuvole — tutti provati
       e tutti tolti. C'è il cielo e c'è il marchio.
 
-   Il momento chiave è al 64% dei keyframes: il nono secondo su quattordici.
+   Riferimenti temporali sui keyframes: 64% = nono secondo, 93% = tredicesimo.
    -------------------------------------------------------------------------- */
 
 .intro-scene {
@@ -2067,12 +2067,38 @@ html.theme-transitions .border-bento-border {
   animation: intro-sky-breathe var(--intro-duration, 14s) linear forwards;
 }
 
+/* Il campo stellare avanza verso l'osservatore accelerando: è metà del senso
+   di viaggio, l'altra metà la danno le scie. */
 @keyframes intro-sky-breathe {
-  0% { transform: scale(1); opacity: 0; }
-  18% { opacity: 0.75; }
-  64% { transform: scale(1.1); opacity: 1; }
-  88% { opacity: 0.9; }
-  100% { transform: scale(1.16); opacity: 0.25; }
+  0% { transform: scale(1); opacity: 0; animation-timing-function: ease-out; }
+  12% { transform: scale(1.08); opacity: 0.8; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4); }
+  64% { transform: scale(2.1); opacity: 1; animation-timing-function: ease-out; }
+  93% { transform: scale(2.5); opacity: 0.75; }
+  100% { transform: scale(2.55); opacity: 0.4; }
+}
+
+/* Le scie: nascono al centro e sfrecciano verso i bordi. Angolo, lunghezza e
+   tempi arrivano dal componente, così non ce ne sono due uguali e nessuna
+   resta ferma sullo schermo. */
+.intro-streak {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: var(--len, 10vmin);
+  margin-left: -0.75px;
+  border-radius: 9999px;
+  transform-origin: 50% 0%;
+  background: linear-gradient(to bottom, transparent 0%, rgb(255 255 255 / 0.92) 100%);
+  animation-name: intro-streak-fly;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.9, 0.5);
+  animation-fill-mode: forwards;
+}
+
+@keyframes intro-streak-fly {
+  0% { transform: rotate(var(--a)) translateY(2vmin) scaleY(0.2); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: rotate(var(--a)) translateY(88vmin) scaleY(1.8); opacity: 0; }
 }
 
 /* --- L'alone dell'accensione ---------------------------------------------
@@ -2097,15 +2123,18 @@ html.theme-transitions .border-bento-border {
   animation: intro-glow-swell var(--intro-duration, 14s) linear forwards;
 }
 
-/* Batte insieme al marchio: stessi tempi, stesso unico colpo. */
+/* Nasce e muore con il marchio: prima del nono secondo non esiste, dopo cala
+   con lui e si spegne nello stesso istante. */
 @keyframes intro-glow-swell {
-  0% { transform: scale(0.25); opacity: 0; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
-  60% { transform: scale(0.86); opacity: 0.6; animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1); }
-  /* Il colpo, al nono secondo. */
-  64% { transform: scale(1.45); opacity: 1; animation-timing-function: ease-out; }
-  70% { transform: scale(0.94); opacity: 0.42; animation-timing-function: linear; }
-  88% { transform: scale(0.9); opacity: 0.3; }
-  100% { transform: scale(0.86); opacity: 0; }
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(0.7); opacity: 0; animation-timing-function: cubic-bezier(0.2, 0.85, 0.3, 1); }
+  /* Nono secondo: la vampata. */
+  64% { transform: scale(1.5); opacity: 1; animation-timing-function: linear; }
+  /* Tredicesimo: la luce è ormai spenta... */
+  93% { transform: scale(0.85); opacity: 0.06; }
+  /* ...e sparisce di netto, insieme al marchio. */
+  93.01% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 /* --- Il marchio ----------------------------------------------------------- */
@@ -2122,58 +2151,43 @@ html.theme-transitions .border-bento-border {
 }
 
 /**
- * Il marchio non arriva volando: EMERGE. Parte quasi nero e invisibile, si
- * schiarisce di continuo — un solo segmento accelerante fra il 7% e il 57% —
- * e all'ottavo secondo è al massimo della luce. Poi il picco si placa, resta
- * acceso appena, e in chiusura svanisce con la musica.
+ * Del marchio non c'è traccia finché non è il momento.
+ *
+ * Fino al 60% è del tutto invisibile: si viaggia e basta. Poi, in poco più di
+ * mezzo secondo, entra in dissolvenza mentre la sfocatura si spegne, e al NONO
+ * secondo (64%) è lì che brilla fortissimo. Da lì al TREDICESIMO (93%) la luce
+ * cala di continuo; al tredicesimo si spegne di netto — un fotogramma — invece
+ * di dissolversi.
  */
 @keyframes intro-logo-shine {
   0% {
-    transform: scale(0.94);
+    transform: scale(1);
     opacity: 0;
-    filter: brightness(0.15) blur(9px);
-    animation-timing-function: ease-out;
+    filter: brightness(0.4) blur(30px);
   }
-  /* Appena una traccia nel buio. */
-  7% {
-    transform: scale(0.95);
-    opacity: 0.18;
-    filter: brightness(0.3) blur(7px);
-    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35);
-  }
-  /* Carica: la luce sale di continuo fino all'orlo del picco. */
+  /* Ancora niente: il cielo è l'unico protagonista. */
   60% {
     transform: scale(1);
-    opacity: 1;
-    filter: brightness(1.3) blur(0) drop-shadow(0 0 1.4rem rgb(232 176 75 / 0.5));
-    animation-timing-function: cubic-bezier(0.25, 0.8, 0.4, 1);
+    opacity: 0;
+    filter: brightness(0.8) blur(26px);
+    animation-timing-function: cubic-bezier(0.2, 0.85, 0.3, 1);
   }
-  /* PICCO — nono secondo, uno solo: vampata piena e battito in fuori. */
+  /* NONO SECONDO: appare di colpo, sfocatura spenta, luce al massimo. */
   64% {
-    transform: scale(1.14);
+    transform: scale(1.06);
     opacity: 1;
-    filter: brightness(2.5) blur(0) drop-shadow(0 0 6.5rem rgb(255 214 130 / 1));
-    animation-timing-function: ease-out;
-  }
-  /* Da qui in poi si attenua, e resta acceso appena. */
-  70% {
-    transform: scale(1);
-    opacity: 1;
-    filter: brightness(1.24) blur(0) drop-shadow(0 0 2rem rgb(232 176 75 / 0.5));
+    filter: brightness(2.8) blur(0) drop-shadow(0 0 7rem rgb(255 219 145 / 1));
     animation-timing-function: linear;
   }
-  88% {
+  /* Fino al tredicesimo la luce cala senza scatti. */
+  93% {
     transform: scale(1);
     opacity: 1;
-    filter: brightness(1.08) blur(0) drop-shadow(0 0 1.3rem rgb(232 176 75 / 0.34));
-    animation-timing-function: ease-in;
+    filter: brightness(1) blur(0) drop-shadow(0 0 0.4rem rgb(232 176 75 / 0.18));
   }
-  /* Svanisce mentre il brano sfuma: luce e marchio si spengono insieme. */
-  100% {
-    transform: scale(1.02);
-    opacity: 0;
-    filter: brightness(1) blur(1px) drop-shadow(0 0 0.6rem rgb(232 176 75 / 0.12));
-  }
+  /* Stacco netto: marchio e bagliore spariscono insieme, all'istante. */
+  93.01% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 /* --- Invito iniziale ------------------------------------------------------ */
@@ -2187,9 +2201,13 @@ html.theme-transitions .border-bento-border {
   50% { opacity: 1; }
 }
 
-/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente stelle
-   che respirano, solo il marchio che si accende. */
+/* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: niente viaggio
+   fra le stelle, solo il marchio che appare al momento giusto. */
 @media (prefers-reduced-motion: reduce) {
+  .intro-streak {
+    display: none;
+  }
+
   .intro-stars {
     animation: none;
     opacity: 0.85;
