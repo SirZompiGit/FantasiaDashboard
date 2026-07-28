@@ -2036,18 +2036,19 @@ html.theme-transitions .border-bento-border {
   position: absolute;
   inset: -30%;
   pointer-events: none;
-  /* Punto di partenza e di arrivo della corsa, per la profondità. La velocità
-     è la distanza fra i due nello stesso tempo: allargare la forbice accelera
-     il cielo senza toccare i tempi, che restano legati al brano. */
-  --sky-from: 1.12;
-  --sky-to: 2.82;
+  /* Punto di partenza e di arrivo della corsa. La velocità è la distanza fra i
+     due nello stesso tempo: allargare la forbice accelera il cielo senza
+     toccare i tempi, che restano legati al brano. Ogni piano parte da molto
+     lontano e finisce addosso all'osservatore — è ciò che fa "spazio". */
+  --sky-from: 0.9;
+  --sky-to: 4.2;
   animation: intro-sky-drift var(--intro-duration, 14s) both;
 }
 
 .intro-stars--near {
   /* Il primo piano corre di più: è la parallasse. */
-  --sky-from: 1.15;
-  --sky-to: 3.35;
+  --sky-from: 1.1;
+  --sky-to: 5.4;
   background-image:
     radial-gradient(1.7px 1.7px at 18% 24%, rgb(255 255 255 / 0.95), transparent),
     radial-gradient(1.5px 1.5px at 72% 16%, rgb(255 255 255 / 0.85), transparent),
@@ -2061,8 +2062,8 @@ html.theme-transitions .border-bento-border {
 }
 
 .intro-stars--mid {
-  --sky-from: 1.1;
-  --sky-to: 2.82;
+  --sky-from: 0.9;
+  --sky-to: 4.2;
   background-image:
     radial-gradient(1.2px 1.2px at 33% 12%, rgb(255 255 255 / 0.8), transparent),
     radial-gradient(1px 1px at 61% 39%, rgb(255 255 255 / 0.75), transparent),
@@ -2079,8 +2080,8 @@ html.theme-transitions .border-bento-border {
 
 .intro-stars--far {
   /* Il fondo si muove meno: è lontanissimo. */
-  --sky-from: 1.05;
-  --sky-to: 2.29;
+  --sky-from: 0.7;
+  --sky-to: 3.2;
   background-image:
     radial-gradient(0.9px 0.9px at 25% 45%, rgb(255 255 255 / 0.65), transparent),
     radial-gradient(0.8px 0.8px at 67% 22%, rgb(255 255 255 / 0.6), transparent),
@@ -2092,6 +2093,38 @@ html.theme-transitions .border-bento-border {
   background-size: 11% 11%;
   opacity: 0.75;
   filter: blur(0.2px);
+}
+
+/* Il fondo remoto: pulviscolo fittissimo, si muove pochissimo. Serve a non
+   lasciare mai il nero vuoto dietro i piani che corrono. */
+.intro-stars--deep {
+  --sky-from: 0.55;
+  --sky-to: 2.6;
+  background-image:
+    radial-gradient(0.7px 0.7px at 22% 18%, rgb(255 255 255 / 0.55), transparent),
+    radial-gradient(0.6px 0.6px at 63% 41%, rgb(255 255 255 / 0.5), transparent),
+    radial-gradient(0.7px 0.7px at 37% 73%, rgb(255 255 255 / 0.52), transparent),
+    radial-gradient(0.6px 0.6px at 85% 86%, rgb(255 255 255 / 0.48), transparent),
+    radial-gradient(0.7px 0.7px at 9% 57%, rgb(255 255 255 / 0.5), transparent),
+    radial-gradient(0.6px 0.6px at 74% 9%, rgb(255 255 255 / 0.46), transparent);
+  background-size: 7% 7%;
+  opacity: 0.6;
+  filter: blur(0.3px);
+}
+
+/* Il primissimo piano: poche stelle grandi che sfilano addosso velocissime.
+   È il piano che dà la misura della velocità — senza, il viaggio sembrava
+   sempre lontano. */
+.intro-stars--rush {
+  --sky-from: 1.35;
+  --sky-to: 7.6;
+  background-image:
+    radial-gradient(2.1px 2.1px at 27% 36%, rgb(255 255 255 / 1), transparent),
+    radial-gradient(1.9px 1.9px at 68% 71%, rgb(255 255 255 / 0.95), transparent),
+    radial-gradient(2px 2px at 82% 24%, rgb(255 255 255 / 0.92), transparent),
+    radial-gradient(1.8px 1.8px at 14% 79%, rgb(255 255 255 / 0.9), transparent);
+  background-size: 58% 58%;
+  opacity: 0.95;
 }
 
 /**

@@ -163,10 +163,14 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
 
       {phase === 'playing' && (
         <>
-          {/* Il cielo: tre livelli di stelle a densità e passo diversi. */}
-          <div className="intro-stars intro-stars--near" />
-          <div className="intro-stars intro-stars--mid" />
+          {/* Il cielo: cinque piani di profondità, dal fondo lontanissimo alle
+              stelle che sfilano addosso. Più piani ci sono, più il viaggio è
+              continuo — con tre restavano vuoti fra un piano e l'altro. */}
+          <div className="intro-stars intro-stars--deep" />
           <div className="intro-stars intro-stars--far" />
+          <div className="intro-stars intro-stars--mid" />
+          <div className="intro-stars intro-stars--near" />
+          <div className="intro-stars intro-stars--rush" />
 
           {/* L'alone che accompagna l'accensione del marchio. */}
           <div className="intro-glow" />
