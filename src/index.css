@@ -2109,20 +2109,22 @@ html.theme-transitions .border-bento-border {
      verticali e immobili. Era la "riga bianca in mezzo allo schermo". */
   opacity: 0;
   animation-name: intro-streak-fly;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.9, 0.5);
+  /* Moto da scoppio: schizza fuori e poi decelera. L'accelerazione progressiva
+     serviva al viaggio, qui darebbe l'effetto opposto. */
+  animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
   /* `both`, non `forwards`: applica il fotogramma iniziale anche PRIMA di
      partire, non solo quello finale dopo. */
   animation-fill-mode: both;
 }
 
-/* La scia nasce GIÀ LONTANA dal centro e invisibile: partendo attaccata al
-   centro, quella diretta verso il basso restava lì per un attimo e si leggeva
-   come una riga bianca ferma in mezzo allo schermo. */
+/* Nasce nel punto esatto in cui compare il marchio e si allunga sfuggendo
+   verso il bordo. Restare invisibile prima di partire è ciò che evita la riga
+   ferma al centro (vedi `animation-fill-mode` qui sopra). */
 @keyframes intro-streak-fly {
-  0% { transform: rotate(var(--a)) translateY(9vmin) scaleY(0.4); opacity: 0; }
-  14% { opacity: 0.9; }
-  88% { opacity: 0.75; }
-  100% { transform: rotate(var(--a)) translateY(96vmin) scaleY(1.7); opacity: 0; }
+  0% { transform: rotate(var(--a)) translateY(0) scaleY(0.12); opacity: 0; }
+  6% { opacity: 1; }
+  70% { opacity: 0.85; }
+  100% { transform: rotate(var(--a)) translateY(96vmin) scaleY(1.6); opacity: 0; }
 }
 
 /* --- L'alone dell'accensione ---------------------------------------------

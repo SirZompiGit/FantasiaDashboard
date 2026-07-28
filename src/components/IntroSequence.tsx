@@ -52,39 +52,30 @@ const VOLUME_FADE_STEP = 40;
  */
 const REVEAL_RATIO = 0.643;
 
-/** Quante scie compongono il viaggio fra le stelle. */
+/** Quante scie sprigiona il marchio quando compare. */
 const STREAK_COUNT = 78;
 
 /**
- * Di quanto il viaggio è già cominciato quando la scena appare.
+ * Le scie.
  *
- * È un ritardo NEGATIVO: le prime scie partono a corsa iniziata, così al primo
- * fotogramma sono già sparse per lo schermo. Senza, si vedeva il campo stellare
- * fermo che si metteva in moto da zero — sembrava di partire, non di essere già
- * in viaggio.
- */
-const HEAD_START = 2.4;
-
-/**
- * Le scie del viaggio.
- *
- * Fuggono dal centro verso i bordi: è ciò che dà la sensazione di muoversi
- * davvero nel cielo, invece di guardarlo da fermi. Gli angoli avanzano di
- * 137,5° — l'angolo aureo — così non si allineano mai fra loro e l'occhio non
- * riconosce alcun motivo che si ripete. I ritardi coprono l'INTERA durata del
- * brano: le scie si infittiscono e accelerano fino alla comparsa del marchio,
- * poi continuano a passo costante fino alla fine.
+ * Non accompagnano il viaggio: nascono TUTTE nell'istante in cui il marchio
+ * appare, sprigionandosi dal centro come uno scoppio di luce. I ritardi salgono
+ * con una potenza alta, quindi il grosso parte insieme alla rivelazione e le
+ * ultime si diradano nei secondi successivi. Gli angoli avanzano di 137,5° —
+ * l'angolo aureo — così non si allineano mai e lo scoppio resta irregolare.
  */
 function buildStreaks(durationMs: number) {
   const total = durationMs / 1000;
+  const revealAt = total * REVEAL_RATIO;
+  const tail = total - revealAt;
 
   return Array.from({ length: STREAK_COUNT }, (_, index) => {
     const progress = index / STREAK_COUNT;
     return {
       angle: (index * 137.5) % 360,
-      delay: -HEAD_START + total * Math.pow(progress, 1.2) * 1.08,
-      // Accelerano fino alla rivelazione, poi tengono quel passo.
-      duration: 2.4 - Math.min(progress, REVEAL_RATIO) * 1.3,
+      delay: revealAt + Math.pow(progress, 2.1) * tail * 0.95,
+      // Corte e rapide: è un getto, non una crociera.
+      duration: 1.1 + progress * 0.9,
       // Lunghezze diverse: alcune passano vicine, altre lontanissime.
       length: 5 + ((index * 7) % 12),
     };
@@ -215,7 +206,7 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-stars intro-stars--mid" />
           <div className="intro-stars intro-stars--far" />
 
-          {/* Le scie: è il movimento che fa sembrare di viaggiare. */}
+          {/* Le scie: sprigionate dal marchio nell'istante in cui appare. */}
           {streaks.map((streak, index) => (
             <span
               key={index}
