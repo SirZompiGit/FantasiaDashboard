@@ -395,7 +395,16 @@ export function HealthBarsManager({
                 </button>
 
                 {!isCollapsed && (
-                  <div className="space-y-3">
+                  // Le barre ad anello sono larghe quanto il loro contenuto:
+                  // si affiancano e vanno a capo, invece di lasciare mezza riga
+                  // vuota ciascuna. Le lineari restano impilate.
+                  <div
+                    className={
+                      barStyle === 'circolare'
+                        ? 'flex flex-wrap items-start gap-3'
+                        : 'space-y-3'
+                    }
+                  >
                     {group.bars.map((bar, index) => renderBar(bar, group.bars, index))}
                   </div>
                 )}

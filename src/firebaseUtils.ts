@@ -71,6 +71,12 @@ export async function createRoom(initialState: CampaignState): Promise<string> {
       // È ciò che permette di riconoscere le stanze abbandonate.
       lastSeen: serverTimestamp(),
     });
+
+    // I PIN si riciclano: se una vecchia stanza con questo numero aveva lasciato
+    // le proprie immagini sul ramo separato, la stanza nuova se le ritroverebbe
+    // addosso. Si parte sempre puliti.
+    await remove(ref(db, `${MEDIA_PATH}/${pin}`));
+
     return pin;
   }
 
@@ -228,10 +234,16 @@ export async function sweepAbandonedRooms(maxAgeMs: number): Promise<number> {
   if (!snap.exists()) return 0;
 
   const removals: Promise<void>[] = [];
+  let swept = 0;
   snap.forEach((child) => {
+    swept++;
     removals.push(remove(child.ref));
+    // Le immagini vivono su un ramo separato: cancellando solo `rooms/{pin}`
+    // restavano lì per sempre, orfane e pesanti. Vanno via con la stanza,
+    // esattamente come fa `deleteRoom`.
+    if (child.key) removals.push(remove(ref(getDb(), `${MEDIA_PATH}/${child.key}`)));
   });
 
   await Promise.all(removals);
-  return removals.length;
+  return swept;
 }

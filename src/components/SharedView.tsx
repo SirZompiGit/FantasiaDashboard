@@ -196,6 +196,14 @@ export function SharedView({
 
     schedule(() => {
       setRolling(false);
+
+      // Tiro nascosto: qui NON si rivela nulla dell'esito. Niente suono di
+      // critico o fallimento e niente scintille — li sentivano anche i
+      // giocatori, che così sapevano del 20 o dell'1 pur vedendo "Nascosto".
+      // Il suono del lancio sopra resta: che il master abbia tirato è già
+      // visibile, è il RISULTATO a dover restare segreto.
+      if (isRollHidden) return;
+
       if (isCritical(lastRoll.result, lastRoll.diceType)) {
         playCritSuccessSound();
         setCritBurst(lastRoll.timestamp);
@@ -204,7 +212,7 @@ export function SharedView({
         playCritFailSound();
       }
     }, MASTER_ROLL_DURATION);
-  }, [lastRoll]);
+  }, [lastRoll, isRollHidden]);
 
   // Le barre nascoste dal master non compaiono affatto qui.
   const { groups, ungrouped } = groupBars(
@@ -248,9 +256,10 @@ export function SharedView({
   );
 
   // In verticale le barre vanno a capo su più righe invece di allungarsi in
-  // uno scorrimento orizzontale senza fine.
+  // uno scorrimento orizzontale senza fine. Gli anelli fanno lo stesso: sono
+  // larghi quanto il loro contenuto, quindi si affiancano.
   const barsContainer =
-    effectiveLayout === 'vertical'
+    effectiveLayout === 'vertical' || state.barStyle === 'circolare'
       ? 'flex flex-row flex-wrap items-start gap-2 pt-1 sm:gap-3'
       : 'flex flex-col gap-3';
 
@@ -575,8 +584,11 @@ export function SharedView({
                         state={rolling ? 'rolling' : 'result'}
                         accent={accent}
                         reveal={rolling || isRollHidden ? 'hidden' : 'full'}
+                        // Con il tiro nascosto la sagoma NON prende il colore
+                        // dell'esito: l'oro del critico e il rosso del
+                        // fallimento tradivano il risultato coperto dal "?".
                         outcome={
-                          rolling
+                          rolling || isRollHidden
                             ? null
                             : isCritical(lastRoll.result, lastRoll.diceType)
                               ? 'critical'

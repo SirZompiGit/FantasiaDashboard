@@ -147,6 +147,12 @@ const VERTICAL_THIN = 'w-[14px] shrink-0';
  */
 const MAX_VERTICAL_RESOURCES = 4;
 
+/**
+ * Quante risorse per riga nel design circolare. Oltre, si va a capo: con dieci
+ * risorse su una riga sola la scheda diventerebbe larghissima.
+ */
+const CIRCULAR_COLUMNS = 4;
+
 /** Sigla di un effetto, per le targhette compatte: le prime due lettere. */
 const statusInitials = (name: string): string => name.trim().slice(0, 2).toUpperCase() || '•';
 
@@ -370,10 +376,13 @@ interface RadialBarProps {
   value: number;
   max: number;
   color: string;
-  /** Diametro dell'anello, in px. */
-  diameter: number;
-  /** Spessore dell'anello, in px. */
-  thickness: number;
+  /**
+   * Diametro e spessore dell'anello come misure CSS, in `rem`: così seguono lo
+   * zoom della vista condivisa, che agisce sulla dimensione di base del
+   * documento. In px resterebbero identici mentre tutto il resto si ingrandisce.
+   */
+  diameter: string;
+  thickness: string;
   readOnly?: boolean;
   onChange?: (value: number) => void;
   label: string;
@@ -476,7 +485,7 @@ function RadialBar({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      style={{ width: `${diameter}px`, height: `${diameter}px` }}
+      style={{ width: diameter, height: diameter }}
       className={`relative shrink-0 rounded-full select-none ${
         interactive ? 'cursor-pointer touch-none' : ''
       }`}
@@ -485,8 +494,8 @@ function RadialBar({
         className="absolute inset-0 rounded-full transition-[background] duration-200"
         style={{
           background: `conic-gradient(${color} 0deg ${deg}deg, ${color}1f ${deg}deg 360deg)`,
-          WebkitMask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px))`,
-          mask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}px), #000 calc(100% - ${thickness}px))`,
+          WebkitMask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}), #000 calc(100% - ${thickness}))`,
+          mask: `radial-gradient(farthest-side, transparent calc(100% - ${thickness}), #000 calc(100% - ${thickness}))`,
           filter: `drop-shadow(0 0 4px ${color}55)`,
         }}
       />
@@ -785,9 +794,15 @@ export function HealthBarItem({
           : undefined
       }
       onDragEnd={reorder?.onDragEnd}
+      // Con gli anelli la scheda si restringe al proprio contenuto invece di
+      // occupare tutta la riga: così più barre stanno affiancate e non resta
+      // mezzo pannello vuoto a destra. Le barre lineari restano a piena
+      // larghezza, che è ciò che serve loro per essere leggibili.
       className={`group relative rounded-xl border bg-bento-bg transition-colors duration-200 ${
-        compact ? 'p-1.5 sm:p-2' : 'p-2.5 sm:p-3'
-      } ${readOnly ? 'border-bento-border' : 'border-bento-border hover:border-slate-600'} ${
+        isCircular ? 'w-fit max-w-full' : ''
+      } ${compact ? 'p-1.5 sm:p-2' : 'p-2.5 sm:p-3'} ${
+        readOnly ? 'border-bento-border' : 'border-bento-border hover:border-slate-600'
+      } ${
         reorder?.dragging ? 'opacity-30' : ''
       } ${reorder?.dragOver ? 'border-theme-500 ring-1 ring-theme-500/30' : ''} ${
         shaking ? 'health-shake' : ''
@@ -939,25 +954,32 @@ export function HealthBarItem({
       </div>
 
       {isCircular ? (
-        // Anelli: la barra principale grande a sinistra, le risorse piccole a
-        // seguire (vanno a capo se sono tante).
-        <div className="flex items-center gap-4 pt-1">
-          <div className="relative">
+        // Anelli: barra principale grande a sinistra, risorse a seguire in una
+        // griglia regolare (al massimo CIRCULAR_COLUMNS per riga), così restano
+        // allineate invece di ammassarsi e la scheda non diventa lunghissima.
+        <div className="flex items-center gap-5 pt-1">
+          <div className="relative shrink-0">
             <RadialBar
               value={bar.currentValue}
               max={bar.maxValue}
               color={activeColor}
-              diameter={compact ? 64 : 76}
-              thickness={compact ? 7 : 9}
+              diameter={compact ? '5.75rem' : '7rem'}
+              thickness={compact ? '0.55rem' : '0.7rem'}
               readOnly={readOnly}
               onChange={(value) => onChangeValue(bar, value)}
               label={`Punti ferita di ${bar.name}`}
               center={
                 <div className="flex flex-col items-center leading-none">
-                  <span className="font-display text-lg font-black text-slate-100">
+                  <span
+                    className={`font-display font-black text-slate-100 ${
+                      compact ? 'text-xl' : 'text-2xl'
+                    }`}
+                  >
                     {bar.currentValue}
                   </span>
-                  <span className="font-mono text-[9px] text-slate-500">/{bar.maxValue}</span>
+                  <span className="mt-0.5 font-mono text-[10px] text-slate-500">
+                    /{bar.maxValue}
+                  </span>
                 </div>
               }
             />
@@ -965,15 +987,25 @@ export function HealthBarItem({
           </div>
 
           {resources.length > 0 && (
-            <div className="flex flex-1 flex-wrap items-start gap-x-3 gap-y-2">
+            <div
+              className="grid gap-x-4 gap-y-3"
+              // Le colonne sono tante quante le risorse, fino al tetto: con due
+              // risorse non restano tre buchi a destra.
+              style={{
+                gridTemplateColumns: `repeat(${Math.min(
+                  resources.length,
+                  CIRCULAR_COLUMNS,
+                )}, minmax(0, 1fr))`,
+              }}
+            >
               {resources.map((resource) => (
-                <div key={resource.id} className="flex flex-col items-center gap-0.5">
+                <div key={resource.id} className="flex flex-col items-center gap-1">
                   <RadialBar
                     value={resource.currentValue}
                     max={resource.maxValue}
                     color={getBarColor(resource)}
-                    diameter={34}
-                    thickness={4}
+                    diameter="3.5rem"
+                    thickness="0.4rem"
                     readOnly={readOnly || !onChangeResource}
                     onChange={
                       onChangeResource
@@ -982,14 +1014,14 @@ export function HealthBarItem({
                     }
                     label={`${resource.name} di ${bar.name}`}
                     center={
-                      <span className="font-mono text-[9px] font-bold text-slate-200">
+                      <span className="font-mono text-[11px] font-bold text-slate-200">
                         {resource.currentValue}
                       </span>
                     }
                   />
                   <span
-                    className="max-w-[3.5rem] truncate font-mono text-[8px] font-bold uppercase tracking-wider text-slate-500"
-                    title={resource.name}
+                    className="max-w-[4.5rem] truncate font-mono text-[9px] font-bold uppercase tracking-wider text-slate-400"
+                    title={`${resource.name}: ${resource.currentValue}/${resource.maxValue}`}
                   >
                     {resource.name}
                   </span>
