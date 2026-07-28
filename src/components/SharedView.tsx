@@ -95,6 +95,52 @@ const PANEL = `${PANEL_BASE} p-4 sm:p-5`;
 const PANEL_TITLE =
   'flex items-center gap-2 font-display text-sm font-extrabold uppercase tracking-wider text-slate-200 sm:text-base';
 
+/**
+ * Immagine di scena, con la lente.
+ *
+ * Passando il mouse sopra si apre l'ingrandimento; togliendolo si richiude da
+ * sé. Vale per chiunque guardi questa vista: proiezione e giocatori collegati.
+ *
+ * L'ingrandimento NON intercetta il puntatore (`pointer-events-none`), ed è la
+ * cosa che lo fa funzionare: coprendo l'immagine di partenza il mouse la
+ * perderebbe, l'ingrandimento si chiuderebbe, il mouse la ritroverebbe e si
+ * riaprirebbe — uno sfarfallio senza fine.
+ *
+ * Su touch l'hover non esiste: lì apre e chiude il tocco.
+ */
+function SceneImage({ src }: { src: string }) {
+  const [zoomed, setZoomed] = useState(false);
+
+  return (
+    <>
+      <div className={`${PANEL_BASE} shrink-0 p-1`}>
+        <img
+          src={src}
+          alt="Immagine della scena"
+          onMouseEnter={() => setZoomed(true)}
+          onMouseLeave={() => setZoomed(false)}
+          onPointerDown={(event) => {
+            if (event.pointerType === 'touch') setZoomed((current) => !current);
+          }}
+          className="max-h-[42vh] w-full cursor-zoom-in rounded-lg object-contain lg:max-h-[34vh]"
+        />
+      </div>
+
+      {zoomed && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in sm:p-8">
+          <div className="absolute inset-0 bg-bento-void/80 backdrop-blur-sm" />
+          <img
+            src={src}
+            alt=""
+            aria-hidden
+            className="relative max-h-full max-w-full rounded-xl border border-bento-border object-contain shadow-overlay"
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 export function SharedView({
   state,
   participantRolls = [],
@@ -447,15 +493,7 @@ export function SharedView({
 
             {/* Immagine di scena: compare solo se il master ne ha caricata una,
                 altrimenti la colonna resta esattamente com'era. */}
-            {sceneImage && (
-              <div className={`${PANEL_BASE} shrink-0 p-1`}>
-                <img
-                  src={sceneImage}
-                  alt="Immagine della scena"
-                  className="max-h-[42vh] w-full rounded-lg object-contain lg:max-h-[34vh]"
-                />
-              </div>
-            )}
+            {sceneImage && <SceneImage src={sceneImage} />}
             </div>
 
             {/* Salute */}
