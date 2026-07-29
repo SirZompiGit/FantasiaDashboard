@@ -330,6 +330,7 @@ export function DashboardHeader({
       <div className="hidden flex-wrap items-center gap-2 md:flex">
         {tools}
         {undoRedo}
+        <HelpButton onClick={onOpenHelp} />
         <HomeButton onClick={handleBack} />
         <SettingsButton open={settingsOpen} onToggle={() => setSettingsOpen((v) => !v)} />
       </div>
