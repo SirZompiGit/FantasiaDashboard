@@ -716,6 +716,88 @@ export function HealthBarItem({
     </div>
   ));
 
+  /**
+   * Anelli in colonna: la vita in cima, grande, e le risorse a scendere.
+   *
+   * È la versione verticale del design circolare — l'equivalente della scheda
+   * stretta delle barre lineari, ma con gli anelli.
+   */
+  if (isVertical && isCircular) {
+    return (
+      <div
+        className={`relative flex w-[7.5rem] shrink-0 flex-col items-center gap-2 rounded-xl border border-bento-border bg-bento-bg p-2 transition-colors duration-200 ${
+          readOnly ? '' : 'hover:border-slate-600'
+        } ${shaking ? 'health-shake' : ''}`}
+      >
+        {/* Gli effetti stanno in cima, come nella scheda verticale lineare. */}
+        {effectDots && <div className="w-full">{effectDots}</div>}
+
+        <div className="relative">
+          <RadialBar
+            value={bar.currentValue}
+            max={bar.maxValue}
+            color={activeColor}
+            diameter={compact ? '4.5rem' : '5.25rem'}
+            thickness={compact ? '0.5rem' : '0.6rem'}
+            readOnly={readOnly}
+            onChange={(value) => onChangeValue(bar, value)}
+            label={`Punti ferita di ${bar.name}`}
+            center={
+              <div className="flex flex-col items-center leading-none">
+                <span className="font-display text-base font-black text-slate-100">
+                  {bar.currentValue}
+                </span>
+                <span className="font-mono text-[9px] text-slate-500">/{bar.maxValue}</span>
+              </div>
+            }
+          />
+          {particleNodes}
+        </div>
+
+        <span
+          className="w-full truncate text-center font-display text-[11px] font-bold uppercase tracking-wide text-slate-200"
+          title={bar.name}
+        >
+          {bar.name}
+        </span>
+
+        {resources.length > 0 && (
+          <div className="flex w-full flex-col items-center gap-1.5 border-t border-bento-border/50 pt-2">
+            {resources.map((resource) => (
+              <div key={resource.id} className="flex flex-col items-center gap-0.5">
+                <RadialBar
+                  value={resource.currentValue}
+                  max={resource.maxValue}
+                  color={getBarColor(resource)}
+                  diameter="2.9rem"
+                  thickness="0.35rem"
+                  readOnly={readOnly || !onChangeResource}
+                  onChange={
+                    onChangeResource
+                      ? (value) => onChangeResource(bar, resource, value)
+                      : undefined
+                  }
+                  label={`${resource.name} di ${bar.name}`}
+                  center={
+                    <span className="font-mono text-[10px] font-bold text-slate-200">
+                      {resource.currentValue}
+                    </span>
+                  }
+                />
+                <span
+                  className="max-w-[6rem] truncate font-mono text-[8px] font-bold uppercase tracking-wider text-slate-400"
+                  title={`${resource.name}: ${resource.currentValue}/${resource.maxValue}`}
+                >
+                  {resource.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (isVertical && !isCircular) {
     return (
       <div

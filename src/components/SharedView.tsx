@@ -282,12 +282,8 @@ export function SharedView({
    * più larghi.
    */
   const isNarrow = useMediaQuery(NARROW_SCREEN);
-  // Gli anelli non hanno un verso: con il design circolare la vista verticale
-  // non si applica mai, nemmeno se era la preferenza salvata (che resta intatta
-  // per quando si torna alle barre lineari).
   const isCircularBars = state.barStyle === 'circolare';
-  const effectiveLayout: HealthLayout =
-    isNarrow || isCircularBars ? 'horizontal' : healthLayout;
+  const effectiveLayout: HealthLayout = isNarrow ? 'horizontal' : healthLayout;
 
   const collapsed = usePersistentSet(COLLAPSED_KEY);
 
@@ -504,10 +500,9 @@ export function SharedView({
                 <h2 className={PANEL_TITLE}>
                   <Heart className="h-5 w-5 text-theme-500" /> Stato della Salute
                 </h2>
-                {/* Su schermi stretti — e con le barre ad anello — il layout è
-                    forzato a orizzontale: il selettore non avrebbe alcun
-                    effetto, quindi sparisce. */}
-                {!isNarrow && !isCircularBars && (
+                {/* Su schermi stretti il layout è forzato a orizzontale: il
+                    selettore non avrebbe alcun effetto, quindi sparisce. */}
+                {!isNarrow && (
                   <IconButton
                     label={
                       healthLayout === 'horizontal'
