@@ -2306,15 +2306,15 @@ html.theme-transitions .border-bento-border {
      due nello stesso tempo: allargare la forbice accelera il cielo senza
      toccare i tempi, che restano legati al brano. Ogni piano parte da molto
      lontano e finisce addosso all'osservatore — è ciò che fa "spazio". */
-  --sky-from: 0.9;
-  --sky-to: 4.2;
+  --sky-from: 0.78;
+  --sky-to: 5.4;
   animation: intro-sky-drift var(--intro-duration, 14s) both;
 }
 
 .intro-stars--near {
   /* Il primo piano corre di più: è la parallasse. */
-  --sky-from: 1.1;
-  --sky-to: 5.4;
+  --sky-from: 0.95;
+  --sky-to: 7;
   background-image:
     radial-gradient(1.7px 1.7px at 18% 24%, rgb(255 255 255 / 0.95), transparent),
     radial-gradient(1.5px 1.5px at 72% 16%, rgb(255 255 255 / 0.85), transparent),
@@ -2328,8 +2328,8 @@ html.theme-transitions .border-bento-border {
 }
 
 .intro-stars--mid {
-  --sky-from: 0.9;
-  --sky-to: 4.2;
+  --sky-from: 0.78;
+  --sky-to: 5.4;
   background-image:
     radial-gradient(1.2px 1.2px at 33% 12%, rgb(255 255 255 / 0.8), transparent),
     radial-gradient(1px 1px at 61% 39%, rgb(255 255 255 / 0.75), transparent),
@@ -2346,8 +2346,8 @@ html.theme-transitions .border-bento-border {
 
 .intro-stars--far {
   /* Il fondo si muove meno: è lontanissimo. */
-  --sky-from: 0.7;
-  --sky-to: 3.2;
+  --sky-from: 0.62;
+  --sky-to: 4.1;
   background-image:
     radial-gradient(0.9px 0.9px at 25% 45%, rgb(255 255 255 / 0.65), transparent),
     radial-gradient(0.8px 0.8px at 67% 22%, rgb(255 255 255 / 0.6), transparent),
@@ -2364,8 +2364,8 @@ html.theme-transitions .border-bento-border {
 /* Il fondo remoto: pulviscolo fittissimo, si muove pochissimo. Serve a non
    lasciare mai il nero vuoto dietro i piani che corrono. */
 .intro-stars--deep {
-  --sky-from: 0.55;
-  --sky-to: 2.6;
+  --sky-from: 0.5;
+  --sky-to: 3.2;
   background-image:
     radial-gradient(0.7px 0.7px at 22% 18%, rgb(255 255 255 / 0.55), transparent),
     radial-gradient(0.6px 0.6px at 63% 41%, rgb(255 255 255 / 0.5), transparent),
@@ -2382,8 +2382,8 @@ html.theme-transitions .border-bento-border {
    È il piano che dà la misura della velocità — senza, il viaggio sembrava
    sempre lontano. */
 .intro-stars--rush {
-  --sky-from: 1.35;
-  --sky-to: 7.6;
+  --sky-from: 1.2;
+  --sky-to: 9.6;
   background-image:
     radial-gradient(2.1px 2.1px at 27% 36%, rgb(255 255 255 / 1), transparent),
     radial-gradient(1.9px 1.9px at 68% 71%, rgb(255 255 255 / 0.95), transparent),
@@ -2393,24 +2393,74 @@ html.theme-transitions .border-bento-border {
   opacity: 0.95;
 }
 
+/* Il pulviscolo più remoto: quasi immobile, riempie il nero là in fondo. */
+.intro-stars--veil {
+  --sky-from: 0.4;
+  --sky-to: 2.4;
+  background-image:
+    radial-gradient(0.6px 0.6px at 14% 27%, rgb(255 255 255 / 0.45), transparent),
+    radial-gradient(0.5px 0.5px at 48% 12%, rgb(255 255 255 / 0.4), transparent),
+    radial-gradient(0.6px 0.6px at 71% 58%, rgb(255 255 255 / 0.42), transparent),
+    radial-gradient(0.5px 0.5px at 33% 84%, rgb(255 255 255 / 0.38), transparent),
+    radial-gradient(0.6px 0.6px at 92% 39%, rgb(255 255 255 / 0.44), transparent);
+  background-size: 5% 5%;
+  opacity: 0.5;
+  filter: blur(0.3px);
+}
+
+/* Foschia intermedia: riempie il salto fra il fondo e i piani vicini. */
+.intro-stars--haze {
+  --sky-from: 0.7;
+  --sky-to: 4.7;
+  background-image:
+    radial-gradient(1px 1px at 21% 63%, rgb(255 255 255 / 0.68), transparent),
+    radial-gradient(1.1px 1.1px at 55% 29%, rgb(255 255 255 / 0.72), transparent),
+    radial-gradient(1px 1px at 77% 81%, rgb(255 255 255 / 0.66), transparent),
+    radial-gradient(1.1px 1.1px at 38% 45%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1px 1px at 88% 15%, rgb(255 255 255 / 0.64), transparent),
+    radial-gradient(1px 1px at 6% 92%, rgb(255 255 255 / 0.62), transparent);
+  background-size: 15% 15%;
+  opacity: 0.8;
+}
+
+/**
+ * Il piano che sfreccia addosso.
+ *
+ * Poche stelle, enormi e sfocate: passano così vicine da non essere più a
+ * fuoco. È ciò che trasforma un cielo che si allarga in un viaggio a velocità.
+ */
+.intro-stars--blur {
+  --sky-from: 1.5;
+  --sky-to: 13;
+  background-image:
+    radial-gradient(3px 3px at 31% 22%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(2.6px 2.6px at 74% 63%, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(2.8px 2.8px at 12% 74%, rgb(255 255 255 / 0.8), transparent);
+  background-size: 85% 85%;
+  opacity: 0.75;
+  filter: blur(1.1px);
+}
+
 /**
  * L'avanzamento fra le stelle: è tutto il movimento della scena.
  *
  * Due fasi, e il punto di giunzione è calcolato perché la velocità NON cambi
  * di colpo:
  *
- *   0 → 8s   corsa a velocità COSTANTE (`linear`). Una curva unica che si
- *            appiattiva presto faceva sembrare il cielo già fermo dal quinto
- *            secondo: quasi tutto il cammino era finito a metà tempo.
- *   8 → 9s   frenata: decelerazione uniforme fino a velocità zero.
+ *   0 → 8,3s   corsa a velocità COSTANTE (`linear`). Una curva unica che si
+ *              appiattiva presto faceva sembrare il cielo già fermo a metà
+ *              tempo, perché quasi tutto il cammino era finito lì.
+ *   8,3 → 9s   frenata: decelerazione uniforme fino a velocità zero, tutta
+ *              concentrata nell'ultimo istante, quando il marchio compare.
  *
- * Il valore all'ottavo secondo è il 94,2% del cammino, non un numero a caso:
- * è il punto in cui la velocità costante della prima fase equivale al doppio
- * della velocità media della frenata — cioè la condizione perché le due fasi
- * si saldino senza strappi.
+ * Il 95,9% del cammino all'inizio della frenata non è un numero a caso: è il
+ * punto in cui la velocità costante della prima fase equivale al doppio della
+ * velocità media della frenata — la condizione perché le due fasi si saldino
+ * senza strappi. Accorciando la frenata quel valore sale, ed è ciò che rende
+ * l'arresto secco pur restando continuo.
  *
  * Dal 64% (nono secondo) in poi i valori non cambiano più: il cielo è fermo ma
- * resta lì, e tutti e tre i livelli si arrestano nello stesso istante.
+ * resta lì, e tutti i piani si arrestano nello stesso istante.
  */
 @keyframes intro-sky-drift {
   0% {
@@ -2418,15 +2468,15 @@ html.theme-transitions .border-bento-border {
     opacity: 0.9;
     animation-timing-function: linear;
   }
-  /* Ottavo secondo: fin qui si è viaggiato a velocità piena. */
-  57% {
+  /* Fin qui si è viaggiato a velocità piena. */
+  59% {
     transform: scale(
-      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.942)
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.959)
     );
     opacity: 1;
     animation-timing-function: cubic-bezier(0.33, 0.66, 0.66, 1);
   }
-  /* Nono secondo: fermo. */
+  /* Nono secondo: fermo, insieme alla comparsa del marchio. */
   64% { transform: scale(var(--sky-to, 2.6)); opacity: 1; }
   /* Fermo, ma sempre presente. */
   100% { transform: scale(var(--sky-to, 2.6)); opacity: 0.95; }
