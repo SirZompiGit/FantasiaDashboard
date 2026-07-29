@@ -442,6 +442,10 @@ export function DashboardHeader({
                     </option>
                   ))}
                 </select>
+                <p className="text-[10px] leading-snug text-slate-500">
+                  È l&apos;aspetto delle barre lasciate su &quot;Come la campagna&quot;. Ogni
+                  barra può sceglierne uno proprio dalla sezione Design del suo form.
+                </p>
               </label>
 
               <div className="space-y-1.5">

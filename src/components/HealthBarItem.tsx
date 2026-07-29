@@ -211,8 +211,13 @@ function BarTrack({
    * non ha tacche, e un tracciato cardiaco spezzato in blocchi non è più un
    * tracciato. Gli altri design mantengono i segmenti sotto soglia.
    */
-  const sizedFill = usesSizedFill(design);
-  const useSegments = max <= segmentThreshold && !sizedFill;
+  /**
+   * Solo le tracce piene: su una risorsa alta dieci pixel non c'è onda né
+   * tracciato da preservare, e misurare il riempimento invece di scalarlo lo
+   * faceva sparire quando il contenitore non aveva un'altezza propria.
+   */
+  const sizedFill = usesSizedFill(design) && !thin;
+  const useSegments = max <= segmentThreshold && !sizedFill && !usesSizedFill(design);
 
   const commit = (next: number) => {
     if (!onChange) return;

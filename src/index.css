@@ -1990,9 +1990,16 @@ html.theme-transitions .border-bento-border {
   overflow: hidden;
 }
 
+/**
+ * Il riempimento è SQUADRATO, non a pillola.
+ *
+ * Arrotondandolo, il bordo curvo e l'onda attaccata di fianco non combaciavano
+ * e restava una fessura fra i due. A dare la forma a capsula ci pensa già la
+ * traccia, che è arrotondata e ritaglia ciò che contiene.
+ */
 .hp-track--capsula .hp-segment,
 .hp-track--pozione .hp-segment {
-  border-radius: 9999px;
+  border-radius: 0;
   overflow: visible;
 }
 
@@ -2008,12 +2015,14 @@ html.theme-transitions .border-bento-border {
 
 /* Orizzontale: la superficie è il bordo destro, quindi l'onda corre in
    verticale e ondeggia lungo l'altezza. */
+/* `right` negativo di poco meno della larghezza: l'onda si SOVRAPPONE di un
+   paio di pixel al riempimento, così fra i due non resta una riga vuota. */
 .hp-track--capsula.flex-row .hp-segment::after,
 .hp-track--pozione.flex-row .hp-segment::after {
   top: 0;
   bottom: 0;
   right: -0.5rem;
-  width: 0.55rem;
+  width: 0.62rem;
   -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='36'%20viewBox='0%200%2010%2036'%3E%3Cpath%20d='M0,0%20C9,4.5%209,13.5%200,18%20C9,22.5%209,31.5%200,36%20Z'%20fill='white'/%3E%3C/svg%3E")
     repeat-y 0 0 / 100% 2.25rem;
   mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='36'%20viewBox='0%200%2010%2036'%3E%3Cpath%20d='M0,0%20C9,4.5%209,13.5%200,18%20C9,22.5%209,31.5%200,36%20Z'%20fill='white'/%3E%3C/svg%3E")
@@ -2027,7 +2036,7 @@ html.theme-transitions .border-bento-border {
   left: 0;
   right: 0;
   top: -0.5rem;
-  height: 0.55rem;
+  height: 0.62rem;
   -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='36'%20height='10'%20viewBox='0%200%2036%2010'%3E%3Cpath%20d='M0,10%20C4.5,1%2013.5,1%2018,10%20C22.5,1%2031.5,1%2036,10%20Z'%20fill='white'/%3E%3C/svg%3E")
     repeat-x 0 100% / 2.25rem 100%;
   mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='36'%20height='10'%20viewBox='0%200%2036%2010'%3E%3Cpath%20d='M0,10%20C4.5,1%2013.5,1%2018,10%20C22.5,1%2031.5,1%2036,10%20Z'%20fill='white'/%3E%3C/svg%3E")
@@ -2079,28 +2088,50 @@ html.theme-transitions .border-bento-border {
 
 /* --- Pozione: le bolle che salgono ------------------------------------- */
 
+/**
+ * Poche bolle, sparse e mai allineate.
+ *
+ * Con `repeat` formavano colonne continue — sembravano righe punteggiate, non
+ * bolle — e nelle capsuline si vedeva soltanto quello. Qui sono tre, ciascuna
+ * `no-repeat`, di dimensioni diverse e a quote irregolari, e viaggiano NELLA
+ * DIREZIONE del riempimento: verso destra nella barra orizzontale, verso l'alto
+ * in quella verticale.
+ */
 .hp-track--pozione .hp-segment::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border-radius: inherit;
+  overflow: hidden;
   background-image:
-    radial-gradient(circle, rgb(255 255 255 / 0.75) 42%, transparent 44%),
-    radial-gradient(circle, rgb(255 255 255 / 0.6) 40%, transparent 42%),
-    radial-gradient(circle, rgb(255 255 255 / 0.5) 38%, transparent 40%);
-  background-size: 0.42rem 0.42rem, 0.3rem 0.3rem, 0.55rem 0.55rem;
-  background-position: 18% 90%, 62% 70%, 84% 95%;
-  background-repeat: repeat-y, repeat-y, repeat-y;
-  animation: pozione-bolle 3.4s linear infinite;
+    radial-gradient(circle, rgb(255 255 255 / 0.7) 45%, transparent 47%),
+    radial-gradient(circle, rgb(255 255 255 / 0.5) 45%, transparent 47%),
+    radial-gradient(circle, rgb(255 255 255 / 0.6) 45%, transparent 47%);
+  background-size: 0.38rem 0.38rem, 0.24rem 0.24rem, 0.3rem 0.3rem;
+  background-repeat: no-repeat;
 }
 
-/* Le bolle salgono sempre verso l'alto, anche nella barra orizzontale: è il
-   verso che rende l'idea del liquido. */
-@keyframes pozione-bolle {
-  0% { background-position: 18% 100%, 62% 100%, 84% 100%; opacity: 0.15; }
-  25% { opacity: 0.75; }
-  100% { background-position: 22% -40%, 58% -60%, 80% -30%; opacity: 0; }
+.hp-track--pozione.flex-row .hp-segment::before {
+  animation: pozione-bolle-x 4.2s linear infinite;
+}
+
+.hp-track--pozione.flex-col-reverse .hp-segment::before {
+  animation: pozione-bolle-y 4.2s linear infinite;
+}
+
+/* Quote diverse (28%, 66%, 47%) e partenze sfalsate: non salgono mai in fila. */
+@keyframes pozione-bolle-x {
+  0% { background-position: -8% 28%, -22% 66%, -40% 47%; opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.7; }
+  100% { background-position: 108% 24%, 122% 70%, 140% 43%; opacity: 0; }
+}
+
+@keyframes pozione-bolle-y {
+  0% { background-position: 28% 108%, 66% 122%, 47% 140%; opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.7; }
+  100% { background-position: 24% -8%, 70% -22%, 43% -40%; opacity: 0; }
 }
 
 /* === GEMME ===============================================================
@@ -2144,9 +2175,9 @@ html.theme-transitions .border-bento-border {
 
 /* Orizzontale: il tracciato corre da sinistra a destra. */
 .hp-track--battito.flex-row .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L40,7%20L46,33%20L52,13%20L57,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
     repeat-x 0 center / 7.5rem 100%;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L40,7%20L46,33%20L52,13%20L57,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
     repeat-x 0 center / 7.5rem 100%;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
@@ -2155,9 +2186,9 @@ html.theme-transitions .border-bento-border {
 
 /* Verticale: lo stesso tracciato ruotato di 90°, i picchi sporgono ai lati. */
 .hp-track--battito.flex-col-reverse .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V26%20L20,32%20L8,36%20L32,42%20L14,48%20L20,52%20V70%20L20,74%20L12,78%20L28,84%20L20,88%20V120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L7,40%20L33,46%20L13,52%20L20,57%20V120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
     repeat-y center 0 / 100% 7.5rem;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V26%20L20,32%20L8,36%20L32,42%20L14,48%20L20,52%20V70%20L20,74%20L12,78%20L28,84%20L20,88%20V120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L7,40%20L33,46%20L13,52%20L20,57%20V120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
     repeat-y center 0 / 100% 7.5rem;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
