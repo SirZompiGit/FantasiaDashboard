@@ -16,6 +16,7 @@
 
 import { type FormEvent, useState } from 'react';
 import type { ColoredBar, HealthBar, Resource, StatusEffect } from '../types';
+import { BAR_STYLES, type BarStyle } from '../theme';
 import { ChevronRight, Eye, EyeOff, Plus, Trash2, X } from 'lucide-react';
 import { IconButton } from './ui/IconButton';
 import { FIELD, FIELD_SM } from './ui/fields';
@@ -81,6 +82,8 @@ interface FormValues extends ColorDraft {
   zeroHpText: string;
   lowHpAlert: boolean;
   hidden: boolean;
+  /** Vuoto = eredita il design della campagna. */
+  barStyle: BarStyle | '';
   resources: ResourceDraft[];
   statusEffects: StatusDraft[];
 }
@@ -102,6 +105,7 @@ const EMPTY_FORM: FormValues = {
   zeroHpText: DEFAULT_ZERO_HP_TEXT,
   lowHpAlert: true,
   hidden: false,
+  barStyle: '',
   resources: [],
   statusEffects: [],
 };
@@ -142,6 +146,7 @@ function toDraft(bar: HealthBar): FormValues {
     zeroHpText: bar.zeroHpText ?? DEFAULT_ZERO_HP_TEXT,
     lowHpAlert: bar.lowHpAlert !== false,
     hidden: bar.hidden === true,
+    barStyle: bar.barStyle ?? '',
     resources: (bar.resources ?? []).map((resource) => ({
       id: resource.id,
       name: resource.name,
@@ -323,6 +328,7 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
   const [showResources, setShowResources] = useState(() => (bar?.resources?.length ?? 0) > 0);
   const [showEffects, setShowEffects] = useState(() => (bar?.statusEffects?.length ?? 0) > 0);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showDesign, setShowDesign] = useState(false);
   const [expandedResource, setExpandedResource] = useState<string | null>(null);
 
   const setField = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
@@ -422,6 +428,8 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
       zeroHpText: form.zeroHpText.trim() || DEFAULT_ZERO_HP_TEXT,
       lowHpAlert: form.lowHpAlert,
       hidden: form.hidden || undefined,
+      // Assente = segue il design della campagna.
+      barStyle: form.barStyle || undefined,
       // Assente quando non ce ne sono: una barra senza risorse deve produrre lo
       // stesso identico payload di prima che le risorse esistessero.
       resources: resources.length > 0 ? resources : undefined,
@@ -739,6 +747,45 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
                 </div>
               ))
             )}
+          </div>
+        )}
+      </div>
+
+      {/* ------------------------------------------------------------ design */}
+      <div className="space-y-2 border-t border-bento-border pt-3">
+        <SectionToggle
+          title="Design"
+          badge={
+            form.barStyle
+              ? BAR_STYLES.find((style) => style.id === form.barStyle)?.label
+              : 'come la campagna'
+          }
+          open={showDesign}
+          onToggle={() => setShowDesign((v) => !v)}
+        />
+
+        {showDesign && (
+          <div className="space-y-1.5 animate-fade-in">
+            {/* Ogni barra può avere il proprio aspetto: una fiala per il veleno,
+                un tracciato cardiaco per il boss, anelli per le risorse magiche. */}
+            <select
+              value={form.barStyle}
+              onChange={(event) => setField('barStyle', event.target.value as BarStyle | '')}
+              aria-label="Design di questa barra"
+              className={`${FIELD} w-full cursor-pointer`}
+            >
+              <option value="">Come la campagna</option>
+              {BAR_STYLES.map((style) => (
+                <option key={style.id} value={style.id}>
+                  {style.label} — {style.hint}
+                </option>
+              ))}
+            </select>
+
+            <p className="text-[10px] leading-snug text-slate-500">
+              Vale solo per questa barra. Lasciando &quot;come la campagna&quot; segue
+              l&apos;impostazione generale.
+            </p>
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import {
   SOLID_THEMES,
   STYLES,
   THEMES,
+  isKnownBarStyle,
   isLightStyle,
   normalizeBarStyle,
   normalizeLogoVariant,
@@ -145,9 +146,26 @@ describe('design', () => {
 });
 
 describe('aspetto delle barre', () => {
-  it('offre solo Classico (predefinito) e Circolare', () => {
-    expect(BAR_STYLES.map((b) => b.id)).toEqual(['classico', 'circolare']);
+  it('parte dal classico e propone i design alternativi', () => {
+    expect(BAR_STYLES.map((b) => b.id)).toEqual([
+      'classico',
+      'circolare',
+      'capsula',
+      'gemme',
+      'battito',
+    ]);
     expect(DEFAULT_BAR_STYLE).toBe('classico');
+  });
+
+  /**
+   * Sulla singola barra il campo è facoltativo: un design ignoto non deve
+   * diventare 'classico' ma sparire, lasciando che la barra erediti quello
+   * della campagna.
+   */
+  it('riconosce i design esistenti, uno per uno', () => {
+    for (const style of BAR_STYLES) expect(isKnownBarStyle(style.id)).toBe(true);
+    expect(isKnownBarStyle('fiala')).toBe(false);
+    expect(isKnownBarStyle('')).toBe(false);
   });
 
   it('accetta i valori previsti e ricade sul classico', () => {

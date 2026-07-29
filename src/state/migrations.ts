@@ -39,7 +39,13 @@ import {
 } from '../lib/healthBars';
 import { DEFAULT_STAT, DEFAULT_STAT_LABELS, STAT_COUNT, clampStat } from '../lib/stats';
 import { clampClips, normalizeClipPlayback } from '../lib/soundClips';
-import { normalizeBarStyle, normalizeLogoVariant, normalizeStyle, normalizeTheme } from '../theme';
+import {
+  isKnownBarStyle,
+  normalizeBarStyle,
+  normalizeLogoVariant,
+  normalizeStyle,
+  normalizeTheme,
+} from '../theme';
 import { DEFAULT_DICE_LABELS, createEmptyCampaign } from './defaults';
 
 export const SCHEMA_VERSION = 2;
@@ -226,6 +232,12 @@ function normalizeHealthBar(value: unknown): HealthBar | null {
 
   // Assente quando visibile: una barra normale si serializza come prima.
   if (value.hidden === true) bar.hidden = true;
+
+  // Assente quando la barra segue il design della campagna. Un valore ignoto
+  // (design rimosso in un aggiornamento) viene semplicemente ignorato.
+  if (typeof value.barStyle === 'string' && isKnownBarStyle(value.barStyle)) {
+    bar.barStyle = value.barStyle;
+  }
 
   return bar;
 }

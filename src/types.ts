@@ -127,6 +127,12 @@ export interface HealthBar extends ColoredBar {
    * è visibile, così le barre normali non cambiano payload.
    */
   hidden?: boolean;
+  /**
+   * Aspetto di QUESTA barra. Assente = eredita il design della campagna, così
+   * le barre già create non cambiano faccia e il payload resta identico a
+   * prima che il campo esistesse.
+   */
+  barStyle?: BarStyle;
 }
 
 export interface RollResult {

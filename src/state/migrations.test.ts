@@ -313,3 +313,27 @@ describe('parseImportedCampaign', () => {
     expect(parseImportedCampaign('{"players":[]}').ok).toBe(false);
   });
 });
+
+describe('design della singola barra', () => {
+  const bar = (barStyle: unknown) =>
+    normalizeCampaign({
+      title: 'X',
+      healthBars: [{ name: 'Boss', maxValue: 10, currentValue: 10, barStyle }],
+    }).healthBars[0];
+
+  it('conserva un design esistente', () => {
+    expect(bar('capsula').barStyle).toBe('capsula');
+  });
+
+  /**
+   * Il campo è facoltativo: assente significa "eredita dalla campagna". Un
+   * valore ignoto non deve trasformarsi in 'classico', altrimenti una barra
+   * salvata con un design poi rimosso resterebbe inchiodata al predefinito
+   * invece di seguire la campagna.
+   */
+  it('resta assente quando manca o non è riconosciuto', () => {
+    for (const input of [undefined, null, 'fiala', 42, '']) {
+      expect(bar(input)).not.toHaveProperty('barStyle');
+    }
+  });
+});

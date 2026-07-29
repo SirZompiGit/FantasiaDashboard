@@ -170,13 +170,16 @@ export function isLightStyle(style: CampaignStyle): boolean {
  * Non è una skin CSS ma un layout reso dal componente; il colore resta quello
  * di ogni barra, quindi si adatta a qualunque design generale.
  */
-export type BarStyle = 'classico' | 'circolare';
+export type BarStyle = 'classico' | 'circolare' | 'capsula' | 'gemme' | 'battito';
 
 export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
 
 export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
   { id: 'classico', label: 'Classico', hint: 'Barre lineari (predefinito)' },
   { id: 'circolare', label: 'Circolare', hint: 'Anelli: principale grande, risorse piccole' },
+  { id: 'capsula', label: 'Capsula', hint: 'Fiala di liquido che ondeggia, risorse a pastiglia' },
+  { id: 'gemme', label: 'Gemme', hint: 'Cristalli incastonati che si spengono uno a uno' },
+  { id: 'battito', label: 'Battito', hint: 'Tracciato cardiaco che pulsa e si spegne' },
 ];
 
 const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));
@@ -185,6 +188,15 @@ export function normalizeBarStyle(value: unknown): BarStyle {
   return typeof value === 'string' && BAR_STYLE_IDS.has(value)
     ? (value as BarStyle)
     : DEFAULT_BAR_STYLE;
+}
+
+/**
+ * Vero solo per un design ancora esistente. Serve alle singole barre, dove il
+ * campo è FACOLTATIVO: un valore ignoto non deve diventare 'classico', deve
+ * sparire e lasciare che la barra erediti il design della campagna.
+ */
+export function isKnownBarStyle(value: string): value is BarStyle {
+  return BAR_STYLE_IDS.has(value);
 }
 
 /**

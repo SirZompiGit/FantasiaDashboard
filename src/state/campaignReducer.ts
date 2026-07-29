@@ -147,6 +147,9 @@ function applyBarChanges(bar: HealthBar, changes: Partial<Omit<HealthBar, 'id'>>
   // Assente quando visibile: il payload di una barra normale non cambia.
   if (!next.hidden) delete next.hidden;
 
+  // Assente quando la barra segue il design della campagna.
+  if (!next.barStyle) delete next.barStyle;
+
   return next;
 }
 

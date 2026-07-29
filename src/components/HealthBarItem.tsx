@@ -168,6 +168,8 @@ interface BarTrackProps {
   className?: string;
   /** Classi aggiuntive sulla traccia, per il lampeggio di danno e cura. */
   trackClassName?: string;
+  /** Design della barra: aggancia le regole `hp-track--*` di index.css. */
+  design?: BarStyle;
 }
 
 /**
@@ -192,6 +194,7 @@ function BarTrack({
   alert = false,
   className = '',
   trackClassName = '',
+  design = 'classico',
 }: BarTrackProps) {
   const hitRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -203,7 +206,13 @@ function BarTrack({
     : vertical
       ? VERTICAL_SEGMENT_THRESHOLD
       : SEGMENT_THRESHOLD;
-  const useSegments = max <= segmentThreshold;
+  /**
+   * Capsula e Battito vogliono una massa continua: il liquido di una fiala non
+   * ha tacche, e un tracciato cardiaco spezzato in blocchi non è più un
+   * tracciato. Gli altri design mantengono i segmenti sotto soglia.
+   */
+  const continuous = design === 'capsula' || design === 'battito';
+  const useSegments = max <= segmentThreshold && !continuous;
 
   const commit = (next: number) => {
     if (!onChange) return;
@@ -285,7 +294,15 @@ function BarTrack({
    * qui sopra, e quelle misure su dieci pixel azzerano il riempimento. La
    * classe è l'aggancio con cui `index.css` le riporta in proporzione.
    */
-  const trackVariant = thin ? 'hp-track--thin' : '';
+  /**
+   * `hp-track--thin` non è decorativa (vedi sopra); `hp-track--<design>` è
+   * l'aggancio dei design della singola barra. Sono classi scritte a mano in
+   * index.css, non utility di Tailwind, quindi comporle qui a runtime è sicuro:
+   * non dipendono dall'estrazione a build time.
+   */
+  const trackVariant = `${thin ? 'hp-track--thin' : ''} ${
+    design === 'classico' ? '' : `hp-track--${design}`
+  }`;
 
   return (
     <div
@@ -594,10 +611,13 @@ export function HealthBarItem({
   }, [bar]);
 
   const isVertical = layout === 'vertical';
-  // Il design 'circolare' rende anelli invece di tracce: barra principale grande
-  // a sinistra, risorse piccole a fianco. Ha la precedenza sull'orientamento
-  // verticale, che per gli anelli non ha senso.
-  const isCircular = barStyle === 'circolare';
+  /**
+   * Il design della SINGOLA barra vince su quello della campagna: così una
+   * fiala di veleno e un tracciato cardiaco possono stare nello stesso tavolo.
+   * Assente sulla barra = eredita, ed è il caso di tutte quelle già create.
+   */
+  const style: BarStyle = bar.barStyle ?? barStyle;
+  const isCircular = style === 'circolare';
   const percentage = healthRatio(bar) * 100;
   const activeColor = getBarColor(bar);
   const inAlert = isLowHp(bar);
@@ -641,6 +661,7 @@ export function HealthBarItem({
       onChange={(value) => onChangeValue(bar, value)}
       label={`Punti ferita di ${bar.name}`}
       alert={inAlert}
+      design={style}
       className={isVertical ? VERTICAL_MAIN : 'w-full'}
       trackClassName={flashRing}
     />
@@ -652,13 +673,16 @@ export function HealthBarItem({
       value={resource.currentValue}
       max={resource.maxValue}
       color={getBarColor(resource)}
-      vertical={isVertical}
+      // Nella fiala le risorse sono bolle tonde che si riempiono dal basso,
+      // quindi si comportano come tracce verticali qualunque sia l'impaginato.
+      vertical={isVertical || style === 'capsula'}
       thin
       readOnly={readOnly || !onChangeResource}
       onChange={
         onChangeResource ? (value) => onChangeResource(bar, resource, value) : undefined
       }
       label={`${resource.name} di ${bar.name}`}
+      design={style}
       className={className}
     />
   );
@@ -1111,7 +1135,24 @@ export function HealthBarItem({
 
       {effectPills}
 
-      {!isCircular && resources.length > 0 && (
+      {/* Fiala: le risorse sono bolle tonde in fila, non righe. */}
+      {style === 'capsula' && resources.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap items-start gap-3">
+          {resources.map((resource) => (
+            <div key={resource.id} className="flex flex-col items-center gap-1">
+              {resourceTrack(resource, 'h-11 w-11 shrink-0')}
+              <span
+                className="max-w-[4.5rem] truncate font-mono text-[9px] font-bold uppercase tracking-wider text-slate-400"
+                title={`${resource.name}: ${resource.currentValue}/${resource.maxValue}`}
+              >
+                {resource.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isCircular && style !== 'capsula' && resources.length > 0 && (
         <div className="mt-1.5 space-y-0.5">
           {resources.map((resource) => (
             <div key={resource.id} className="flex items-center gap-2">
