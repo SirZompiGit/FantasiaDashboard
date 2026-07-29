@@ -24,7 +24,7 @@
 
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import type { HealthBar, Resource } from '../types';
-import type { BarStyle } from '../theme';
+import { usesSizedFill, type BarStyle } from '../theme';
 import {
   ChevronDown,
   ChevronUp,
@@ -207,12 +207,12 @@ function BarTrack({
       ? VERTICAL_SEGMENT_THRESHOLD
       : SEGMENT_THRESHOLD;
   /**
-   * Capsula e Battito vogliono una massa continua: il liquido di una fiala non
-   * ha tacche, e un tracciato cardiaco spezzato in blocchi non è più un
+   * Liquidi e tracciato vogliono una massa continua: il liquido di una fiala
+   * non ha tacche, e un tracciato cardiaco spezzato in blocchi non è più un
    * tracciato. Gli altri design mantengono i segmenti sotto soglia.
    */
-  const continuous = design === 'capsula' || design === 'battito';
-  const useSegments = max <= segmentThreshold && !continuous;
+  const sizedFill = usesSizedFill(design);
+  const useSegments = max <= segmentThreshold && !sizedFill;
 
   const commit = (next: number) => {
     if (!onChange) return;
@@ -366,14 +366,31 @@ function BarTrack({
               style={{ backgroundColor: color, opacity: 0.08 }}
             />
             <div
-              className="hp-segment absolute inset-0 rounded-sm transition-transform duration-200"
+              className={`hp-segment absolute rounded-sm duration-200 ${
+                sizedFill ? 'transition-[width,height]' : 'inset-0 transition-transform'
+              }`}
               style={{
                 backgroundColor: color,
                 boxShadow: `0 0 15px ${color}70`,
-                transform: vertical
-                  ? `scaleY(${percentage / 100})`
-                  : `scaleX(${percentage / 100})`,
-                transformOrigin: vertical ? 'bottom' : 'left',
+                /**
+                 * Due modi di rappresentare il livello:
+                 *
+                 *  scala   il riempimento resta grande quanto la traccia e viene
+                 *          rimpicciolito — economico, ma deforma tutto ciò che
+                 *          contiene o che gli si attacca al bordo;
+                 *  misura  il riempimento è davvero largo (o alto) quanto il
+                 *          livello, così onde e tracciati restano integri.
+                 */
+                ...(sizedFill
+                  ? vertical
+                    ? { left: 0, right: 0, bottom: 0, height: `${percentage}%` }
+                    : { top: 0, bottom: 0, left: 0, width: `${percentage}%` }
+                  : {
+                      transform: vertical
+                        ? `scaleY(${percentage / 100})`
+                        : `scaleX(${percentage / 100})`,
+                      transformOrigin: vertical ? 'bottom' : 'left',
+                    }),
               }}
             />
           </div>
@@ -675,7 +692,7 @@ export function HealthBarItem({
       color={getBarColor(resource)}
       // Nella fiala le risorse sono bolle tonde che si riempiono dal basso,
       // quindi si comportano come tracce verticali qualunque sia l'impaginato.
-      vertical={isVertical || style === 'capsula'}
+      vertical={isVertical || style === 'capsula' || style === 'pozione'}
       thin
       readOnly={readOnly || !onChangeResource}
       onChange={
@@ -1136,7 +1153,7 @@ export function HealthBarItem({
       {effectPills}
 
       {/* Fiala: le risorse sono bolle tonde in fila, non righe. */}
-      {style === 'capsula' && resources.length > 0 && (
+      {(style === 'capsula' || style === 'pozione') && resources.length > 0 && (
         <div className="mt-2.5 flex flex-wrap items-start gap-3">
           {resources.map((resource) => (
             <div key={resource.id} className="flex flex-col items-center gap-1">
@@ -1152,7 +1169,7 @@ export function HealthBarItem({
         </div>
       )}
 
-      {!isCircular && style !== 'capsula' && resources.length > 0 && (
+      {!isCircular && style !== 'capsula' && style !== 'pozione' && resources.length > 0 && (
         <div className="mt-1.5 space-y-0.5">
           {resources.map((resource) => (
             <div key={resource.id} className="flex items-center gap-2">

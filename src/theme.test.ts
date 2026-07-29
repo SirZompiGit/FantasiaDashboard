@@ -15,6 +15,7 @@ import {
   normalizeLogoVariant,
   normalizeStyle,
   normalizeTheme,
+  usesSizedFill,
 } from './theme';
 
 describe('temi di colore', () => {
@@ -151,6 +152,7 @@ describe('aspetto delle barre', () => {
       'classico',
       'circolare',
       'capsula',
+      'pozione',
       'gemme',
       'battito',
     ]);
@@ -193,5 +195,24 @@ describe('variante del marchio', () => {
     expect(normalizeLogoVariant(undefined)).toBe('normal');
     expect(normalizeLogoVariant('arcobaleno')).toBe('normal');
     expect(normalizeLogoVariant(42)).toBe('normal');
+  });
+});
+
+describe('riempimento dimensionato', () => {
+  /**
+   * Onde e tracciati vivono DENTRO il riempimento o attaccati al suo bordo:
+   * ingrandirlo con `transform: scale` li deformerebbe insieme a lui. Questi
+   * design devono quindi usare la misura reale.
+   */
+  it('vale per i design che disegnano sul riempimento', () => {
+    for (const style of ['capsula', 'pozione', 'battito'] as const) {
+      expect(usesSizedFill(style)).toBe(true);
+    }
+  });
+
+  it('non tocca i design che non ne hanno bisogno', () => {
+    for (const style of ['classico', 'circolare', 'gemme'] as const) {
+      expect(usesSizedFill(style)).toBe(false);
+    }
   });
 });

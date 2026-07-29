@@ -170,17 +170,36 @@ export function isLightStyle(style: CampaignStyle): boolean {
  * Non è una skin CSS ma un layout reso dal componente; il colore resta quello
  * di ogni barra, quindi si adatta a qualunque design generale.
  */
-export type BarStyle = 'classico' | 'circolare' | 'capsula' | 'gemme' | 'battito';
+export type BarStyle =
+  | 'classico'
+  | 'circolare'
+  | 'capsula'
+  | 'pozione'
+  | 'gemme'
+  | 'battito';
 
 export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
 
 export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
   { id: 'classico', label: 'Classico', hint: 'Barre lineari (predefinito)' },
   { id: 'circolare', label: 'Circolare', hint: 'Anelli: principale grande, risorse piccole' },
-  { id: 'capsula', label: 'Capsula', hint: 'Fiala di liquido che ondeggia, risorse a pastiglia' },
+  { id: 'capsula', label: 'Capsula', hint: 'Liquido con la superficie che ondeggia' },
+  { id: 'pozione', label: 'Pozione', hint: 'Come Capsula, ma con le bolle che salgono' },
   { id: 'gemme', label: 'Gemme', hint: 'Cristalli incastonati che si spengono uno a uno' },
-  { id: 'battito', label: 'Battito', hint: 'Tracciato cardiaco che pulsa e si spegne' },
+  { id: 'battito', label: 'Battito', hint: 'Tracciato cardiaco che scorre e pulsa' },
 ];
+
+/**
+ * Design il cui riempimento è dimensionato davvero (larghezza/altezza) invece
+ * che ingrandito con `transform: scale`.
+ *
+ * Serve a chi disegna qualcosa sul bordo o dentro il riempimento: la scala
+ * deforma tutto ciò che contiene — a metà vita un'onda sarebbe larga la metà e
+ * un tracciato risulterebbe compresso — e per giunta lo taglia ai bordi.
+ */
+export function usesSizedFill(style: BarStyle): boolean {
+  return style === 'capsula' || style === 'pozione' || style === 'battito';
+}
 
 const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));
 

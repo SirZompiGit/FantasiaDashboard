@@ -1967,60 +1967,87 @@ html.theme-transitions .border-bento-border {
 /* --------------------------------------------------------------------------
    Design della singola barra.
 
-   Si sceglie barra per barra (sezione "Design" nel form), non più solo per
-   l'intera campagna: al tavolo una fiala di veleno e un tracciato cardiaco
-   possono convivere. `classico` non ha regole — è l'aspetto di sempre.
+   Si sceglie nelle impostazioni per l'intera campagna e, volendo, barra per
+   barra nella sezione "Design" del form: al tavolo una fiala di veleno e un
+   tracciato cardiaco possono convivere. `classico` non ha regole — è l'aspetto
+   di sempre.
 
-   Tutto è agganciato a `.hp-track--<nome>`, e le regole stanno DOPO i blocchi
-   dei design generali per poterli scavalcare quando serve.
+   Capsula, Pozione e Battito hanno il riempimento DIMENSIONATO (larghezza o
+   altezza reale, vedi `usesSizedFill` in theme.ts) e non ingrandito con
+   `transform`: solo così l'onda resta della stessa forma a ogni livello e il
+   tracciato non si comprime.
    -------------------------------------------------------------------------- */
 
-/* === CAPSULA === Fiala di liquido: pillola chiusa, massa continua e una
-   superficie che ondeggia sul fronte di avanzamento. ------------------------ */
+/* === CAPSULA e POZIONE ===================================================
+   Fiala di liquido: pillola chiusa, massa continua e la SUPERFICIE che
+   ondeggia. L'onda è un pezzo di liquido in più, attaccato al bordo del
+   riempimento e sagomato da una maschera sinusoidale che scorre.
+   ========================================================================= */
 
-.hp-track.hp-track--capsula {
+.hp-track--capsula,
+.hp-track--pozione {
   border-radius: 9999px;
   overflow: hidden;
 }
 
-.hp-track--capsula .hp-segment {
+.hp-track--capsula .hp-segment,
+.hp-track--pozione .hp-segment {
   border-radius: 9999px;
+  overflow: visible;
 }
 
-/**
- * Il moto del liquido sta sulla TRACCIA, non sul riempimento.
- *
- * Il riempimento è scalato con `transform` per rappresentare il livello: ogni
- * cosa attaccata lì dentro verrebbe schiacciata insieme a lui — un'onda a metà
- * vita risulterebbe larga la metà — e per giunta tagliata dai bordi. Sulla
- * traccia invece la scala non c'entra, e l'ondeggiare resta uniforme.
- */
-.hp-track--capsula::before {
+/* La superficie del liquido. Sporge dal riempimento e ne condivide il colore
+   (`background: inherit`), così sembra parte della stessa massa. */
+.hp-track--capsula .hp-segment::after,
+.hp-track--pozione .hp-segment::after {
   content: '';
   position: absolute;
-  inset: 0;
-  z-index: 15;
   pointer-events: none;
-  border-radius: inherit;
-  mix-blend-mode: overlay;
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgb(255 255 255 / 0.5) 45%,
-    rgb(255 255 255 / 0.15) 55%,
-    transparent 100%
-  );
-  background-size: 220% 100%;
-  animation: capsula-onda 2.6s ease-in-out infinite;
+  background: inherit;
 }
 
-@keyframes capsula-onda {
-  0%, 100% { background-position: 130% 50%; }
-  50% { background-position: -30% 50%; }
+/* Orizzontale: la superficie è il bordo destro, quindi l'onda corre in
+   verticale e ondeggia lungo l'altezza. */
+.hp-track--capsula.flex-row .hp-segment::after,
+.hp-track--pozione.flex-row .hp-segment::after {
+  top: 0;
+  bottom: 0;
+  right: -0.5rem;
+  width: 0.55rem;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='36'%20viewBox='0%200%2010%2036'%3E%3Cpath%20d='M0,0%20C9,4.5%209,13.5%200,18%20C9,22.5%209,31.5%200,36%20Z'%20fill='white'/%3E%3C/svg%3E")
+    repeat-y 0 0 / 100% 2.25rem;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='10'%20height='36'%20viewBox='0%200%2010%2036'%3E%3Cpath%20d='M0,0%20C9,4.5%209,13.5%200,18%20C9,22.5%209,31.5%200,36%20Z'%20fill='white'/%3E%3C/svg%3E")
+    repeat-y 0 0 / 100% 2.25rem;
+  animation: capsula-onda-y 2.1s linear infinite;
 }
 
-/* Vetro della fiala: un riflesso fisso sopra al liquido. */
-.hp-track--capsula::after {
+/* Verticale: la superficie è in cima e ondeggia lungo la larghezza. */
+.hp-track--capsula.flex-col-reverse .hp-segment::after,
+.hp-track--pozione.flex-col-reverse .hp-segment::after {
+  left: 0;
+  right: 0;
+  top: -0.5rem;
+  height: 0.55rem;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='36'%20height='10'%20viewBox='0%200%2036%2010'%3E%3Cpath%20d='M0,10%20C4.5,1%2013.5,1%2018,10%20C22.5,1%2031.5,1%2036,10%20Z'%20fill='white'/%3E%3C/svg%3E")
+    repeat-x 0 100% / 2.25rem 100%;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='36'%20height='10'%20viewBox='0%200%2036%2010'%3E%3Cpath%20d='M0,10%20C4.5,1%2013.5,1%2018,10%20C22.5,1%2031.5,1%2036,10%20Z'%20fill='white'/%3E%3C/svg%3E")
+    repeat-x 0 100% / 2.25rem 100%;
+  animation: capsula-onda-x 2.1s linear infinite;
+}
+
+/* Scorrendo di ESATTAMENTE un periodo della maschera il ciclo è invisibile:
+   l'onda sembra continua, non un motivo che riparte. */
+@keyframes capsula-onda-y {
+  to { -webkit-mask-position: 0 2.25rem; mask-position: 0 2.25rem; }
+}
+
+@keyframes capsula-onda-x {
+  to { -webkit-mask-position: 2.25rem 100%; mask-position: 2.25rem 100%; }
+}
+
+/* Vetro della fiala: riflesso fisso sopra al liquido. */
+.hp-track--capsula::after,
+.hp-track--pozione::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -2029,21 +2056,57 @@ html.theme-transitions .border-bento-border {
   border-radius: inherit;
   background: linear-gradient(
     180deg,
-    rgb(255 255 255 / 0.28) 0%,
+    rgb(255 255 255 / 0.26) 0%,
     rgb(255 255 255 / 0.06) 38%,
     transparent 55%
   );
 }
 
-/* Le risorse diventano bolle tonde che si riempiono dal basso. */
-.hp-track--capsula.hp-track--thin {
+/* Le risorse restano capsule: pillole sottili in verticale, bolle tonde nella
+   scheda orizzontale (lì è il contenitore a essere quadrato). Nessun
+   `aspect-ratio` forzato qui: in colonna schiacciava la traccia. */
+.hp-track--capsula.hp-track--thin,
+.hp-track--pozione.hp-track--thin {
   border-radius: 9999px;
-  aspect-ratio: 1;
   padding: 2px;
 }
 
-/* === GEMME === Cristalli incastonati: ogni segmento è un rombo sfaccettato che
-   si spegne quando la vita cala. --------------------------------------------- */
+/* Su una traccia di pochi pixel l'onda non si leggerebbe: resta la pillola. */
+.hp-track--capsula.hp-track--thin .hp-segment::after,
+.hp-track--pozione.hp-track--thin .hp-segment::after {
+  display: none;
+}
+
+/* --- Pozione: le bolle che salgono ------------------------------------- */
+
+.hp-track--pozione .hp-segment::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 0.75) 42%, transparent 44%),
+    radial-gradient(circle, rgb(255 255 255 / 0.6) 40%, transparent 42%),
+    radial-gradient(circle, rgb(255 255 255 / 0.5) 38%, transparent 40%);
+  background-size: 0.42rem 0.42rem, 0.3rem 0.3rem, 0.55rem 0.55rem;
+  background-position: 18% 90%, 62% 70%, 84% 95%;
+  background-repeat: repeat-y, repeat-y, repeat-y;
+  animation: pozione-bolle 3.4s linear infinite;
+}
+
+/* Le bolle salgono sempre verso l'alto, anche nella barra orizzontale: è il
+   verso che rende l'idea del liquido. */
+@keyframes pozione-bolle {
+  0% { background-position: 18% 100%, 62% 100%, 84% 100%; opacity: 0.15; }
+  25% { opacity: 0.75; }
+  100% { background-position: 22% -40%, 58% -60%, 80% -30%; opacity: 0; }
+}
+
+/* === GEMME ===============================================================
+   Cristalli incastonati: ogni segmento è un rombo sfaccettato che si spegne
+   quando la vita cala.
+   ========================================================================= */
 
 .hp-track--gemme {
   background-color: transparent;
@@ -2059,18 +2122,14 @@ html.theme-transitions .border-bento-border {
   background-image: linear-gradient(135deg, rgb(255 255 255 / 0.55), transparent 45%);
 }
 
-/* Senza segmenti (barre lunghe) la fila di rombi la disegna una maschera. */
-.hp-track--gemme.flex-row .hp-segment {
-  -webkit-mask-image: repeating-linear-gradient(
-    135deg,
-    #000 0 6px,
-    transparent 6px 8px
-  );
-  mask-image: repeating-linear-gradient(135deg, #000 0 6px, transparent 6px 8px);
-}
+/* === BATTITO =============================================================
+   Tracciato cardiaco: il riempimento non è una massa ma una linea che sale e
+   scende, scorre e pulsa.
 
-/* === BATTITO === Tracciato cardiaco: il riempimento non è una massa, è una
-   linea che sale e scende, e pulsa. ------------------------------------------ */
+   La maschera si RIPETE a dimensione fissa invece di adattarsi alla traccia:
+   allungandola su una barra verticale il tracciato si stirava fino a diventare
+   irriconoscibile.
+   ========================================================================= */
 
 .hp-track--battito {
   background-color: transparent;
@@ -2080,24 +2139,56 @@ html.theme-transitions .border-bento-border {
 .hp-track--battito .hp-segment {
   border-radius: 0 !important;
   box-shadow: none !important;
-  /* La maschera ritaglia il profilo dell'elettrocardiogramma dal riempimento:
-     resta soltanto la linea, nel colore della barra. */
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    center / auto 100% repeat-x;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    center / auto 100% repeat-x;
   animation: battito-pulsa 1.5s ease-in-out infinite;
 }
 
-/* Il battito rallenta e si affievolisce quando la barra è in allerta: è la
-   stessa condizione che fa pulsare il bordo. */
+/* Orizzontale: il tracciato corre da sinistra a destra. */
+.hp-track--battito.flex-row .hp-segment {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-x 0 center / 7.5rem 100%;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H26%20L32,20%20L36,8%20L42,32%20L48,14%20L52,20%20H70%20L74,20%20L78,12%20L84,28%20L88,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-x 0 center / 7.5rem 100%;
+  animation:
+    battito-pulsa 1.5s ease-in-out infinite,
+    battito-scorre-x 2.4s linear infinite;
+}
+
+/* Verticale: lo stesso tracciato ruotato di 90°, i picchi sporgono ai lati. */
+.hp-track--battito.flex-col-reverse .hp-segment {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V26%20L20,32%20L8,36%20L32,42%20L14,48%20L20,52%20V70%20L20,74%20L12,78%20L28,84%20L20,88%20V120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 7.5rem;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V26%20L20,32%20L8,36%20L32,42%20L14,48%20L20,52%20V70%20L20,74%20L12,78%20L28,84%20L20,88%20V120'%20fill='none'%20stroke='white'%20stroke-width='4'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 7.5rem;
+  animation:
+    battito-pulsa 1.5s ease-in-out infinite,
+    battito-scorre-y 2.4s linear infinite;
+}
+
+/* Le risorse sono troppo sottili per un tracciato: diventano una linea piena e
+   spessa, che però pulsa allo stesso ritmo della barra principale. */
+.hp-track--battito.hp-track--thin .hp-segment {
+  -webkit-mask: none;
+  mask: none;
+  border-radius: 9999px !important;
+  animation: battito-pulsa 1.5s ease-in-out infinite;
+}
+
+/* Sotto soglia il cuore accelera: stessa condizione che pulsa sul bordo. */
 .hp-track--battito.is-alert .hp-segment {
-  animation-duration: 0.75s;
+  animation-duration: 0.75s, 1.2s;
+}
+
+@keyframes battito-scorre-x {
+  to { -webkit-mask-position: -7.5rem center; mask-position: -7.5rem center; }
+}
+
+@keyframes battito-scorre-y {
+  to { -webkit-mask-position: center 7.5rem; mask-position: center 7.5rem; }
 }
 
 @keyframes battito-pulsa {
   0%, 100% { filter: brightness(1); }
-  45% { filter: brightness(1.6); }
+  45% { filter: brightness(1.7); }
 }
 
 @keyframes skeleton-pulse {

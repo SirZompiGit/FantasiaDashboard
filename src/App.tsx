@@ -587,6 +587,8 @@ export default function App() {
         onThemeChange={(theme) => dispatch({ type: 'SET_THEME', theme })}
         style={state.style}
         onStyleChange={(style) => dispatch({ type: 'SET_STYLE', style })}
+        barStyle={state.barStyle}
+        onBarStyleChange={(barStyle) => dispatch({ type: 'SET_BAR_STYLE', barStyle })}
         soundClips={state.soundClips ?? []}
         onAddSoundClip={(name, url) => dispatch({ type: 'ADD_SOUND_CLIP', name, url })}
         onRenameSoundClip={(id, name) =>
