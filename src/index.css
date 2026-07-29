@@ -2655,113 +2655,6 @@ html.theme-transitions .border-bento-border {
   100% { transform: rotate(var(--a)) translateY(105vmin) scaleY(1.5); opacity: 0; }
 }
 
-/* ==== Sagome del viaggio (accessorio) ======================================
-   Tre sagome che emergono dal fondo e ti superano di lato. Sono un accessorio:
-   questo intero blocco e il file IntroObjects.tsx si possono cancellare senza
-   toccare nient'altro dell'introduzione.
-
-   Crescono con la stessa legge del cielo — progressione geometrica, cioè
-   velocità percepita costante — e si spengono prima della frenata.
-   ========================================================================= */
-
-.intro-object {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 26vmin;
-  height: 26vmin;
-  margin: -13vmin 0 0 -13vmin;
-  pointer-events: none;
-  opacity: 0;
-  will-change: transform, opacity;
-  animation-name: intro-object-pass;
-  animation-timing-function: linear;
-  animation-fill-mode: both;
-}
-
-/* La sagoma nasce quasi al centro, minuscola, e scivola verso il proprio
-   angolo mentre ingrandisce: le tappe seguono la stessa progressione
-   geometrica del campo stellare, così non sembra rallentare. */
-@keyframes intro-object-pass {
-  0% {
-    transform: translate(calc(var(--dx) * 1vmin), calc(var(--dy) * 1vmin)) scale(0.07);
-    opacity: 0;
-  }
-  18% {
-    transform: translate(calc(var(--dx) * 7vmin), calc(var(--dy) * 7vmin)) scale(0.16);
-    opacity: 0.55;
-  }
-  40% {
-    transform: translate(calc(var(--dx) * 19vmin), calc(var(--dy) * 19vmin)) scale(0.4);
-    opacity: 0.9;
-  }
-  62% {
-    transform: translate(calc(var(--dx) * 40vmin), calc(var(--dy) * 40vmin)) scale(0.95);
-    opacity: 0.9;
-  }
-  82% {
-    transform: translate(calc(var(--dx) * 72vmin), calc(var(--dy) * 72vmin)) scale(2);
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate(calc(var(--dx) * 115vmin), calc(var(--dy) * 115vmin)) scale(3.6);
-    opacity: 0;
-  }
-}
-
-/**
- * L'ondeggiare, come un relitto alla deriva.
- *
- * Sta su un livello suo perché il `transform` non si somma: se lo mettessi
- * insieme alla traiettoria, uno dei due movimenti sparirebbe. `alternate` fa
- * tornare indietro l'animazione invece di riavviarla, quindi non c'è nessun
- * punto di ricongiunzione da nascondere.
- */
-.intro-object-float {
-  width: 100%;
-  height: 100%;
-  animation-name: intro-object-float;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-
-@keyframes intro-object-float {
-  from { transform: translate(-2.5%, 3%) rotate(-4deg); }
-  to { transform: translate(2.5%, -3%) rotate(4deg); }
-}
-
-/**
- * La rotazione su sé stessa.
- *
- * Un GIRO INTERO, sempre: prima ruotava di pochi gradi e poi ripartiva da zero,
- * e quel ritorno di scatto era il sussulto che si notava. Arrivando a 360° il
- * fotogramma finale coincide con quello iniziale, quindi il ciclo è invisibile.
- *
- * Sta sul disegno e non sul contenitore: se fosse sul contenitore girerebbe
- * anche la traiettoria, e la sagoma descriverebbe un arco invece di allontanarsi
- * dritta.
- */
-.intro-object-spin {
-  width: 100%;
-  height: 100%;
-  will-change: transform;
-  animation-name: intro-object-spin;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-@keyframes intro-object-spin {
-  to { transform: rotate(var(--turn, 360deg)); }
-}
-
-.intro-object-art {
-  width: 100%;
-  height: 100%;
-}
-
-/* ==== fine sagome del viaggio ============================================ */
-
 /* --- L'alone dell'accensione ---------------------------------------------
    Sta dietro il marchio e cresce insieme a lui: al picco è un bagliore d'oro
    ampio, poi si riduce a un chiarore appena percettibile. ------------------ */
@@ -2874,8 +2767,7 @@ html.theme-transitions .border-bento-border {
    avanzamento fra le stelle, solo il marchio che appare al momento giusto. */
 @media (prefers-reduced-motion: reduce) {
   .intro-streak,
-  .intro-cycle,
-  .intro-object {
+  .intro-cycle {
     display: none;
   }
 

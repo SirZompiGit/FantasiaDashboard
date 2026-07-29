@@ -24,9 +24,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getMuted } from '../utils/audio';
-// Accessorio: togliendo questo import e la riga <IntroObjects /> più sotto, le
-// sagome spariscono e il resto dell'introduzione non cambia di una virgola.
-import { IntroObjects } from './IntroObjects';
 
 /**
  * Durata attesa del brano. È solo il valore di partenza: appena i metadati
@@ -227,8 +224,6 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-stars intro-stars--near" />
           <div className="intro-stars intro-stars--rush" />
           <div className="intro-stars intro-stars--blur" />
-
-          <IntroObjects duration={duration} />
 
           {/* Piani che ciclano: riportano stelle nuove al centro mentre gli
               altri si allargano e svuotano l'inquadratura. */}
