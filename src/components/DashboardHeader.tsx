@@ -21,6 +21,7 @@ import {
   Dices,
   Download,
   ExternalLink,
+  HelpCircle,
   History,
   Home,
   LayoutTemplate,
@@ -97,6 +98,8 @@ interface DashboardHeaderProps {
   onRestoreBackup: (backup: CampaignBackup) => void;
   /** Torna alla schermata di scelta della modalità. */
   onBackToWelcome: () => void;
+  /** Apre la guida: scorciatoie e installazione. */
+  onOpenHelp: () => void;
   /** Con una stanza aperta, uscire la chiude: va confermato. */
   roomOpen: boolean;
   onUndo: () => void;
@@ -165,6 +168,7 @@ export function DashboardHeader({
   backups,
   onRestoreBackup,
   onBackToWelcome,
+  onOpenHelp,
   roomOpen,
   onUndo,
   onRedo,
@@ -311,6 +315,7 @@ export function DashboardHeader({
             <MoreHorizontal className="h-4 w-4" />
           </button>
           {undoRedo}
+          <HelpButton onClick={onOpenHelp} />
           <HomeButton onClick={handleBack} />
           <SettingsButton open={settingsOpen} onToggle={() => setSettingsOpen((v) => !v)} />
         </div>
@@ -876,6 +881,27 @@ function HomeButton({ onClick }: { onClick: () => void }) {
     >
       <Home className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Esci</span>
+    </button>
+  );
+}
+
+/**
+ * Guida rapida.
+ *
+ * Sta accanto alle impostazioni e non in fondo alla pagina: il collegamento nel
+ * piè di pagina c'era già, ma per vederlo bisognava scorrere oltre tutta la
+ * dashboard — cioè non lo vedeva nessuno.
+ */
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Guida: scorciatoie e installazione"
+      title="Guida (?)"
+      className={`flex ${TOOL_HEIGHT} w-9 shrink-0 items-center justify-center rounded-xl border border-bento-border bg-bento-panel text-slate-300 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400`}
+    >
+      <HelpCircle className="h-4 w-4" />
     </button>
   );
 }

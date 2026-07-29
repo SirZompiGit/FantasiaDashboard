@@ -18,7 +18,7 @@ import { ParticipantView } from './components/ParticipantView';
 import { PlayerCards } from './components/PlayerCards';
 import { RoomPanel } from './components/RoomPanel';
 import { SharedView } from './components/SharedView';
-import { ShortcutsPanel } from './components/ShortcutsPanel';
+import { HelpPanel } from './components/HelpPanel';
 import { IntroSequence } from './components/IntroSequence';
 import { SoundBoard } from './components/SoundBoard';
 import { TreasuryPanel } from './components/TreasuryPanel';
@@ -92,7 +92,7 @@ export default function App() {
       return false;
     }
   });
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(() => {
     try {
       return localStorage.getItem(MUTED_KEY) === 'true';
@@ -652,6 +652,7 @@ export default function App() {
         onCompactBarsChange={(enabled) => dispatch({ type: 'SET_COMPACT_BARS', enabled })}
         currency={state.currency}
         onCurrencyChange={(changes) => dispatch({ type: 'SET_CURRENCY', changes })}
+        onOpenHelp={() => setHelpOpen(true)}
         onBackToWelcome={() => {
           // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
           // sul database, con i giocatori collegati a un master che non c'è più.
@@ -764,16 +765,18 @@ export default function App() {
         <p className="font-mono">
           Fantasia • Plancia di comando per sessioni di gioco di ruolo
         </p>
+        {/* Resta anche qui, ma non è più l'unico accesso: il "?" nella barra in
+            alto è sempre in vista, questo bisogna andarselo a cercare. */}
         <button
           type="button"
-          onClick={() => setShortcutsOpen(true)}
+          onClick={() => setHelpOpen(true)}
           className="font-mono text-[11px] text-slate-600 underline-offset-2 transition-colors duration-200 hover:text-theme-400 hover:underline"
         >
-          Scorciatoie da tastiera (?)
+          Guida e scorciatoie (?)
         </button>
       </footer>
 
-      <ShortcutsPanel open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+      <HelpPanel open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }
