@@ -1,8 +1,14 @@
 import type { BarStyle, CampaignStyle, CampaignTheme, LogoVariant } from './theme';
+import type { Currency } from './lib/currency';
 
 export interface InventoryItem {
   id: string;
   name: string;
+  /**
+   * Quante se ne hanno. Campo additivo e ASSENTE quando vale uno: un oggetto
+   * singolo si serializza come prima che la quantità esistesse.
+   */
+  quantity?: number;
 }
 
 export interface BonusItem {
@@ -105,11 +111,17 @@ export interface HealthBar extends ColoredBar {
   /** Testo mostrato a 0 HP. */
   zeroHpText?: string;
   /**
-   * Allerta visiva sotto il 25% dei punti ferita.
+   * Allerta visiva sotto la soglia dei punti ferita.
    * Campo additivo: assente sulle barre create prima, dove viene attivato di
    * default dalla normalizzazione.
    */
   lowHpAlert?: boolean;
+  /**
+   * Soglia dell'allerta in percentuale (5–95). Campo additivo e ASSENTE quando
+   * vale il 25% predefinito: una barra che non l'ha mai toccata si serializza
+   * identica a prima che la soglia fosse regolabile.
+   */
+  lowHpThreshold?: number;
   /**
    * Risorse associate, al massimo due. Campo additivo e assente quando la lista
    * è vuota: le barre senza risorse producono lo stesso identico payload di
@@ -215,4 +227,10 @@ export interface CampaignState {
   d2Labels: string[];
   /** Barre della vita in versione più sottile e densa. Campo additivo. */
   compactBars: boolean;
+  /**
+   * Tesoro del gruppo: totale, nome della valuta e icona. Campo additivo, con
+   * i valori predefiniti forniti dalla normalizzazione alle campagne salvate
+   * prima che esistesse.
+   */
+  currency: Currency;
 }

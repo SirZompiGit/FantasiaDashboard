@@ -16,7 +16,22 @@ import type { BarStyle, CampaignStyle, CampaignTheme, LogoVariant } from '../the
 import { MAX_ROLL_HISTORY, normalizeCampaign } from './migrations';
 import { DEFAULT_STAT_LABELS } from '../lib/stats';
 import { createEmptyCampaign } from './defaults';
-import { clampHp, clampMaxHp, clampResources, clampStatusEffects } from '../lib/healthBars';
+import {
+  DEFAULT_LOW_HP_PERCENT,
+  clampHp,
+  clampLowHpPercent,
+  clampMaxHp,
+  clampResources,
+  clampStatusEffects,
+  nextCopyName,
+} from '../lib/healthBars';
+import {
+  type Currency,
+  MAX_CURRENCY_NAME,
+  clampCurrency,
+  isCurrencyIcon,
+} from '../lib/currency';
+import { itemQuantity, withQuantity } from '../lib/inventory';
 import { STAT_COUNT, clampStat } from '../lib/stats';
 import {
   DEFAULT_CLIP_VOLUME,
@@ -46,6 +61,8 @@ export type CampaignAction =
   | { type: 'SET_STAT_LABEL'; index: number; label: string }
   | { type: 'SET_D2_LABEL'; index: number; label: string }
   | { type: 'SET_COMPACT_BARS'; enabled: boolean }
+  /** Tesoro del gruppo: totale, nome della valuta o icona, anche insieme. */
+  | { type: 'SET_CURRENCY'; changes: Partial<Currency> }
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'INSERT_PLAYER'; player: Player; index: number }
   | { type: 'REMOVE_PLAYER'; id: string }
@@ -65,6 +82,11 @@ export type CampaignAction =
   | { type: 'RESTORE_GROUP'; group: string; index: number; barIds: string[] }
   | { type: 'ADD_HEALTH_BAR'; bar: Omit<HealthBar, 'id'> }
   | { type: 'INSERT_HEALTH_BAR'; bar: HealthBar; index: number }
+  /**
+   * Copia una barra subito sotto l'originale. Serve al caso più comune del
+   * gioco — sei goblin identici — che prima costava sei volte lo stesso form.
+   */
+  | { type: 'DUPLICATE_HEALTH_BAR'; id: string }
   /** Sposta una barra di un posto su/giù restando dentro il suo gruppo. */
   | { type: 'MOVE_HEALTH_BAR'; id: string; direction: 'up' | 'down' }
   /** Trascina una barra sopra un'altra dello stesso gruppo. */
@@ -150,7 +172,46 @@ function applyBarChanges(bar: HealthBar, changes: Partial<Omit<HealthBar, 'id'>>
   // Assente quando la barra segue il design della campagna.
   if (!next.barStyle) delete next.barStyle;
 
+  applyLowHpThreshold(next);
+
   return next;
+}
+
+/**
+ * Soglia dell'allerta: assente quando vale il quarto predefinito.
+ * È ciò che tiene identico il payload delle barre che non l'hanno mai toccata.
+ */
+function applyLowHpThreshold(bar: HealthBar): void {
+  // `delete` e non un `return`: il form invia esplicitamente `undefined` quando
+  // si torna al valore predefinito, e la chiave resterebbe lì a vuoto.
+  if (bar.lowHpThreshold === undefined) {
+    delete bar.lowHpThreshold;
+    return;
+  }
+
+  const threshold = clampLowHpPercent(bar.lowHpThreshold);
+  if (threshold === DEFAULT_LOW_HP_PERCENT) delete bar.lowHpThreshold;
+  else bar.lowHpThreshold = threshold;
+}
+
+/**
+ * Copia di una barra, pronta a stare accanto all'originale.
+ *
+ * Identificativi nuovi ovunque — barra, risorse ed effetti — altrimenti
+ * trascinare il mana della copia muoverebbe quello dell'originale, che li
+ * riconosce per id.
+ */
+function duplicateBar(bar: HealthBar, takenNames: Iterable<string>): HealthBar {
+  const copy: HealthBar = { ...bar, id: newId(), name: nextCopyName(bar.name, takenNames) };
+
+  if (bar.resources) {
+    copy.resources = bar.resources.map((resource) => ({ ...resource, id: newId() }));
+  }
+  if (bar.statusEffects) {
+    copy.statusEffects = bar.statusEffects.map((effect) => ({ ...effect, id: newId() }));
+  }
+
+  return copy;
 }
 
 /** Le statistiche di un Player restano assenti quando non impostate. */
@@ -162,6 +223,11 @@ function applyPlayerChanges(
   if ('stats' in changes) {
     if (changes.stats) next.stats = changes.stats.map(clampStat);
     else delete next.stats;
+  }
+  // Quantità entro i limiti e chiave assente quando vale uno: la garanzia di
+  // compatibilità dell'inventario vale anche per ciò che arriva dal form.
+  if (changes.inventory) {
+    next.inventory = changes.inventory.map((item) => withQuantity(item, itemQuantity(item)));
   }
   return next;
 }
@@ -283,6 +349,29 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
     case 'SET_COMPACT_BARS':
       return { ...state, compactBars: action.enabled };
+
+    case 'SET_CURRENCY': {
+      const { name, icon, amount } = action.changes;
+      const next: Currency = {
+        // Il nome può restare vuoto MENTRE si scrive: si ripulisce solo il
+        // superfluo, senza rimettere d'autorità quello predefinito a ogni tasto.
+        name: name === undefined ? state.currency.name : name.slice(0, MAX_CURRENCY_NAME),
+        icon: icon !== undefined && isCurrencyIcon(icon) ? icon : state.currency.icon,
+        amount: amount === undefined ? state.currency.amount : clampCurrency(amount),
+      };
+
+      if (
+        next.name === state.currency.name &&
+        next.icon === state.currency.icon &&
+        next.amount === state.currency.amount
+      ) {
+        // Nessuna variazione: restituendo lo stesso stato la cronologia non
+        // registra un passo da annullare per un valore che non è cambiato.
+        return state;
+      }
+
+      return { ...state, currency: next };
+    }
 
 
     case 'ADD_PLAYER': {
@@ -436,11 +525,27 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
 
       if (!bar.hidden) delete bar.hidden;
 
+      applyLowHpThreshold(bar);
+
       return { ...state, healthBars: [...state.healthBars, bar] };
     }
 
     case 'INSERT_HEALTH_BAR':
       return { ...state, healthBars: insertAt(state.healthBars, action.bar, action.index) };
+
+    case 'DUPLICATE_HEALTH_BAR': {
+      const index = state.healthBars.findIndex((bar) => bar.id === action.id);
+      if (index === -1) return state;
+
+      // Subito SOTTO l'originale, non in fondo: la copia va vista accanto a ciò
+      // da cui nasce, e resta nello stesso gruppo senza toccare l'ordinamento.
+      const copy = duplicateBar(
+        state.healthBars[index],
+        state.healthBars.map((bar) => bar.name),
+      );
+
+      return { ...state, healthBars: insertAt(state.healthBars, copy, index + 1) };
+    }
 
     case 'MOVE_HEALTH_BAR': {
       const from = state.healthBars.findIndex((b) => b.id === action.id);

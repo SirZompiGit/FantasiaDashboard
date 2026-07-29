@@ -53,6 +53,10 @@ function mergeSignature(action: CampaignAction): string | null {
       return 'campaignNotes';
     case 'SET_TITLE':
       return 'title';
+    // Il totale del tesoro si scrive a cifre e si corregge a colpi di +/-:
+    // un ripensamento è un solo Ctrl+Z, non uno per pressione.
+    case 'SET_CURRENCY':
+      return 'currency';
     case 'UPDATE_HEALTH_BAR':
       // Solo il trascinamento degli HP è continuo; modificare nome o colori no.
       return Object.keys(action.changes).length === 1 && 'currentValue' in action.changes

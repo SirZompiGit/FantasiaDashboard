@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import type { BonusItem, InventoryItem, Player } from '../types';
+import type { InventoryItem, Player } from '../types';
 import type { CampaignAction } from '../state/campaignReducer';
 import { Backpack, Check, Edit2, Plus, Sparkles, Trash2, Users, X } from 'lucide-react';
 import { EmptyState } from './ui/EmptyState';
@@ -16,6 +16,13 @@ import { IconButton } from './ui/IconButton';
 import { StatBlock } from './StatBlock';
 import { useToasts } from '../hooks/useToasts';
 import { newId } from '../lib/ids';
+import {
+  MAX_ITEM_QUANTITY,
+  MIN_ITEM_QUANTITY,
+  clampQuantity,
+  itemQuantity,
+  withQuantity,
+} from '../lib/inventory';
 
 type Section = 'inventory' | 'bonus';
 
@@ -34,9 +41,18 @@ interface ItemSectionProps {
   placeholder: string;
   emptyText: string;
   accent: boolean;
+  /**
+   * Aggiunge il contatore accanto al nome. Vale per l'inventario — tre pozioni
+   * sono una riga sola — ma non per i bonus, che non si contano.
+   */
+  quantities?: boolean;
   dispatch: React.Dispatch<CampaignAction>;
   onDeleted: (message: string, undo: () => void) => void;
 }
+
+/** Il campo resta una stringa mentre si scrive, così è possibile svuotarlo. */
+const readQuantity = (raw: string) =>
+  clampQuantity(Number.parseInt(raw, 10) || MIN_ITEM_QUANTITY);
 
 function ItemSection({
   player,
@@ -45,36 +61,60 @@ function ItemSection({
   placeholder,
   emptyText,
   accent,
+  quantities = false,
   dispatch,
   onDeleted,
 }: ItemSectionProps) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
+  const [draftQuantity, setDraftQuantity] = useState('1');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
+  const [editingQuantity, setEditingQuantity] = useState('1');
 
-  const items: (InventoryItem | BonusItem)[] = player[section];
+  /**
+   * Una sola forma per entrambe le sezioni: un bonus è un oggetto senza
+   * quantità, e `quantity` è facoltativa. Tenendo due tipi distinti ogni
+   * lettura del contatore avrebbe richiesto un cast.
+   */
+  const items: InventoryItem[] = player[section];
 
-  const commit = (next: (InventoryItem | BonusItem)[]) =>
+  const commit = (next: InventoryItem[]) =>
     dispatch({ type: 'UPDATE_PLAYER', id: player.id, changes: { [section]: next } });
 
   const addItem = () => {
     const name = draft.trim();
     if (!name) return;
-    commit([...items, { id: newId(), name }]);
+    const item: InventoryItem = { id: newId(), name };
+    commit([...items, quantities ? withQuantity(item, readQuantity(draftQuantity)) : item]);
     setDraft('');
+    setDraftQuantity('1');
     setAdding(false);
   };
 
-  const removeItem = (item: InventoryItem | BonusItem) => {
+  const removeItem = (item: InventoryItem) => {
     const previous = items;
     commit(items.filter((i) => i.id !== item.id));
     onDeleted(`"${item.name}" rimosso.`, () => commit(previous));
   };
 
-  const saveEdit = (item: InventoryItem | BonusItem) => {
+  const startEdit = (item: InventoryItem) => {
+    setEditingId(item.id);
+    setEditingText(item.name);
+    setEditingQuantity(String(itemQuantity(item)));
+  };
+
+  const saveEdit = (item: InventoryItem) => {
     const name = editingText.trim();
-    if (name) commit(items.map((i) => (i.id === item.id ? { ...i, name } : i)));
+    if (name) {
+      commit(
+        items.map((i) => {
+          if (i.id !== item.id) return i;
+          const renamed = { ...i, name };
+          return quantities ? withQuantity(renamed, readQuantity(editingQuantity)) : renamed;
+        }),
+      );
+    }
     setEditingId(null);
   };
 
@@ -112,6 +152,26 @@ function ItemSection({
             aria-label={placeholder}
             className="min-w-0 flex-grow rounded border border-bento-border bg-bento-bg px-2.5 py-1 text-xs text-slate-100 transition-colors duration-200 focus:border-theme-500 focus:outline-none"
           />
+          {/* Il numero si imposta già alla creazione: aggiungere tre pozioni e
+              poi riaprire la riga per correggerne la quantità era un passaggio
+              in più su un gesto che si ripete a ogni bottino. */}
+          {quantities && (
+            <input
+              type="number"
+              inputMode="numeric"
+              min={MIN_ITEM_QUANTITY}
+              max={MAX_ITEM_QUANTITY}
+              value={draftQuantity}
+              onChange={(event) => setDraftQuantity(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') addItem();
+                if (event.key === 'Escape') setAdding(false);
+              }}
+              onBlur={() => setDraftQuantity(String(readQuantity(draftQuantity)))}
+              aria-label="Quantità del nuovo oggetto"
+              className="w-14 shrink-0 rounded border border-bento-border bg-bento-bg px-1.5 py-1 text-center font-mono text-xs text-slate-100 transition-colors duration-200 focus:border-theme-500 focus:outline-none"
+            />
+          )}
           <button
             type="button"
             onClick={addItem}
@@ -147,6 +207,22 @@ function ItemSection({
                     aria-label={`Modifica ${item.name}`}
                     className="w-full min-w-0 rounded border border-theme-500/50 bg-bento-panel px-1.5 py-0.5 font-mono text-xs text-slate-100 focus:outline-none"
                   />
+                  {quantities && (
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={MIN_ITEM_QUANTITY}
+                      max={MAX_ITEM_QUANTITY}
+                      value={editingQuantity}
+                      onChange={(event) => setEditingQuantity(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') saveEdit(item);
+                        if (event.key === 'Escape') setEditingId(null);
+                      }}
+                      aria-label={`Quantità di ${item.name}`}
+                      className="w-12 shrink-0 rounded border border-theme-500/50 bg-bento-panel px-1 py-0.5 text-center font-mono text-xs text-slate-100 focus:outline-none"
+                    />
+                  )}
                   <IconButton label="Salva" tone="positive" onClick={() => saveEdit(item)}>
                     <Check className="h-3.5 w-3.5" />
                   </IconButton>
@@ -160,24 +236,30 @@ function ItemSection({
                   >
                     {item.name}
                   </span>
-                  <div className="touch-visible flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100">
-                    <IconButton
-                      label={`Modifica ${item.name}`}
-                      tone="accent"
-                      onClick={() => {
-                        setEditingId(item.id);
-                        setEditingText(item.name);
-                      }}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </IconButton>
-                    <IconButton
-                      label={`Elimina ${item.name}`}
-                      tone="danger"
-                      onClick={() => removeItem(item)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </IconButton>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    {/* La pastiglia compare solo oltre l'unità: un oggetto
+                        singolo resta una riga pulita, com'è sempre stato. */}
+                    {quantities && itemQuantity(item) > 1 && (
+                      <span className="mr-1 rounded border border-bento-border bg-bento-panel px-1.5 py-0.5 font-mono text-[10px] font-bold text-slate-300">
+                        ×{itemQuantity(item)}
+                      </span>
+                    )}
+                    <span className="touch-visible flex items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 group-focus-within/item:opacity-100">
+                      <IconButton
+                        label={`Modifica ${item.name}`}
+                        tone="accent"
+                        onClick={() => startEdit(item)}
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </IconButton>
+                      <IconButton
+                        label={`Elimina ${item.name}`}
+                        tone="danger"
+                        onClick={() => removeItem(item)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </IconButton>
+                    </span>
                   </div>
                 </>
               )}
@@ -276,6 +358,7 @@ export function PlayerCards({
                     placeholder="Nuovo oggetto..."
                     emptyText="Inventario vuoto."
                     accent={false}
+                    quantities
                     dispatch={dispatch}
                     onDeleted={notifyUndo}
                   />

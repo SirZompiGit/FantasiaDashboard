@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { HealthBar, Resource } from '../types';
 import {
+  DEFAULT_LOW_HP_PERCENT,
+  MAX_LOW_HP_PERCENT,
   MAX_RESOURCES,
   MAX_STATUS_EFFECTS,
+  MIN_LOW_HP_PERCENT,
   SEGMENT_THRESHOLD,
   THIN_SEGMENT_THRESHOLD,
   VERTICAL_SEGMENT_THRESHOLD,
@@ -13,6 +16,8 @@ import {
   groupBars,
   healthRatio,
   isLowHp,
+  lowHpPercent,
+  nextCopyName,
   resolveBarStyle,
   areAllCircular,
 } from './healthBars';
@@ -119,6 +124,52 @@ describe('isLowHp', () => {
     // Assente significa attivo: le barre create prima devono comportarsi
     // come quelle nuove.
     expect(isLowHp({ ...low, lowHpAlert: undefined })).toBe(true);
+  });
+
+  /**
+   * Un boss con 400 punti ferita è in pericolo molto prima di un quarto, un
+   * gregario con 8 molto dopo: la soglia è per barra, non per l'app.
+   */
+  it('usa la soglia della barra quando ce n è una', () => {
+    const half = { ...low, currentValue: 50 };
+    expect(isLowHp(half)).toBe(false);
+    expect(isLowHp({ ...half, lowHpThreshold: 50 })).toBe(true);
+    expect(isLowHp({ ...half, lowHpThreshold: 49 })).toBe(false);
+  });
+
+  it('resta a zero silenziosa anche con una soglia altissima', () => {
+    expect(isLowHp({ ...low, currentValue: 0, lowHpThreshold: 95 })).toBe(false);
+  });
+});
+
+describe('soglia di allerta', () => {
+  it('assente vale il quarto di sempre', () => {
+    expect(lowHpPercent({})).toBe(DEFAULT_LOW_HP_PERCENT);
+    expect(lowHpPercent({ lowHpThreshold: undefined })).toBe(DEFAULT_LOW_HP_PERCENT);
+  });
+
+  it('un valore fuori scala viene riportato dentro invece di essere ignorato', () => {
+    expect(lowHpPercent({ lowHpThreshold: 0 })).toBe(MIN_LOW_HP_PERCENT);
+    expect(lowHpPercent({ lowHpThreshold: 300 })).toBe(MAX_LOW_HP_PERCENT);
+    expect(lowHpPercent({ lowHpThreshold: 42 })).toBe(42);
+  });
+});
+
+describe('nome della copia', () => {
+  it('aggiunge un numero, o incrementa quello che c è già', () => {
+    expect(nextCopyName('Goblin', [])).toBe('Goblin 2');
+    expect(nextCopyName('Goblin 1', [])).toBe('Goblin 2');
+    expect(nextCopyName('Goblin 7', [])).toBe('Goblin 8');
+    // Attaccato al nome resta attaccato: non si inventa una spaziatura.
+    expect(nextCopyName('Goblin3', [])).toBe('Goblin4');
+  });
+
+  it('scavalca i nomi già presi, invece di creare due barre uguali', () => {
+    expect(nextCopyName('Goblin', ['Goblin 2', 'Goblin 3'])).toBe('Goblin 4');
+  });
+
+  it('non supera la lunghezza massima di un nome', () => {
+    expect(nextCopyName('X'.repeat(80), []).length).toBeLessThanOrEqual(60);
   });
 });
 

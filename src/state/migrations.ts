@@ -29,14 +29,24 @@ import type {
 import { newId } from '../lib/ids';
 import { DEFAULT_DICE, isDiceType } from '../lib/dice';
 import {
+  DEFAULT_LOW_HP_PERCENT,
   DEFAULT_RESOURCE_COLOR,
   DEFAULT_STATUS_COLOR,
   DEFAULT_ZERO_HP_TEXT,
   MAX_RESOURCES,
   MAX_STATUS_EFFECTS,
   clampHp,
+  clampLowHpPercent,
   clampMaxHp,
 } from '../lib/healthBars';
+import { MIN_ITEM_QUANTITY, clampQuantity } from '../lib/inventory';
+import {
+  type Currency,
+  MAX_CURRENCY_NAME,
+  clampCurrency,
+  createCurrency,
+  isCurrencyIcon,
+} from '../lib/currency';
 import { DEFAULT_STAT, DEFAULT_STAT_LABELS, STAT_COUNT, clampStat } from '../lib/stats';
 import { clampClips, normalizeClipPlayback } from '../lib/soundClips';
 import {
@@ -94,7 +104,7 @@ function asStringList(value: unknown, fallback: string[]): string[] {
   return out;
 }
 
-function normalizeNamedItems(value: unknown): (InventoryItem | BonusItem)[] {
+function normalizeNamedItems(value: unknown): BonusItem[] {
   return asArray(value)
     .filter(isRecord)
     .map((item) => ({
@@ -102,6 +112,46 @@ function normalizeNamedItems(value: unknown): (InventoryItem | BonusItem)[] {
       name: asString(item.name).slice(0, 200),
     }))
     .filter((item) => item.name.length > 0);
+}
+
+/**
+ * Come `normalizeNamedItems`, ma con la quantità.
+ *
+ * La chiave resta assente quando vale uno, così un inventario di oggetti
+ * singoli si riserializza identico a prima che la quantità esistesse. Le voci
+ * scartate qui sono le stesse di là: nome vuoto o riga illeggibile.
+ */
+function normalizeInventory(value: unknown): InventoryItem[] {
+  const out: InventoryItem[] = [];
+
+  for (const source of asArray(value)) {
+    if (!isRecord(source)) continue;
+    const name = asString(source.name).slice(0, 200);
+    if (!name) continue;
+
+    const item: InventoryItem = { id: asString(source.id) || newId(), name };
+    const quantity = clampQuantity(asNumber(source.quantity, MIN_ITEM_QUANTITY));
+    if (quantity > MIN_ITEM_QUANTITY) item.quantity = quantity;
+
+    out.push(item);
+  }
+
+  return out;
+}
+
+/** Tesoro del gruppo: assente sulle campagne salvate prima, quindi al minimo. */
+function normalizeCurrency(value: unknown): Currency {
+  const base = createCurrency();
+  if (!isRecord(value)) return base;
+
+  const name = asString(value.name).trim().slice(0, MAX_CURRENCY_NAME);
+  const icon = asString(value.icon);
+
+  return {
+    name: name || base.name,
+    icon: isCurrencyIcon(icon) ? icon : base.icon,
+    amount: clampCurrency(asNumber(value.amount, 0)),
+  };
 }
 
 /**
@@ -124,7 +174,7 @@ function normalizePlayer(value: unknown): Player | null {
   const player: Player = {
     id: asString(value.id) || newId(),
     name: name.slice(0, 60),
-    inventory: normalizeNamedItems(value.inventory),
+    inventory: normalizeInventory(value.inventory),
     bonus: normalizeNamedItems(value.bonus),
   };
 
@@ -213,6 +263,13 @@ function normalizeHealthBar(value: unknown): HealthBar | null {
   // `group` resta assente quando è vuoto: Firebase rifiuta i valori undefined
   // solo dopo la serializzazione, e questa forma è quella già in uso.
   if (group) bar.group = group.slice(0, 40);
+
+  // Assente quando vale il quarto predefinito: una barra che non ha mai toccato
+  // la soglia si riserializza come prima che fosse regolabile.
+  if (value.lowHpThreshold !== undefined) {
+    const threshold = clampLowHpPercent(asNumber(value.lowHpThreshold, DEFAULT_LOW_HP_PERCENT));
+    if (threshold !== DEFAULT_LOW_HP_PERCENT) bar.lowHpThreshold = threshold;
+  }
 
   // Stessa regola per le risorse: assenti quando non ce ne sono, così una barra
   // creata prima di questa funzione si riserializza identica a com'era.
@@ -321,6 +378,7 @@ export function normalizeCampaign(raw: unknown): CampaignState {
     statLabels: normalizeStatLabels(raw.statLabels),
     d2Labels: normalizeD2Labels(raw.d2Labels),
     compactBars: asBoolean(raw.compactBars),
+    currency: normalizeCurrency(raw.currency),
   };
 }
 

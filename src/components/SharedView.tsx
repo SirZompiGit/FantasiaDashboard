@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { CampaignState, HealthBar, RollResult } from '../types';
+import type { CampaignState, HealthBar, InventoryItem, RollResult } from '../types';
 import type { RoomUser } from '../firebaseUtils';
 import {
   BookOpen,
@@ -37,7 +37,9 @@ import { CRITICAL_COLOR, DiceShape, FUMBLE_COLOR } from './DiceShape';
 import { CritSparkles } from './CritSparkles';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
+import { TreasuryPanel } from './TreasuryPanel';
 import { areAllCircular, groupBars } from '../lib/healthBars';
+import { itemQuantity } from '../lib/inventory';
 import { d2FaceText, isCritical, isFumble } from '../lib/dice';
 import { decodeRollLabel, resolveRollerName } from '../lib/participantRolls';
 import { getThemeAccent } from '../theme';
@@ -387,10 +389,14 @@ export function SharedView({
             {/* Ordine di turno, con sotto l'immagine di scena quando c'è */}
             <div className="order-3 flex flex-col gap-4 md:order-2 lg:order-1 lg:col-span-3 lg:h-full lg:min-h-0">
             <section className={`${PANEL} @container flex-1`}>
-              <div className="mb-3 shrink-0 border-b border-bento-border pb-3">
+              <div className="mb-3 shrink-0 space-y-3 border-b border-bento-border pb-3">
                 <h2 className={PANEL_TITLE}>
                   <Shield className="h-5 w-5 text-theme-500" /> Ordine di Turno
                 </h2>
+
+                {/* Il tesoro compare solo quando c'è: una campagna che non lo
+                    usa non si porta dietro una riga a zero. */}
+                {state.currency.amount > 0 && <TreasuryPanel currency={state.currency} />}
               </div>
 
               <div className="max-h-[40vh] flex-1 space-y-2.5 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin lg:max-h-none">
@@ -401,6 +407,15 @@ export function SharedView({
                 ) : (
                   players.map((player, index) => {
                     const isActive = player.id === activePlayerId;
+                    /**
+                     * Oggetti e bonus si disegnano allo stesso modo. Il tipo è
+                     * uno solo — un bonus è un oggetto senza quantità — così il
+                     * contatore si legge senza cast.
+                     */
+                    const itemGroups: { label: string; items: InventoryItem[] }[] = [
+                      { label: 'Inventario', items: player.inventory },
+                      { label: 'Bonus', items: player.bonus },
+                    ];
                     return (
                       <div
                         key={player.id}
@@ -457,12 +472,7 @@ export function SharedView({
                           // viewport: `sm:` imponeva due colonne dentro una
                           // colonna da ~310px, e gli oggetti uscivano dal riquadro.
                           <div className="mt-3 grid grid-cols-1 gap-3 border-t border-bento-border/50 pt-3 animate-fade-in @sm:grid-cols-2">
-                            {(
-                              [
-                                { label: 'Inventario', items: player.inventory },
-                                { label: 'Bonus', items: player.bonus },
-                              ] as const
-                            ).map(({ label, items }) =>
+                            {itemGroups.map(({ label, items }) =>
                               items.length > 0 ? (
                                 <div key={label} className="min-w-0">
                                   <span className="mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -478,6 +488,11 @@ export function SharedView({
                                         className="max-w-full rounded-md border border-bento-border/60 bg-bento-item px-2 py-1 text-[11px] leading-tight font-medium break-words text-slate-300"
                                       >
                                         {item.name}
+                                        {itemQuantity(item) > 1 && (
+                                          <span className="ml-1 font-mono font-bold text-theme-400">
+                                            ×{itemQuantity(item)}
+                                          </span>
+                                        )}
                                       </span>
                                     ))}
                                   </div>

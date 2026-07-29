@@ -414,3 +414,164 @@ describe('clip sonore', () => {
     expect(state.soundClips?.[0].name).toBe('Tuono');
   });
 });
+
+describe('duplicazione delle barre', () => {
+  it('mette la copia subito sotto l originale, non in fondo', () => {
+    const state = seed();
+    const source = state.healthBars[0];
+
+    const next = campaignReducer(state, { type: 'DUPLICATE_HEALTH_BAR', id: source.id });
+
+    expect(next.healthBars).toHaveLength(state.healthBars.length + 1);
+    expect(next.healthBars[1].name).toBe('Drago Rosso Antico 2');
+    // Stesso gruppo e stessi valori: è una copia, non una barra nuova.
+    expect(next.healthBars[1].group).toBe(source.group);
+    expect(next.healthBars[1].currentValue).toBe(source.currentValue);
+  });
+
+  /**
+   * Gli identificativi devono essere nuovi ovunque: le risorse si riconoscono
+   * per id, e condividendoli trascinare il mana della copia muoverebbe quello
+   * dell'originale.
+   */
+  it('assegna identificativi nuovi alla barra e a ciò che contiene', () => {
+    let state = seed();
+    const id = state.healthBars[0].id;
+
+    state = campaignReducer(state, {
+      type: 'UPDATE_HEALTH_BAR',
+      id,
+      changes: {
+        resources: [
+          {
+            id: 'r1',
+            name: 'Mana',
+            maxValue: 10,
+            currentValue: 4,
+            colorMode: 'static',
+            staticColor: '#3b82f6',
+            gradientColors: { low: '#f00', mid: '#0f0', high: '#00f' },
+            shared: true,
+          },
+        ],
+        statusEffects: [{ id: 'e1', name: 'Furioso', color: '#a855f7', shared: false }],
+      },
+    });
+
+    const next = campaignReducer(state, { type: 'DUPLICATE_HEALTH_BAR', id });
+    const copy = next.healthBars[1];
+
+    expect(copy.id).not.toBe(id);
+    expect(copy.resources?.[0].id).not.toBe('r1');
+    expect(copy.resources?.[0].name).toBe('Mana');
+    expect(copy.statusEffects?.[0].id).not.toBe('e1');
+  });
+
+  it('duplicando più volte i nomi avanzano invece di ripetersi', () => {
+    let state = seed();
+    const id = state.healthBars[1].id;
+
+    state = campaignReducer(state, { type: 'DUPLICATE_HEALTH_BAR', id });
+    state = campaignReducer(state, { type: 'DUPLICATE_HEALTH_BAR', id });
+
+    const names = state.healthBars.map((bar) => bar.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('ignora un identificativo che non esiste', () => {
+    const state = seed();
+    expect(campaignReducer(state, { type: 'DUPLICATE_HEALTH_BAR', id: 'fantasma' })).toBe(state);
+  });
+});
+
+describe('soglia di allerta della barra', () => {
+  const withThreshold = (lowHpThreshold: number | undefined) => {
+    const state = seed();
+    return campaignReducer(state, {
+      type: 'UPDATE_HEALTH_BAR',
+      id: state.healthBars[0].id,
+      changes: { lowHpThreshold },
+    }).healthBars[0];
+  };
+
+  it('conserva una soglia propria, riportata nei limiti', () => {
+    expect(withThreshold(60).lowHpThreshold).toBe(60);
+    expect(withThreshold(999).lowHpThreshold).toBe(95);
+    expect(withThreshold(1).lowHpThreshold).toBe(5);
+  });
+
+  /**
+   * Il vincolo di compatibilità: una barra al valore predefinito deve
+   * serializzarsi identica a prima che la soglia fosse regolabile.
+   */
+  it('sparisce del tutto al valore predefinito e quando viene tolta', () => {
+    expect(withThreshold(25)).not.toHaveProperty('lowHpThreshold');
+    expect(withThreshold(undefined)).not.toHaveProperty('lowHpThreshold');
+  });
+});
+
+describe('tesoro del gruppo', () => {
+  it('cambia una cosa per volta senza toccare le altre', () => {
+    let state = seed();
+
+    state = campaignReducer(state, { type: 'SET_CURRENCY', changes: { amount: 300 } });
+    expect(state.currency.amount).toBe(300);
+    expect(state.currency.name).toBe(seed().currency.name);
+
+    state = campaignReducer(state, { type: 'SET_CURRENCY', changes: { name: 'Crediti' } });
+    expect(state.currency.name).toBe('Crediti');
+    expect(state.currency.amount).toBe(300);
+  });
+
+  it('non scende sotto zero né sfonda il tetto', () => {
+    const state = seed();
+    expect(campaignReducer(state, { type: 'SET_CURRENCY', changes: { amount: -50 } }).currency
+      .amount).toBe(0);
+    expect(campaignReducer(state, { type: 'SET_CURRENCY', changes: { amount: 1e12 } }).currency
+      .amount).toBe(9_999_999);
+  });
+
+  it('rifiuta un icona inesistente invece di lasciare il tesoro senza simbolo', () => {
+    const state = seed();
+    const next = campaignReducer(state, {
+      type: 'SET_CURRENCY',
+      // @ts-expect-error: è proprio il caso di un valore arrivato da fuori.
+      changes: { icon: 'patatina' },
+    });
+    expect(next.currency.icon).toBe(state.currency.icon);
+  });
+
+  /**
+   * Restituire lo stesso stato quando nulla cambia non è un'ottimizzazione: è
+   * ciò che impedisce alla cronologia di registrare un passo da annullare.
+   */
+  it('non produce un nuovo stato quando il valore è già quello', () => {
+    const state = seed();
+    const same = campaignReducer(state, {
+      type: 'SET_CURRENCY',
+      changes: { amount: state.currency.amount },
+    });
+    expect(same).toBe(state);
+  });
+});
+
+describe('quantità degli oggetti', () => {
+  it('resta assente a uno e viene riportata nei limiti', () => {
+    const state = seed();
+    const id = state.players[0].id;
+
+    const single = campaignReducer(state, {
+      type: 'UPDATE_PLAYER',
+      id,
+      changes: { inventory: [{ id: 'i1', name: 'Corda', quantity: 1 }] },
+    });
+    expect(single.players[0].inventory[0]).not.toHaveProperty('quantity');
+
+    const many = campaignReducer(state, {
+      type: 'UPDATE_PLAYER',
+      id,
+      changes: { inventory: [{ id: 'i1', name: 'Frecce', quantity: 5000 }] },
+    });
+    expect(many.players[0].inventory[0].quantity).toBe(999);
+  });
+});

@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { NotesPanel } from './ui/NotesPanel';
 import { IconButton } from './ui/IconButton';
+import { TreasuryPanel } from './TreasuryPanel';
+import type { Currency } from '../lib/currency';
 import { useToasts } from '../hooks/useToasts';
 
 /**
@@ -51,6 +53,8 @@ interface CampaignHeaderProps {
   notes: string;
   campaignNotes: string;
   activePlayerId: string | null;
+  /** Tesoro del gruppo, modificabile dal master. */
+  currency: Currency;
   dispatch: React.Dispatch<CampaignAction>;
 }
 
@@ -62,6 +66,7 @@ export function CampaignHeader({
   notes,
   campaignNotes,
   activePlayerId,
+  currency,
   dispatch,
 }: CampaignHeaderProps) {
   const { notifyUndo } = useToasts();
@@ -280,6 +285,15 @@ export function CampaignHeader({
         </div>
 
         <div className="flex flex-col lg:col-span-5">
+          {/* Il tesoro sta sopra ai partecipanti: è del gruppo, non di uno solo,
+              e in questa colonna lo si vede senza aprire nulla. */}
+          <div className="mb-3">
+            <TreasuryPanel
+              currency={currency}
+              onChange={(amount) => dispatch({ type: 'SET_CURRENCY', changes: { amount } })}
+            />
+          </div>
+
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 font-display text-sm font-semibold uppercase tracking-wider text-slate-200">
               <Users className="h-4 w-4 text-theme-500" />

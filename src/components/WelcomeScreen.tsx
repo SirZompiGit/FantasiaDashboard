@@ -14,9 +14,18 @@
  */
 
 import { type FormEvent, useState } from 'react';
-import { AlertTriangle, ArrowRight, Crown, LogIn, Monitor, Shield } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Crown,
+  LogIn,
+  Monitor,
+  MonitorDown,
+  Shield,
+} from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
 import type { CampaignStyle, LogoVariant } from '../theme';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 interface WelcomeScreenProps {
   /** Design in vigore: sceglie la variante del marchio adatta al fondo. */
@@ -64,6 +73,8 @@ export function WelcomeScreen({
   const [pin, setPin] = useState(readInvitedPin);
   const [displayName, setDisplayName] = useState('');
   const invited = pin.length === 6;
+
+  const { canInstall, install } = useInstallPrompt();
 
   const submitJoin = (event: FormEvent) => {
     event.preventDefault();
@@ -240,6 +251,23 @@ export function WelcomeScreen({
           )}
         </section>
       </div>
+
+      {/* Anche i giocatori possono installarla: questa schermata è l'unica che
+          vedono tutti, e il pannello impostazioni è solo del master. */}
+      {canInstall && (
+        <div className="relative flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              void install();
+            }}
+            className="flex items-center gap-1.5 rounded-full border border-bento-border bg-bento-panel/60 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400 transition-colors duration-200 hover:border-theme-500/40 hover:text-theme-400"
+          >
+            <MonitorDown className="h-3.5 w-3.5" />
+            Installa l&apos;app
+          </button>
+        </div>
+      )}
 
       <footer className="relative flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center font-mono text-[11px] tracking-wide text-slate-600">
         <span>I dati locali restano sul tuo dispositivo</span>

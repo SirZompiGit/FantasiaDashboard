@@ -159,9 +159,12 @@ export function ParticipantView({
         </div>
 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
+          {/* Non un semplice "Offline": l'app si sta già ricollegando da sola e
+              rientra in stanza appena la linea torna. Dirlo evita che il
+              giocatore ricarichi la pagina, che è la cosa peggiore da fare. */}
           {!online && (
             <span className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-950/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
-              <WifiOff className="h-3 w-3" /> Offline
+              <WifiOff className="h-3 w-3 animate-pulse" /> Riconnessione…
             </span>
           )}
 

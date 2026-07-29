@@ -112,9 +112,38 @@ export async function joinRoom(pin: string, userId: string, userName: string): P
   await onDisconnect(userRef).remove();
 }
 
-/** Rinnova la rimozione automatica dopo una riconnessione. */
-export async function armUserDisconnect(pin: string, userId: string): Promise<void> {
-  await onDisconnect(ref(getDb(), `rooms/${pin}/users/${userId}`)).remove();
+/**
+ * Riporta un giocatore nella stanza dopo una caduta di rete.
+ *
+ * Non basta riarmare `onDisconnect`: quando la connessione cade è il SERVER a
+ * cancellare il nodo dell'utente, e al ritorno il giocatore non risulta più
+ * nella stanza — restava fermo su "Accesso in corso..." finché non ricaricava
+ * la pagina e reinseriva il PIN.
+ *
+ * Il nodo si riscrive solo se manca davvero: se è ancora lì si conservano il
+ * personaggio assegnato dal master e gli appunti personali, che altrimenti
+ * verrebbero azzerati a ogni sfarfallio della linea.
+ *
+ * @returns `false` se la stanza non esiste più (il master l'ha chiusa).
+ */
+export async function restoreUser(
+  pin: string,
+  userId: string,
+  userName: string,
+): Promise<boolean> {
+  const db = getDb();
+
+  if (!(await get(ref(db, `rooms/${pin}`))).exists()) return false;
+
+  const userRef = ref(db, `rooms/${pin}/users/${userId}`);
+  if (!(await get(userRef)).exists()) {
+    await set(userRef, { id: userId, name: userName, assignedPlayerId: null, notes: '' });
+  }
+
+  // La rimozione automatica va sempre rinnovata: Firebase la consuma a ogni
+  // disconnessione, anche quando il nodo è sopravvissuto.
+  await onDisconnect(userRef).remove();
+  return true;
 }
 
 export async function leaveRoom(pin: string, userId: string): Promise<void> {

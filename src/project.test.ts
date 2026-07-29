@@ -218,6 +218,66 @@ describe('tracce sottili delle risorse', () => {
   });
 });
 
+/**
+ * App installabile.
+ *
+ * Un manifest che cita un'icona inesistente, o che ne dichiara una misura
+ * diversa da quella reale, non produce alcun errore: semplicemente il browser
+ * smette di proporre l'installazione, e non c'è modo di accorgersene se non
+ * provando a installarla su un dispositivo.
+ */
+describe('manifest della web app', () => {
+  const manifest = JSON.parse(read('public/manifest.webmanifest'));
+
+  it('dichiara ciò che serve per essere installabile', () => {
+    expect(manifest.name).toBeTruthy();
+    expect(manifest.short_name).toBeTruthy();
+    expect(manifest.start_url).toBe('/');
+    expect(manifest.display).toBe('standalone');
+  });
+
+  it('le icone esistono davvero e misurano quanto dichiarano', () => {
+    for (const icon of manifest.icons) {
+      const file = path.join(root, 'public', icon.src.replace(/^\//, ''));
+      expect(fs.existsSync(file)).toBe(true);
+
+      // Intestazione PNG: larghezza a 16, altezza a 20.
+      const buffer = fs.readFileSync(file);
+      const [width, height] = icon.sizes.split('x').map(Number);
+      expect(buffer.readUInt32BE(16)).toBe(width);
+      expect(buffer.readUInt32BE(20)).toBe(height);
+    }
+  });
+
+  /**
+   * Chrome non propone l'installazione senza un'icona da almeno 192 pixel, e
+   * senza una `maskable` Android ritaglia il marchio dentro il proprio cerchio.
+   */
+  it('copre la misura minima richiesta e la maschera adattiva', () => {
+    const sizes = manifest.icons.map((icon: { sizes: string }) => Number(icon.sizes.split('x')[0]));
+    expect(Math.max(...sizes)).toBeGreaterThanOrEqual(192);
+    expect(
+      manifest.icons.some((icon: { purpose?: string }) => icon.purpose === 'maskable'),
+    ).toBe(true);
+  });
+
+  it('la pagina lo collega e il service worker viene registrato', () => {
+    expect(read('index.html')).toContain('manifest.webmanifest');
+    expect(fs.existsSync(path.join(root, 'public', 'sw.js'))).toBe(true);
+    expect(read('src/main.tsx')).toContain("register('/sw.js')");
+  });
+
+  /**
+   * Il service worker non deve mettersi in mezzo fra l'app e il database: lo
+   * stato della campagna arriva da Firebase, mai da una copia salvata.
+   */
+  it('il service worker si occupa solo delle risorse locali', () => {
+    const worker = read('public/sw.js');
+    expect(worker).toContain('self.location.origin');
+    expect(worker).not.toMatch(/firebase(io|database)/i);
+  });
+});
+
 describe('regole di Firestore', () => {
   it('lo chiudono del tutto, visto che l app non lo usa', () => {
     expect(read('firestore.rules')).toMatch(/allow read, write: if false;/);

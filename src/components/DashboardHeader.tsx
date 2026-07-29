@@ -23,6 +23,7 @@ import {
   History,
   Home,
   LayoutTemplate,
+  MonitorDown,
   MoreHorizontal,
   Palette,
   Redo2,
@@ -56,7 +57,15 @@ import { MediaSettings } from './MediaSettings';
 import { SoundClipsSettings } from './SoundClipsSettings';
 import { SettingsSection } from './ui/SettingsSection';
 import { Wordmark } from './ui/Wordmark';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import type { SoundClip } from '../types';
+import {
+  CURRENCY_ICONS,
+  type Currency,
+  type CurrencyIcon,
+  DEFAULT_CURRENCY_NAME,
+  MAX_CURRENCY_NAME,
+} from '../lib/currency';
 import type { UseMediaResult } from '../hooks/useMedia';
 import type { CampaignBackup, SaveStatus } from '../hooks/useCampaignState';
 
@@ -108,6 +117,9 @@ interface DashboardHeaderProps {
   /** Barre della vita in versione sottile. */
   compactBars: boolean;
   onCompactBarsChange: (enabled: boolean) => void;
+  /** Valuta del gruppo: qui si decidono nome e icona, il totale sta in pagina. */
+  currency: Currency;
+  onCurrencyChange: (changes: Partial<Currency>) => void;
 }
 
 /**
@@ -167,12 +179,17 @@ export function DashboardHeader({
   onD2LabelChange,
   compactBars,
   onCompactBarsChange,
+  currency,
+  onCurrencyChange,
 }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [confirmingExit, setConfirmingExit] = useState(false);
   const [showBackups, setShowBackups] = useState(false);
+
+  // Compare solo dove il browser lo consente e finché l'app non è installata.
+  const { canInstall, install } = useInstallPrompt();
 
   /** Senza stanza aperta non c'è nulla da perdere: si esce direttamente. */
   const handleBack = () => {
@@ -332,7 +349,7 @@ export function DashboardHeader({
               <span className="font-mono text-xs font-bold uppercase tracking-widest text-slate-300">
                 Impostazioni
               </span>
-              <span className="font-mono text-[10px] text-slate-500">v5.0</span>
+              <span className="font-mono text-[10px] text-slate-500">v6.0</span>
             </div>
 
             {/* Colore, design e marchio: gli assi dell'aspetto, richiudibili. */}
@@ -542,6 +559,55 @@ export function DashboardHeader({
                 </span>
               </label>
 
+              {/* Valuta del gruppo: il totale si tocca in pagina, qui si decide
+                  come si chiama e con quale simbolo si mostra. Non tutte le
+                  campagne contano monete d'oro. */}
+              <div className="space-y-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                  <Coins className="h-3.5 w-3.5 text-theme-500" /> Valuta del gruppo
+                </span>
+
+                <input
+                  type="text"
+                  value={currency.name}
+                  onChange={(event) => onCurrencyChange({ name: event.target.value })}
+                  onBlur={() => {
+                    // Un nome vuoto non è una scelta: si torna al predefinito
+                    // invece di lasciare l'icona senza etichetta.
+                    if (!currency.name.trim()) onCurrencyChange({ name: DEFAULT_CURRENCY_NAME });
+                  }}
+                  maxLength={MAX_CURRENCY_NAME}
+                  placeholder={DEFAULT_CURRENCY_NAME}
+                  aria-label="Nome della valuta"
+                  className="w-full rounded-lg border border-bento-border bg-bento-panel px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                />
+
+                <div className="grid grid-cols-4 gap-1.5">
+                  {CURRENCY_ICONS.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => onCurrencyChange({ icon: id as CurrencyIcon })}
+                      aria-label={label}
+                      aria-pressed={currency.icon === id}
+                      title={label}
+                      className={`flex items-center justify-center rounded-lg border py-1.5 transition-colors duration-200 ${
+                        currency.icon === id
+                          ? 'border-theme-500/50 bg-bento-item text-theme-400'
+                          : 'border-bento-border bg-bento-panel/40 text-slate-500 hover:border-slate-600 hover:text-slate-300'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
+
+                <p className="text-[10px] leading-snug text-slate-500">
+                  Il totale si modifica accanto ai partecipanti. Compare nello schermo condiviso
+                  solo quando è sopra lo zero.
+                </p>
+              </div>
+
               {/* Facce del d2: se lasciate vuote il dado mostra 1 e 2. */}
               <div className="space-y-1.5">
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
@@ -607,6 +673,28 @@ export function DashboardHeader({
                 )}
               </button>
             </div>
+
+            {/* Installazione: l'invito del browser è così discreto da passare
+                inosservato, e da app la dashboard si apre a schermo pieno, con
+                una sua icona e senza barra degli indirizzi. */}
+            {canInstall && (
+              <div className="space-y-1.5 border-t border-bento-border pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void install();
+                  }}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-theme-500/40 bg-bento-button py-2 font-mono text-xs font-bold uppercase tracking-wider text-theme-400 transition-colors duration-200 hover:bg-bento-item hover:text-theme-500"
+                >
+                  <MonitorDown className="h-3.5 w-3.5" />
+                  Installa l&apos;app
+                </button>
+                <p className="text-[10px] leading-snug text-slate-500">
+                  Icona sul desktop, apertura a schermo pieno e avvio anche senza rete. La
+                  campagna resta quella di sempre.
+                </p>
+              </div>
+            )}
 
             {backups.length > 0 && (
               <div className="space-y-2 border-t border-bento-border pt-3">

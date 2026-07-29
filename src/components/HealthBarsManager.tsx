@@ -54,7 +54,7 @@ export function HealthBarsManager({
   compactBars,
   barStyle,
 }: HealthBarsManagerProps) {
-  const { notifyUndo } = useToasts();
+  const { notify, notifyUndo } = useToasts();
 
   // Con venti mostri a schermo, poter chiudere un gruppo è la differenza fra
   // trovare la barra giusta e cercarla. La scelta viene ricordata.
@@ -93,6 +93,16 @@ export function HealthBarsManager({
     );
   };
 
+  /**
+   * La copia nasce nel reducer, che le assegna nome e identificativi nuovi:
+   * qui non si può quindi puntare alla barra creata per offrire un annullamento
+   * mirato. Ci pensa Ctrl+Z, che copre qualunque modifica.
+   */
+  const handleDuplicateBar = (bar: HealthBar) => {
+    dispatch({ type: 'DUPLICATE_HEALTH_BAR', id: bar.id });
+    notify(`"${bar.name}" duplicata.`, { kind: 'success' });
+  };
+
   const handleDeleteGroup = (group: string) => {
     const index = healthGroups.indexOf(group);
     const barIds = healthBars.filter((b) => b.group === group).map((b) => b.id);
@@ -128,6 +138,7 @@ export function HealthBarsManager({
         setIsAdding(false);
         setEditingId(target.id);
       }}
+      onDuplicate={handleDuplicateBar}
       onDelete={handleDeleteBar}
       compact={compactBars}
       barStyle={barStyle}

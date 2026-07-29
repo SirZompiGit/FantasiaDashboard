@@ -1,4 +1,5 @@
 import type { CampaignState } from '../types';
+import { createCurrency } from '../lib/currency';
 import { DEFAULT_DICE } from '../lib/dice';
 import { DEFAULT_HEALTH_GROUPS } from '../lib/healthBars';
 import { DEFAULT_STAT_LABELS } from '../lib/stats';
@@ -37,6 +38,7 @@ export function createEmptyCampaign(): CampaignState {
     statLabels: [...DEFAULT_STAT_LABELS],
     d2Labels: ['', ''],
     compactBars: false,
+    currency: createCurrency(),
   };
 }
 
@@ -45,13 +47,14 @@ export function createSeedCampaign(): CampaignState {
   return {
     ...createEmptyCampaign(),
     title: 'Le Cronache di Elidon - Capitolo IV',
+    currency: { ...createCurrency(), amount: 1250 },
     players: [
       {
         id: 'p1',
         name: "Kaelen l'Elfo Silvano",
         inventory: [
           { id: 'i1', name: 'Arco Lungo del Vento' },
-          { id: 'i2', name: 'Pozione di cura maggiore (x2)' },
+          { id: 'i2', name: 'Pozione di cura maggiore', quantity: 2 },
           { id: 'i3', name: 'Rampino di ferro silvano' },
         ],
         bonus: [

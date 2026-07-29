@@ -69,8 +69,40 @@ export const MAX_STATUS_EFFECTS = 5;
 
 export const DEFAULT_STATUS_COLOR = '#a855f7';
 
-/** Soglia sotto la quale scatta l'allerta visiva, se attiva sulla barra. */
-export const LOW_HP_THRESHOLD = 0.25;
+/**
+ * Soglia predefinita dell'allerta visiva, in percentuale.
+ *
+ * Resta il valore di partenza di ogni barra, ma non è più l'unico possibile:
+ * un boss con 400 punti ferita è in pericolo molto prima di un quarto, e un
+ * gregario con 8 molto dopo.
+ */
+export const DEFAULT_LOW_HP_PERCENT = 25;
+
+/**
+ * Estremi consentiti. Sotto il 5% l'allerta scatterebbe quando ormai la barra è
+ * vuota; sopra il 95% pulserebbe praticamente sempre.
+ */
+export const MIN_LOW_HP_PERCENT = 5;
+export const MAX_LOW_HP_PERCENT = 95;
+
+/** Soglia predefinita come rapporto, per chi ragiona in frazioni di barra. */
+export const LOW_HP_THRESHOLD = DEFAULT_LOW_HP_PERCENT / 100;
+
+export function clampLowHpPercent(value: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_LOW_HP_PERCENT;
+  return Math.max(MIN_LOW_HP_PERCENT, Math.min(Math.round(value), MAX_LOW_HP_PERCENT));
+}
+
+/**
+ * Soglia effettiva della barra: la sua, se ne ha una, altrimenti quella
+ * predefinita. Assente significa "il solito quarto", così le barre create prima
+ * si comportano esattamente come sempre.
+ */
+export function lowHpPercent(bar: Pick<HealthBar, 'lowHpThreshold'>): number {
+  return bar.lowHpThreshold === undefined
+    ? DEFAULT_LOW_HP_PERCENT
+    : clampLowHpPercent(bar.lowHpThreshold);
+}
 
 /**
  * Una barra è in allerta quando è sotto soglia ma non ancora a zero: a zero c'è
@@ -79,7 +111,27 @@ export const LOW_HP_THRESHOLD = 0.25;
 export function isLowHp(bar: HealthBar): boolean {
   if (bar.lowHpAlert === false) return false;
   if (bar.currentValue <= 0) return false;
-  return healthRatio(bar) <= LOW_HP_THRESHOLD;
+  return healthRatio(bar) <= lowHpPercent(bar) / 100;
+}
+
+/**
+ * Nome per la copia di una barra.
+ *
+ * Un numero finale viene incrementato ("Goblin 1" → "Goblin 2"), altrimenti se
+ * ne aggiunge uno ("Goblin" → "Goblin 2"). Se il nome così ottenuto è già preso
+ * si prosegue: duplicando tre volte lo stesso goblin si ottengono 2, 3 e 4, non
+ * tre barre chiamate allo stesso modo.
+ */
+export function nextCopyName(name: string, existing: Iterable<string>): string {
+  const taken = new Set(existing);
+  const match = /^(.*?)(\d+)\s*$/.exec(name);
+  const base = match ? match[1] : `${name} `;
+
+  let counter = match ? Number(match[2]) + 1 : 2;
+  // Il tetto evita un ciclo infinito con una lista assurdamente affollata.
+  while (counter < 1000 && taken.has(`${base}${counter}`)) counter++;
+
+  return `${base}${counter}`.slice(0, 60);
 }
 
 export const DEFAULT_HEALTH_GROUPS = ['Nemici', 'Alleati', 'PG'];

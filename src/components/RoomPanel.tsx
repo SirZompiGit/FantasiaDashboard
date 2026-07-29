@@ -109,7 +109,7 @@ export function RoomPanel({
 
           {!online && (
             <span className="text-[10px] leading-snug text-amber-400">
-              Rete assente: le modifiche partiranno al ritorno della connessione.
+              Rete assente: riconnessione automatica in corso, le modifiche partiranno da sole.
             </span>
           )}
 

@@ -213,6 +213,102 @@ describe('barra nascosta ai giocatori', () => {
   });
 });
 
+describe('soglia di allerta della barra', () => {
+  const bar = (lowHpThreshold: unknown) =>
+    normalizeCampaign({
+      title: 'X',
+      healthBars: [{ name: 'Boss', maxValue: 100, currentValue: 100, lowHpThreshold }],
+    }).healthBars[0];
+
+  it('conserva una soglia propria, riportata nei limiti', () => {
+    expect(bar(60).lowHpThreshold).toBe(60);
+    expect(bar(500).lowHpThreshold).toBe(95);
+    expect(bar(1).lowHpThreshold).toBe(5);
+  });
+
+  /**
+   * Il vincolo di compatibilità: una barra che non ha mai toccato la soglia
+   * deve riserializzarsi identica a prima che fosse regolabile.
+   */
+  it('resta assente quando manca o vale il quarto predefinito', () => {
+    for (const input of [undefined, 25, '25']) {
+      expect(bar(input)).not.toHaveProperty('lowHpThreshold');
+    }
+  });
+});
+
+describe('quantità degli oggetti', () => {
+  const inventory = (items: unknown) =>
+    normalizeCampaign({
+      title: 'X',
+      players: [{ id: 'p1', name: 'Eroe', inventory: items }],
+    }).players[0].inventory;
+
+  it('conserva le quantità valide e le riporta nei limiti', () => {
+    expect(inventory([{ id: 'i', name: 'Frecce', quantity: 20 }])[0].quantity).toBe(20);
+    expect(inventory([{ id: 'i', name: 'Frecce', quantity: 99999 }])[0].quantity).toBe(999);
+  });
+
+  /**
+   * Un oggetto singolo deve serializzarsi come prima che la quantità
+   * esistesse: è ciò che tiene identiche le campagne già salvate.
+   */
+  it('resta assente a uno, a zero e quando non è un numero', () => {
+    for (const input of [undefined, 1, 0, -3, 'tre']) {
+      expect(inventory([{ id: 'i', name: 'Corda', quantity: input }])[0]).not.toHaveProperty(
+        'quantity',
+      );
+    }
+  });
+
+  /**
+   * Le voci senza nome vengono scartate: se la quantità fosse letta per
+   * posizione invece che dalla stessa riga, finirebbe sull'oggetto sbagliato.
+   */
+  it('resta agganciata al proprio oggetto anche scartando le righe rotte', () => {
+    const items = inventory([
+      { name: '' },
+      null,
+      { id: 'a', name: 'Torce', quantity: 4 },
+      { id: 'b', name: 'Pane' },
+    ]);
+
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({ name: 'Torce', quantity: 4 });
+    expect(items[1]).not.toHaveProperty('quantity');
+  });
+});
+
+describe('tesoro del gruppo', () => {
+  it('le campagne salvate prima partono a zero, con nome e icona predefiniti', () => {
+    const currency = normalizeCampaign({ title: 'X' }).currency;
+    expect(currency.amount).toBe(0);
+    expect(currency.icon).toBe('coins');
+    expect(currency.name).toBeTruthy();
+  });
+
+  it('conserva ciò che è stato scelto e scarta il resto', () => {
+    const currency = normalizeCampaign({
+      title: 'X',
+      currency: { name: 'Crediti', icon: 'gem', amount: 4200 },
+    }).currency;
+
+    expect(currency).toEqual({ name: 'Crediti', icon: 'gem', amount: 4200 });
+  });
+
+  it('non si fida di un icona inesistente né di un totale assurdo', () => {
+    const currency = normalizeCampaign({
+      title: 'X',
+      currency: { name: '  ', icon: 'patatina', amount: -99 },
+    }).currency;
+
+    expect(currency.icon).toBe('coins');
+    expect(currency.amount).toBe(0);
+    // Il nome vuoto torna al predefinito: l'icona non resta senza etichetta.
+    expect(currency.name).toBeTruthy();
+  });
+});
+
 describe('statistiche del personaggio', () => {
   const withStats = (stats: unknown) =>
     normalizeCampaign({

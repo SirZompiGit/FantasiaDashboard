@@ -16,11 +16,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CampaignState } from '../types';
 import {
   type RoomState,
-  armUserDisconnect,
   createRoom,
   deleteRoom,
   joinRoom,
   leaveRoom,
+  restoreUser,
   subscribeToConnection,
   subscribeToRoom,
   sweepAbandonedRooms,
@@ -57,6 +57,12 @@ export interface RoomSession {
   role: RoomRole;
   pin: string;
   userId: string | null;
+  /**
+   * Nome con cui il giocatore è entrato. Serve a rientrare da soli dopo una
+   * caduta di rete: il nodo dell'utente viene cancellato dal server e va
+   * riscritto. Assente nelle sessioni salvate da versioni precedenti.
+   */
+  userName?: string;
 }
 
 function readSession(): RoomSession | null {
@@ -94,6 +100,12 @@ export interface UseRoomResult {
   error: string | null;
   /** Stato della connessione al database, per l'indicatore in interfaccia. */
   online: boolean;
+  /**
+   * Vero quando la connessione è caduta DOPO essere stata stabilita: è il
+   * momento in cui l'app si sta ricollegando da sola. Distinto da `!online`,
+   * che è vero anche nell'attimo iniziale in cui non ci si è ancora collegati.
+   */
+  reconnecting: boolean;
   /** True se la stanza è stata chiusa dal master mentre eravamo dentro. */
   roomClosed: boolean;
   available: boolean;
@@ -117,7 +129,20 @@ export function useRoom(campaign: CampaignState, autoResume = true): UseRoomResu
   const [status, setStatus] = useState<RoomStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [online, setOnline] = useState(true);
+  const [reconnecting, setReconnecting] = useState(false);
   const [roomClosed, setRoomClosed] = useState(false);
+
+  /** Ci si è collegati almeno una volta: prima di allora non c'è nulla da riprendere. */
+  const wasOnlineRef = useRef(false);
+
+  /**
+   * Nome corrente del giocatore, per il rientro automatico.
+   *
+   * Un riferimento e non uno stato: si rinfresca quando il giocatore si
+   * rinomina dalla propria scheda, e cambiare `session` qui farebbe staccare e
+   * riattaccare la sottoscrizione alla stanza per un dato che non la riguarda.
+   */
+  const userNameRef = useRef(session?.userName ?? 'Giocatore');
 
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPushedRef = useRef<string | null>(null);
@@ -127,6 +152,8 @@ export function useRoom(campaign: CampaignState, autoResume = true): UseRoomResu
     setSession(next);
     setRoomState(null);
     setRoomClosed(false);
+    setReconnecting(false);
+    wasOnlineRef.current = false;
     lastPushedRef.current = null;
   }, []);
 
@@ -164,18 +191,54 @@ export function useRoom(campaign: CampaignState, autoResume = true): UseRoomResu
   // Indicatore di connessione.
   useEffect(() => {
     if (!session || !isFirebaseConfigured) return;
-    const unsubscribe = subscribeToConnection(setOnline);
+
+    const unsubscribe = subscribeToConnection((next) => {
+      setOnline(next);
+      if (next) {
+        wasOnlineRef.current = true;
+        setReconnecting(false);
+      } else if (wasOnlineRef.current) {
+        // Solo dopo un collegamento riuscito: all'avvio la connessione non è
+        // "caduta", semplicemente non c'è ancora.
+        setReconnecting(true);
+      }
+    });
+
     return () => unsubscribe();
   }, [session]);
 
-  // Dopo una riconnessione la rimozione automatica dell'utente va riarmata:
-  // Firebase la consuma quando la connessione cade.
+  /**
+   * Rientro automatico del giocatore.
+   *
+   * Quando la connessione cade è il server a rimuovere il nodo dell'utente
+   * (`onDisconnect`), quindi al ritorno non basta che la rete funzioni: il
+   * giocatore va rimesso nella stanza, altrimenti resta fuori con la propria
+   * scheda aperta. Vale anche al primo montaggio dopo un F5, dove la sessione
+   * viene ripresa da sessionStorage ma il nodo è stato cancellato nel frattempo.
+   */
   useEffect(() => {
     if (!online || session?.role !== 'participant' || !session.userId) return;
-    armUserDisconnect(session.pin, session.userId).catch((e) =>
-      console.warn('[fantasia] onDisconnect non riarmato:', e),
+
+    restoreUser(session.pin, session.userId, userNameRef.current).catch((e) =>
+      console.warn('[fantasia] rientro nella stanza non riuscito:', e),
     );
   }, [online, session]);
+
+  /**
+   * Il giocatore può rinominarsi dalla propria scheda. Senza questo allineamento
+   * un rientro automatico lo rimetterebbe in stanza con il nome di quando è
+   * entrato, e per gli altri sarebbe una persona diversa.
+   */
+  useEffect(() => {
+    if (session?.role !== 'participant' || !session.userId) return;
+
+    const live = roomState?.users?.[session.userId]?.name;
+    if (!live || live === userNameRef.current) return;
+
+    userNameRef.current = live;
+    // Solo su disco: serve al prossimo avvio, non a questo render.
+    writeSession({ ...session, userName: live });
+  }, [roomState, session]);
 
   // Il master trasmette la campagna, con ritardo.
   useEffect(() => {
@@ -277,7 +340,7 @@ export function useRoom(campaign: CampaignState, autoResume = true): UseRoomResu
         const userId = newUserId();
         const name = sanitizeUserName(displayName).slice(0, 24) || 'Giocatore';
         await joinRoom(cleanPin, userId, name);
-        applySession({ role: 'participant', pin: cleanPin, userId });
+        applySession({ role: 'participant', pin: cleanPin, userId, userName: name });
       } catch (e) {
         console.error('[fantasia] ingresso nella stanza fallito:', e);
         setStatus('error');
@@ -335,6 +398,7 @@ export function useRoom(campaign: CampaignState, autoResume = true): UseRoomResu
     status,
     error,
     online,
+    reconnecting,
     roomClosed,
     available: isFirebaseConfigured,
     openAsMaster,

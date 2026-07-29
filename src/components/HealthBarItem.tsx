@@ -28,6 +28,7 @@ import { usesSizedFill, type BarStyle } from '../theme';
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   Edit2,
   EyeOff,
   GripVertical,
@@ -84,6 +85,8 @@ interface HealthBarItemProps {
   /** Nella vista condivisa mostra solo risorse ed effetti contrassegnati come pubblici. */
   onlyShared?: boolean;
   onEdit?: (bar: HealthBar) => void;
+  /** Crea una copia identica subito sotto: sei goblin uguali, un clic ciascuno. */
+  onDuplicate?: (bar: HealthBar) => void;
   onDelete?: (bar: HealthBar) => void;
   /** Presente solo in dashboard: abilita maniglia e frecce di riordino. */
   reorder?: ReorderControls;
@@ -548,6 +551,7 @@ export function HealthBarItem({
   onChangeResource,
   onlyShared = false,
   onEdit,
+  onDuplicate,
   onDelete,
   reorder,
   compact = false,
@@ -1032,7 +1036,9 @@ export function HealthBarItem({
                 </button>
               ))}
 
-              {(onEdit || onDelete) && <span className="mx-0.5 h-4 w-px bg-bento-border" />}
+              {(onEdit || onDuplicate || onDelete) && (
+                <span className="mx-0.5 h-4 w-px bg-bento-border" />
+              )}
 
               {onEdit && (
                 <button
@@ -1045,6 +1051,20 @@ export function HealthBarItem({
                   className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400"
                 >
                   <Edit2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+
+              {onDuplicate && (
+                <button
+                  type="button"
+                  aria-label={`Duplica ${bar.name}`}
+                  onClick={() => {
+                    playClickSound();
+                    onDuplicate(bar);
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 transition-colors duration-200 hover:bg-bento-button hover:text-theme-400"
+                >
+                  <Copy className="h-3.5 w-3.5" />
                 </button>
               )}
 

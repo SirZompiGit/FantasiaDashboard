@@ -205,6 +205,25 @@ export default function App() {
     exitRoom();
   }, [participantKicked, exitRoom, notify]);
 
+  /**
+   * Caduta e ritorno della linea.
+   *
+   * L'app si ricollega da sola — Firebase riapre la connessione e il giocatore
+   * viene rimesso in stanza da `useRoom` — ma senza dirlo il silenzio sembra un
+   * blocco, e la reazione istintiva è ricaricare la pagina proprio mentre il
+   * rientro è in corso.
+   */
+  const { reconnecting } = room;
+  const wasReconnectingRef = useRef(false);
+  useEffect(() => {
+    if (reconnecting) {
+      notify('Connessione persa. Riconnessione automatica in corso…', { kind: 'info' });
+    } else if (wasReconnectingRef.current) {
+      notify('Riconnesso alla stanza.', { kind: 'success' });
+    }
+    wasReconnectingRef.current = reconnecting;
+  }, [reconnecting, notify]);
+
   const handleExport = useCallback(() => {
     try {
       const slug =
@@ -629,6 +648,8 @@ export default function App() {
         onD2LabelChange={(index, label) => dispatch({ type: 'SET_D2_LABEL', index, label })}
         compactBars={state.compactBars}
         onCompactBarsChange={(enabled) => dispatch({ type: 'SET_COMPACT_BARS', enabled })}
+        currency={state.currency}
+        onCurrencyChange={(changes) => dispatch({ type: 'SET_CURRENCY', changes })}
         onBackToWelcome={() => {
           // Con una stanza aperta si chiude prima: altrimenti resterebbe viva
           // sul database, con i giocatori collegati a un master che non c'è più.
@@ -662,6 +683,7 @@ export default function App() {
           notes={state.notes}
           campaignNotes={state.campaignNotes}
           activePlayerId={state.activePlayerId}
+          currency={state.currency}
           dispatch={dispatch}
         />
 

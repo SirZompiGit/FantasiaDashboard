@@ -22,14 +22,19 @@ import { IconButton } from './ui/IconButton';
 import { FIELD, FIELD_SM } from './ui/fields';
 import { newId } from '../lib/ids';
 import {
+  DEFAULT_LOW_HP_PERCENT,
   DEFAULT_RESOURCE_COLOR,
   DEFAULT_STATUS_COLOR,
   DEFAULT_ZERO_HP_TEXT,
   MAX_HP,
+  MAX_LOW_HP_PERCENT,
   MAX_RESOURCES,
   MAX_STATUS_EFFECTS,
   MIN_HP,
+  MIN_LOW_HP_PERCENT,
+  clampLowHpPercent,
   clampMaxHp,
+  lowHpPercent,
 } from '../lib/healthBars';
 
 const PRESET_COLORS = [
@@ -49,6 +54,15 @@ const COLOR_MODES: { id: ColoredBar['colorMode']; label: string }[] = [
 
 /** Etichetta della colonna sinistra: allinea le righe senza tabelle. */
 const ROW_LABEL = 'w-16 shrink-0 text-xs font-medium text-slate-400 sm:w-20';
+
+/**
+ * Riquadro di una singola opzione avanzata.
+ *
+ * Senza classe di display e senza `select-none`: le celle con un campo di testo
+ * le aggiungono diversamente da quelle con una casella di spunta, e `select-none`
+ * su un contenitore impedirebbe di selezionare il testo dentro l'input.
+ */
+const ADVANCED_CELL = 'rounded-lg border border-bento-border bg-bento-panel px-3 py-2.5';
 
 /** Parte colore, comune alla barra della vita e alle risorse. */
 interface ColorDraft {
@@ -81,6 +95,8 @@ interface FormValues extends ColorDraft {
   group: string;
   zeroHpText: string;
   lowHpAlert: boolean;
+  /** Percentuale sotto cui scatta l'allerta. Stringa: il campo si può svuotare. */
+  lowHpThreshold: string;
   hidden: boolean;
   /** Vuoto = eredita il design della campagna. */
   barStyle: BarStyle | '';
@@ -104,6 +120,7 @@ const EMPTY_FORM: FormValues = {
   group: '',
   zeroHpText: DEFAULT_ZERO_HP_TEXT,
   lowHpAlert: true,
+  lowHpThreshold: String(DEFAULT_LOW_HP_PERCENT),
   hidden: false,
   barStyle: '',
   resources: [],
@@ -131,6 +148,8 @@ const newStatusDraft = (): StatusDraft => ({
 const readMax = (raw: string) => clampMaxHp(Number.parseInt(raw, 10) || MIN_HP);
 const readCurrent = (raw: string, max: number) =>
   Math.max(0, Math.min(Number.parseInt(raw, 10) || 0, max));
+const readThreshold = (raw: string) =>
+  clampLowHpPercent(Number.parseInt(raw, 10) || DEFAULT_LOW_HP_PERCENT);
 
 function toDraft(bar: HealthBar): FormValues {
   return {
@@ -145,6 +164,7 @@ function toDraft(bar: HealthBar): FormValues {
     group: bar.group ?? '',
     zeroHpText: bar.zeroHpText ?? DEFAULT_ZERO_HP_TEXT,
     lowHpAlert: bar.lowHpAlert !== false,
+    lowHpThreshold: String(lowHpPercent(bar)),
     hidden: bar.hidden === true,
     barStyle: bar.barStyle ?? '',
     resources: (bar.resources ?? []).map((resource) => ({
@@ -427,6 +447,12 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
       group: form.group || undefined,
       zeroHpText: form.zeroHpText.trim() || DEFAULT_ZERO_HP_TEXT,
       lowHpAlert: form.lowHpAlert,
+      // Assente al valore predefinito: il payload resta quello di sempre per
+      // tutte le barre che non hanno voluto una soglia propria.
+      lowHpThreshold:
+        readThreshold(form.lowHpThreshold) === DEFAULT_LOW_HP_PERCENT
+          ? undefined
+          : readThreshold(form.lowHpThreshold),
       hidden: form.hidden || undefined,
       // Assente = segue il design della campagna.
       barStyle: form.barStyle || undefined,
@@ -799,20 +825,14 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
         />
 
         {showAdvanced && (
-          <div className="space-y-2 animate-fade-in">
-            <label className="flex items-center gap-2">
-              <span className={ROW_LABEL}>Testo a 0</span>
-              <input
-                type="text"
-                placeholder={DEFAULT_ZERO_HP_TEXT}
-                value={form.zeroHpText}
-                onChange={(event) => setField('zeroHpText', event.target.value)}
-                maxLength={20}
-                className={`${FIELD} w-full font-mono uppercase tracking-wider`}
-              />
-            </label>
-
-            <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-bento-border bg-bento-panel px-3 py-2.5 select-none">
+          // Due colonne: in fila erano quattro riquadri larghi quanto il form e
+          // alti poco, con metà larghezza sprecata. Su schermi stretti tornano
+          // in colonna singola.
+          <div className="grid grid-cols-1 gap-2 animate-fade-in sm:grid-cols-2">
+            {/* L'interruttore dell'allerta e la sua soglia stanno affiancati:
+                separati, si finiva per regolare una percentuale su un'allerta
+                spenta senza capire perché la barra non pulsasse. */}
+            <label className={`${ADVANCED_CELL} flex cursor-pointer items-start gap-2.5 select-none`}>
               <input
                 type="checkbox"
                 checked={form.lowHpAlert}
@@ -821,16 +841,57 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
               />
               <span className="min-w-0">
                 <span className="block text-xs font-medium text-slate-200">
-                  Allerta sotto il 25%
+                  Allerta sotto il {readThreshold(form.lowHpThreshold)}%
                 </span>
                 <span className="block text-[11px] leading-snug text-slate-500">
-                  La barra pulsa quando i punti ferita scendono sotto un quarto. Si spegne da
-                  sola a 0 HP, dove compare già l&apos;etichetta.
+                  La barra pulsa sotto la soglia qui accanto. Si spegne da sola a 0 HP, dove
+                  compare già l&apos;etichetta.
                 </span>
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-bento-border bg-bento-panel px-3 py-2.5 select-none">
+            <label className={`${ADVANCED_CELL} block`}>
+              <span className="block text-xs font-medium text-slate-200">Soglia di allerta</span>
+              <span className="mt-1.5 flex items-center gap-2">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={MIN_LOW_HP_PERCENT}
+                  max={MAX_LOW_HP_PERCENT}
+                  value={form.lowHpThreshold}
+                  onChange={(event) => setField('lowHpThreshold', event.target.value)}
+                  onBlur={() =>
+                    setField('lowHpThreshold', String(readThreshold(form.lowHpThreshold)))
+                  }
+                  disabled={!form.lowHpAlert}
+                  aria-label="Percentuale sotto cui scatta l'allerta"
+                  className={`${FIELD_SM} w-16 font-mono disabled:opacity-40`}
+                />
+                <span className="font-mono text-xs text-slate-500">
+                  % · {MIN_LOW_HP_PERCENT}–{MAX_LOW_HP_PERCENT}
+                </span>
+              </span>
+              <span className="mt-1.5 block text-[11px] leading-snug text-slate-500">
+                Un boss con 400 punti ferita è in pericolo molto prima di un gregario con 8.
+              </span>
+            </label>
+
+            <label className={`${ADVANCED_CELL} block`}>
+              <span className="block text-xs font-medium text-slate-200">Testo a 0</span>
+              <input
+                type="text"
+                placeholder={DEFAULT_ZERO_HP_TEXT}
+                value={form.zeroHpText}
+                onChange={(event) => setField('zeroHpText', event.target.value)}
+                maxLength={20}
+                className={`${FIELD_SM} mt-1.5 w-full font-mono uppercase tracking-wider`}
+              />
+              <span className="mt-1.5 block text-[11px] leading-snug text-slate-500">
+                Compare al posto dei numeri quando la barra arriva a zero.
+              </span>
+            </label>
+
+            <label className={`${ADVANCED_CELL} flex cursor-pointer items-start gap-2.5 select-none`}>
               <input
                 type="checkbox"
                 checked={form.hidden}
@@ -842,8 +903,8 @@ export function HealthBarForm({ bar, healthGroups, onSubmit, onCancel }: HealthB
                   Nascondi ai giocatori
                 </span>
                 <span className="block text-[11px] leading-snug text-slate-500">
-                  La barra sparisce del tutto dalla vista condivisa, ma resta qui nella tua
-                  dashboard. Diverso dalle risorse e dagli effetti, che si nascondono uno per uno.
+                  La barra sparisce dalla vista condivisa ma resta qui. Diverso dalle risorse e
+                  dagli effetti, che si nascondono uno per uno.
                 </span>
               </span>
             </label>
