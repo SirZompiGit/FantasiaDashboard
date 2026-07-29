@@ -2183,10 +2183,10 @@ html.theme-transitions .border-bento-border {
 
 /* Orizzontale: il tracciato corre da sinistra a destra. */
 .hp-track--battito.flex-row .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='360'%20height='40'%20viewBox='0%200%20360%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H34%20L40,20%20L45,6%20L51,34%20L57,12%20L62,20%20H118%20L124,20%20L128,14%20L133,26%20L137,20%20H196%20L202,20%20L207,9%20L213,31%20L219,15%20L224,20%20H300%20L306,20%20L310,17%20L314,23%20L318,20%20H360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
-    repeat-x 0 center / 18rem 100%;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='360'%20height='40'%20viewBox='0%200%20360%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H34%20L40,20%20L45,6%20L51,34%20L57,12%20L62,20%20H118%20L124,20%20L128,14%20L133,26%20L137,20%20H196%20L202,20%20L207,9%20L213,31%20L219,15%20L224,20%20H300%20L306,20%20L310,17%20L314,23%20L318,20%20H360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
-    repeat-x 0 center / 18rem 100%;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='600'%20height='40'%20viewBox='0%200%20600%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L41,5%20L47,35%20L53,11%20L58,20%20H110%20L116,20%20L120,14%20L124,26%20L128,17%20L132,23%20L136,20%20H190%20L196,20%20L201,8%20L207,32%20L212,20%20H300%20L306,20%20L310,16%20L314,24%20L318,20%20H370%20L376,20%20L380,3%20L386,37%20L392,10%20L397,20%20H460%20L466,20%20L470,18%20L474,22%20L478,20%20H520%20L526,20%20L531,12%20L537,28%20L542,20%20H600'%20fill='none'%20stroke='white'%20stroke-width='3.5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-x 0 center / 30rem 100%;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='600'%20height='40'%20viewBox='0%200%20600%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L41,5%20L47,35%20L53,11%20L58,20%20H110%20L116,20%20L120,14%20L124,26%20L128,17%20L132,23%20L136,20%20H190%20L196,20%20L201,8%20L207,32%20L212,20%20H300%20L306,20%20L310,16%20L314,24%20L318,20%20H370%20L376,20%20L380,3%20L386,37%20L392,10%20L397,20%20H460%20L466,20%20L470,18%20L474,22%20L478,20%20H520%20L526,20%20L531,12%20L537,28%20L542,20%20H600'%20fill='none'%20stroke='white'%20stroke-width='3.5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-x 0 center / 30rem 100%;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
     battito-scorre-x 2.4s linear infinite;
@@ -2194,10 +2194,10 @@ html.theme-transitions .border-bento-border {
 
 /* Verticale: lo stesso tracciato ruotato di 90°, i picchi sporgono ai lati. */
 .hp-track--battito.flex-col-reverse .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='360'%20viewBox='0%200%2040%20360'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V34%20L20,40%20L6,45%20L34,51%20L12,57%20L20,62%20V118%20L20,124%20L14,128%20L26,133%20L20,137%20V196%20L20,202%20L9,207%20L31,213%20L15,219%20L20,224%20V300%20L20,306%20L17,310%20L23,314%20L20,318%20V360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
-    repeat-y center 0 / 100% 18rem;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='360'%20viewBox='0%200%2040%20360'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V34%20L20,40%20L6,45%20L34,51%20L12,57%20L20,62%20V118%20L20,124%20L14,128%20L26,133%20L20,137%20V196%20L20,202%20L9,207%20L31,213%20L15,219%20L20,224%20V300%20L20,306%20L17,310%20L23,314%20L20,318%20V360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
-    repeat-y center 0 / 100% 18rem;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='600'%20viewBox='0%200%2040%20600'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L5,41%20L35,47%20L11,53%20L20,58%20V110%20L20,116%20L14,120%20L26,124%20L17,128%20L23,132%20L20,136%20V190%20L20,196%20L8,201%20L32,207%20L20,212%20V300%20L20,306%20L16,310%20L24,314%20L20,318%20V370%20L20,376%20L3,380%20L37,386%20L10,392%20L20,397%20V460%20L20,466%20L18,470%20L22,474%20L20,478%20V520%20L20,526%20L12,531%20L28,537%20L20,542%20V600'%20fill='none'%20stroke='white'%20stroke-width='3.5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 30rem;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='600'%20viewBox='0%200%2040%20600'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L5,41%20L35,47%20L11,53%20L20,58%20V110%20L20,116%20L14,120%20L26,124%20L17,128%20L23,132%20L20,136%20V190%20L20,196%20L8,201%20L32,207%20L20,212%20V300%20L20,306%20L16,310%20L24,314%20L20,318%20V370%20L20,376%20L3,380%20L37,386%20L10,392%20L20,397%20V460%20L20,466%20L18,470%20L22,474%20L20,478%20V520%20L20,526%20L12,531%20L28,537%20L20,542%20V600'%20fill='none'%20stroke='white'%20stroke-width='3.5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 30rem;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
     battito-scorre-y 2.4s linear infinite;
@@ -2218,11 +2218,11 @@ html.theme-transitions .border-bento-border {
 }
 
 @keyframes battito-scorre-x {
-  to { -webkit-mask-position: -18rem center; mask-position: -18rem center; }
+  to { -webkit-mask-position: -30rem center; mask-position: -30rem center; }
 }
 
 @keyframes battito-scorre-y {
-  to { -webkit-mask-position: center 18rem; mask-position: center 18rem; }
+  to { -webkit-mask-position: center 30rem; mask-position: center 30rem; }
 }
 
 @keyframes battito-pulsa {
