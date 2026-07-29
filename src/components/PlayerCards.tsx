@@ -23,6 +23,7 @@ import {
   itemQuantity,
   withQuantity,
 } from '../lib/inventory';
+import { type Currency, MAX_CURRENCY, clampCurrency, currencyIconComponent } from '../lib/currency';
 
 type Section = 'inventory' | 'bonus';
 
@@ -32,6 +33,8 @@ interface PlayerCardsProps {
   dispatch: React.Dispatch<CampaignAction>;
   statsEnabled: boolean;
   statLabels: string[];
+  /** Valuta della campagna: decide se ogni scheda mostra il proprio portafoglio. */
+  currency: Currency;
 }
 
 interface ItemSectionProps {
@@ -277,8 +280,11 @@ export function PlayerCards({
   dispatch,
   statsEnabled,
   statLabels,
+  currency,
 }: PlayerCardsProps) {
   const { notifyUndo } = useToasts();
+
+  const CurrencyIcon = currencyIconComponent(currency.icon);
 
   return (
     <section>
@@ -331,6 +337,35 @@ export function PlayerCards({
                 </div>
 
                 <div className="flex-grow space-y-5 pl-2">
+                  {/* Il portafoglio del personaggio: una riga sola in cima alla
+                      scheda, dove si guarda per prima cosa quando si divide un
+                      bottino. Compare solo se la campagna conta il denaro per
+                      personaggio. */}
+                  {currency.enabled && currency.perPlayer && (
+                    <label className="flex items-center gap-2">
+                      <CurrencyIcon className="h-4 w-4 shrink-0 text-theme-500" />
+                      <span className="min-w-0 flex-1 truncate font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        {currency.name}
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={MAX_CURRENCY}
+                        value={player.gold ?? 0}
+                        onChange={(event) =>
+                          dispatch({
+                            type: 'UPDATE_PLAYER',
+                            id: player.id,
+                            changes: { gold: clampCurrency(Number.parseInt(event.target.value, 10)) },
+                          })
+                        }
+                        aria-label={`${currency.name} di ${player.name}`}
+                        className="w-24 rounded-lg border border-bento-border bg-bento-bg px-2 py-1 text-right font-display text-sm font-bold tabular-nums text-theme-400 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                      />
+                    </label>
+                  )}
+
                   {statsEnabled && (
                     <div className="space-y-1.5">
                       <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">

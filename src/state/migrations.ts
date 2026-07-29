@@ -146,11 +146,22 @@ function normalizeCurrency(value: unknown): Currency {
 
   const name = asString(value.name).trim().slice(0, MAX_CURRENCY_NAME);
   const icon = asString(value.icon);
+  const amount = clampCurrency(asNumber(value.amount, 0));
+  const perPlayer = asBoolean(value.perPlayer);
 
   return {
+    /**
+     * L'interruttore è arrivato dopo il contatore: dove manca lo si deduce dal
+     * totale, così una campagna che l'oro lo stava già usando non se lo vede
+     * sparire al primo caricamento.
+     */
+    enabled: value.enabled === undefined ? amount > 0 : asBoolean(value.enabled),
     name: name || base.name,
     icon: isCurrencyIcon(icon) ? icon : base.icon,
-    amount: clampCurrency(asNumber(value.amount, 0)),
+    amount,
+    perPlayer,
+    // La somma non ha senso senza i portafogli da sommare.
+    sumFromPlayers: perPlayer && asBoolean(value.sumFromPlayers),
   };
 }
 
@@ -180,6 +191,11 @@ function normalizePlayer(value: unknown): Player | null {
 
   const stats = normalizeStats(value.stats);
   if (stats) player.stats = stats;
+
+  // Assente a zero: un personaggio senza denaro si serializza come prima che
+  // la valuta per personaggio esistesse.
+  const gold = clampCurrency(asNumber(value.gold, 0));
+  if (gold > 0) player.gold = gold;
 
   return player;
 }

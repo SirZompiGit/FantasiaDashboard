@@ -28,6 +28,11 @@ export interface Player {
    * valori mancanti valgono `DEFAULT_STAT`.
    */
   stats?: number[];
+  /**
+   * Quanto ha in tasca, quando la valuta è gestita per personaggio. Campo
+   * additivo e ASSENTE a zero, come `stats`.
+   */
+  gold?: number;
 }
 
 export interface GradientColors {

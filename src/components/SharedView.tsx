@@ -37,7 +37,8 @@ import { CRITICAL_COLOR, DiceShape, FUMBLE_COLOR } from './DiceShape';
 import { CritSparkles } from './CritSparkles';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
-import { TreasuryPanel } from './TreasuryPanel';
+import { TreasuryTag } from './TreasuryPanel';
+import { groupTotal } from '../lib/currency';
 import { areAllCircular, groupBars } from '../lib/healthBars';
 import { itemQuantity } from '../lib/inventory';
 import { d2FaceText, isCritical, isFumble } from '../lib/dice';
@@ -153,6 +154,9 @@ export function SharedView({
   sceneImage,
 }: SharedViewProps) {
   const { title, players, healthBars, lastRoll, theme, activePlayerId, isRollHidden } = state;
+
+  /** Il totale del gruppo: il proprio, o la somma dei portafogli. */
+  const treasury = groupTotal(state.currency, players);
 
   const [healthLayout, setHealthLayout] = useState<HealthLayout>(() => {
     try {
@@ -389,14 +393,18 @@ export function SharedView({
             {/* Ordine di turno, con sotto l'immagine di scena quando c'è */}
             <div className="order-3 flex flex-col gap-4 md:order-2 lg:order-1 lg:col-span-3 lg:h-full lg:min-h-0">
             <section className={`${PANEL} @container flex-1`}>
-              <div className="mb-3 shrink-0 space-y-3 border-b border-bento-border pb-3">
+              <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-bento-border pb-3">
                 <h2 className={PANEL_TITLE}>
                   <Shield className="h-5 w-5 text-theme-500" /> Ordine di Turno
                 </h2>
 
-                {/* Il tesoro compare solo quando c'è: una campagna che non lo
-                    usa non si porta dietro una riga a zero. */}
-                {state.currency.amount > 0 && <TreasuryPanel currency={state.currency} />}
+                {/* Una riga accanto al titolo, senza cornice: il totale è
+                    un'informazione, e in una vista già fatta di riquadri un
+                    pannello in più lo farebbe sembrare più importante di quanto
+                    sia. Compare solo se la valuta è in uso. */}
+                {state.currency.enabled && (
+                  <TreasuryTag currency={state.currency} amount={treasury} />
+                )}
               </div>
 
               <div className="max-h-[40vh] flex-1 space-y-2.5 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin lg:max-h-none">
@@ -448,6 +456,18 @@ export function SharedView({
                               {player.name}
                             </span>
                           </div>
+
+                          {/* L'oro del personaggio, quando ognuno tiene il
+                              proprio: due caratteri accanto al nome, non una
+                              riga in più per ciascuno. */}
+                          {state.currency.enabled && state.currency.perPlayer && (
+                            <TreasuryTag
+                              currency={state.currency}
+                              amount={player.gold ?? 0}
+                              compact
+                              className="shrink-0 text-xs"
+                            />
+                          )}
 
                           {isActive && (
                             <span className="flex shrink-0 animate-pulse items-center gap-1 rounded-full bg-theme-500/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-theme-500">

@@ -575,3 +575,56 @@ describe('quantità degli oggetti', () => {
     expect(many.players[0].inventory[0].quantity).toBe(999);
   });
 });
+
+describe('valuta: interruttori', () => {
+  it('spegnendo l oro per personaggio si spegne anche la somma', () => {
+    let state = campaignReducer(seed(), {
+      type: 'SET_CURRENCY',
+      changes: { perPlayer: true, sumFromPlayers: true },
+    });
+    expect(state.currency.sumFromPlayers).toBe(true);
+
+    state = campaignReducer(state, { type: 'SET_CURRENCY', changes: { perPlayer: false } });
+    // Restare accesa senza nulla da sommare la renderebbe un interruttore
+    // acceso che non fa niente.
+    expect(state.currency.sumFromPlayers).toBe(false);
+  });
+
+  it('la somma non si accende senza i portafogli da sommare', () => {
+    const state = campaignReducer(seed(), {
+      type: 'SET_CURRENCY',
+      changes: { sumFromPlayers: true },
+    });
+    expect(state.currency.sumFromPlayers).toBe(false);
+  });
+
+  it('spegnere la valuta non cancella nulla: riaccendendola torna tutto', () => {
+    let state = campaignReducer(seed(), { type: 'SET_CURRENCY', changes: { amount: 700 } });
+    state = campaignReducer(state, { type: 'SET_CURRENCY', changes: { enabled: false } });
+
+    expect(state.currency.amount).toBe(700);
+    expect(campaignReducer(state, { type: 'SET_CURRENCY', changes: { enabled: true } }).currency)
+      .toMatchObject({ enabled: true, amount: 700 });
+  });
+});
+
+describe('oro del personaggio', () => {
+  const setGold = (gold: number) => {
+    const state = seed();
+    return campaignReducer(state, {
+      type: 'UPDATE_PLAYER',
+      id: state.players[0].id,
+      changes: { gold },
+    }).players[0];
+  };
+
+  it('conserva un valore valido e lo riporta nei limiti', () => {
+    expect(setGold(250).gold).toBe(250);
+    expect(setGold(1e12).gold).toBe(9_999_999);
+  });
+
+  it('sparisce del tutto a zero, invece di restare una chiave a vuoto', () => {
+    expect(setGold(0)).not.toHaveProperty('gold');
+    expect(setGold(-10)).not.toHaveProperty('gold');
+  });
+});

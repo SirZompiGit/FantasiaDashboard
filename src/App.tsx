@@ -21,6 +21,8 @@ import { SharedView } from './components/SharedView';
 import { ShortcutsPanel } from './components/ShortcutsPanel';
 import { IntroSequence } from './components/IntroSequence';
 import { SoundBoard } from './components/SoundBoard';
+import { TreasuryPanel } from './components/TreasuryPanel';
+import { groupTotal } from './lib/currency';
 import { useClipPlayer } from './hooks/useClipPlayer';
 import { WelcomeScreen } from './components/WelcomeScreen';
 
@@ -683,7 +685,6 @@ export default function App() {
           notes={state.notes}
           campaignNotes={state.campaignNotes}
           activePlayerId={state.activePlayerId}
-          currency={state.currency}
           dispatch={dispatch}
         />
 
@@ -702,6 +703,18 @@ export default function App() {
           </div>
 
           <div className="lg:col-span-5">
+            {/* Il tesoro sta sopra i dadi: sono i due comandi che il master usa
+                a mani libere durante la sessione, e stanno bene vicini. */}
+            {state.currency.enabled && (
+              <div className="mb-5 lg:mb-6">
+                <TreasuryPanel
+                  currency={state.currency}
+                  amount={groupTotal(state.currency, state.players)}
+                  onChange={(amount) => dispatch({ type: 'SET_CURRENCY', changes: { amount } })}
+                />
+              </div>
+            )}
+
             <DiceRoller
               lastRoll={state.lastRoll}
               rollHistory={state.rollHistory}
@@ -743,6 +756,7 @@ export default function App() {
           dispatch={dispatch}
           statsEnabled={state.statsEnabled}
           statLabels={state.statLabels}
+          currency={state.currency}
         />
       </main>
 

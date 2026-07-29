@@ -47,7 +47,7 @@ export function createSeedCampaign(): CampaignState {
   return {
     ...createEmptyCampaign(),
     title: 'Le Cronache di Elidon - Capitolo IV',
-    currency: { ...createCurrency(), amount: 1250 },
+    currency: { ...createCurrency(), enabled: true, amount: 1250 },
     players: [
       {
         id: 'p1',

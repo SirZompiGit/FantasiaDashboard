@@ -1,34 +1,69 @@
 /**
  * Tesoro del gruppo.
  *
- * Un totale solo, di tutta la compagnia: è così che si gioca davvero, l'oro sta
- * in un mucchio e lo si divide (o non lo si divide) a fine avventura. Prima
- * finiva scritto negli appunti, dove nessuno lo vedeva e ognuno teneva il
- * proprio conto.
+ * Due forme, molto diverse fra loro perché servono due cose diverse:
  *
- * Lo stesso componente serve il master e i giocatori: senza `onChange` diventa
- * una targhetta in sola lettura, ed è la forma che compare nello schermo
- * condiviso. Nome e icona della valuta si scelgono nelle impostazioni, perché
- * non tutte le campagne contano monete d'oro.
+ *  - `TreasuryPanel` — il comando del master, sopra il lancio dei dadi: casella
+ *    scrivibile e scatti rapidi, perché è lì che il denaro si muove davvero.
+ *  - `TreasuryTag` — una riga e basta, per lo schermo condiviso e per le schede
+ *    dei personaggi. Niente cornice: il totale è un'informazione, non un
+ *    pannello, e circondarlo di bordi in una vista già piena di riquadri lo
+ *    farebbe sembrare più importante di quanto sia.
+ *
+ * Quando il totale è la somma dei portafogli dei personaggi il pannello diventa
+ * di sola lettura: scriverlo a mano vorrebbe dire contraddire la somma.
  */
 
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import type { Currency } from '../lib/currency';
-import { MAX_CURRENCY, clampCurrency, currencyIconComponent, formatCurrency } from '../lib/currency';
+import {
+  MAX_CURRENCY,
+  clampCurrency,
+  currencyIconComponent,
+  formatCurrency,
+  isComputedTotal,
+} from '../lib/currency';
 
 /** Scatti dei pulsanti rapidi: la mancia e il bottino. */
 const STEPS = [-100, -10, 10, 100] as const;
 
-interface TreasuryPanelProps {
+interface TreasuryTagProps {
   currency: Currency;
-  /** Assente = sola lettura (schermo condiviso e vista giocatore). */
-  onChange?: (amount: number) => void;
+  amount: number;
+  /** Nasconde il nome della valuta dove lo spazio è quello di una riga di lista. */
+  compact?: boolean;
+  className?: string;
 }
 
-export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
+export function TreasuryTag({ currency, amount, compact = false, className = '' }: TreasuryTagProps) {
   const Icon = currencyIconComponent(currency.icon);
-  const readOnly = onChange === undefined;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+      <Icon className="h-3.5 w-3.5 shrink-0 text-theme-500" />
+      <span className="font-display font-bold tabular-nums text-theme-400">
+        {formatCurrency(amount)}
+      </span>
+      {!compact && (
+        <span className="min-w-0 truncate font-mono text-[11px] uppercase tracking-wider text-slate-500">
+          {currency.name}
+        </span>
+      )}
+    </span>
+  );
+}
+
+interface TreasuryPanelProps {
+  currency: Currency;
+  /** Totale mostrato: il proprio, oppure la somma dei personaggi. */
+  amount: number;
+  onChange: (amount: number) => void;
+}
+
+export function TreasuryPanel({ currency, amount, onChange }: TreasuryPanelProps) {
+  const Icon = currencyIconComponent(currency.icon);
+  const computed = isComputedTotal(currency);
 
   /**
    * Testo in corso di scrittura, mentre il campo è sotto le dita.
@@ -39,13 +74,13 @@ export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
    */
   const [draft, setDraft] = useState<string | null>(null);
 
-  const apply = (amount: number) => {
+  const apply = (next: number) => {
     setDraft(null);
-    onChange?.(amount);
+    onChange(next);
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-bento-border bg-bento-bg px-3 py-2">
+    <section className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-bento-border bg-bento-panel px-3 py-2 shadow-panel">
       <span className="flex min-w-0 items-center gap-2">
         <Icon className="h-4 w-4 shrink-0 text-theme-500" />
         <span className="min-w-0 truncate font-mono text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -53,9 +88,14 @@ export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
         </span>
       </span>
 
-      {readOnly ? (
-        <span className="ml-auto font-display text-lg font-bold tabular-nums text-theme-400">
-          {formatCurrency(currency.amount)}
+      {computed ? (
+        <span className="ml-auto flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-slate-600">
+            somma dei personaggi
+          </span>
+          <span className="font-display text-lg font-bold tabular-nums text-theme-400">
+            {formatCurrency(amount)}
+          </span>
         </span>
       ) : (
         <span className="ml-auto flex items-center gap-1">
@@ -63,18 +103,14 @@ export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
             <button
               key={step}
               type="button"
-              onClick={() => apply(clampCurrency(currency.amount + step))}
+              onClick={() => apply(clampCurrency(amount + step))}
               aria-label={`${step > 0 ? 'Aggiungi' : 'Togli'} ${Math.abs(step)}`}
               title={`${step > 0 ? '+' : '−'}${Math.abs(step)}`}
               className={`flex items-center rounded-lg px-1.5 py-1 font-mono text-[10px] font-bold text-slate-400 transition-colors duration-200 hover:bg-bento-button ${
                 step > 0 ? 'hover:text-emerald-400' : 'hover:text-red-400'
               }`}
             >
-              {step > 0 ? (
-                <Plus className="h-3 w-3" />
-              ) : (
-                <Minus className="h-3 w-3" />
-              )}
+              {step > 0 ? <Plus className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
               {Math.abs(step)}
             </button>
           ))}
@@ -86,7 +122,7 @@ export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
             inputMode="numeric"
             min={0}
             max={MAX_CURRENCY}
-            value={draft ?? String(currency.amount)}
+            value={draft ?? String(amount)}
             onChange={(event) => {
               const raw = event.target.value;
               setDraft(raw);
@@ -95,10 +131,10 @@ export function TreasuryPanel({ currency, onChange }: TreasuryPanelProps) {
             }}
             onBlur={() => setDraft(null)}
             aria-label={`Totale: ${currency.name}`}
-            className="w-24 rounded-lg border border-bento-border bg-bento-panel px-2 py-1 text-right font-display text-base font-bold tabular-nums text-theme-400 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+            className="w-24 rounded-lg border border-bento-border bg-bento-bg px-2 py-1 text-right font-display text-base font-bold tabular-nums text-theme-400 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
           />
         </span>
       )}
-    </div>
+    </section>
   );
 }

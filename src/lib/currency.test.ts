@@ -6,6 +6,8 @@ import {
   createCurrency,
   currencyIconComponent,
   formatCurrency,
+  groupTotal,
+  isComputedTotal,
   isCurrencyIcon,
 } from './currency';
 
@@ -48,11 +50,44 @@ describe('tesoro del gruppo', () => {
     expect(formatCurrency(0)).toBe('0');
   });
 
+  it('parte spenta: una campagna che non conta il denaro non deve vederla', () => {
+    expect(createCurrency().enabled).toBe(false);
+  });
+
   it('ogni icona ha identificativo ed etichetta propri', () => {
     const ids = CURRENCY_ICONS.map((definition) => definition.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const definition of CURRENCY_ICONS) {
       expect(definition.label.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('totale del gruppo', () => {
+  const players = [{ gold: 120 }, { gold: 30 }, {}];
+  const base = { ...createCurrency(), enabled: true, amount: 1000 };
+
+  it('è il proprio numero finché non si chiede la somma', () => {
+    expect(groupTotal(base, players)).toBe(1000);
+    expect(groupTotal({ ...base, perPlayer: true }, players)).toBe(1000);
+  });
+
+  it('diventa la somma dei portafogli quando la funzione è attiva', () => {
+    const summed = { ...base, perPlayer: true, sumFromPlayers: true };
+    // Chi non ha oro conta zero, non fa saltare il totale.
+    expect(groupTotal(summed, players)).toBe(150);
+    expect(groupTotal(summed, [])).toBe(0);
+  });
+
+  /** Senza portafogli non c'è nulla da sommare: la somma non deve avere effetto. */
+  it('ignora la somma quando l oro per personaggio è spento', () => {
+    const inconsistent = { ...base, perPlayer: false, sumFromPlayers: true };
+    expect(groupTotal(inconsistent, players)).toBe(1000);
+    expect(isComputedTotal(inconsistent)).toBe(false);
+  });
+
+  it('un totale calcolato non si scrive a mano', () => {
+    expect(isComputedTotal({ ...base, perPlayer: true, sumFromPlayers: true })).toBe(true);
+    expect(isComputedTotal(base)).toBe(false);
   });
 });

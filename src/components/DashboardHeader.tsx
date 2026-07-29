@@ -18,6 +18,7 @@ import {
   BarChart3,
   CircleDot,
   Coins,
+  Dices,
   Download,
   ExternalLink,
   History,
@@ -559,59 +560,111 @@ export function DashboardHeader({
                 </span>
               </label>
 
-              {/* Valuta del gruppo: il totale si tocca in pagina, qui si decide
-                  come si chiama e con quale simbolo si mostra. Non tutte le
-                  campagne contano monete d'oro. */}
-              <div className="space-y-1.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                  <Coins className="h-3.5 w-3.5 text-theme-500" /> Valuta del gruppo
-                </span>
-
+              {/* Valuta: spenta non compare da nessuna parte. Molte campagne il
+                  denaro non lo contano affatto, e un contatore a zero sempre in
+                  vista è solo ingombro. */}
+              <label className="flex cursor-pointer items-start gap-2.5 select-none">
                 <input
-                  type="text"
-                  value={currency.name}
-                  onChange={(event) => onCurrencyChange({ name: event.target.value })}
-                  onBlur={() => {
-                    // Un nome vuoto non è una scelta: si torna al predefinito
-                    // invece di lasciare l'icona senza etichetta.
-                    if (!currency.name.trim()) onCurrencyChange({ name: DEFAULT_CURRENCY_NAME });
-                  }}
-                  maxLength={MAX_CURRENCY_NAME}
-                  placeholder={DEFAULT_CURRENCY_NAME}
-                  aria-label="Nome della valuta"
-                  className="w-full rounded-lg border border-bento-border bg-bento-panel px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                  type="checkbox"
+                  checked={currency.enabled}
+                  onChange={(event) => onCurrencyChange({ enabled: event.target.checked })}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-theme-500"
                 />
+                <span className="min-w-0">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <Coins className="h-3.5 w-3.5 text-theme-500" /> Valuta
+                  </span>
+                  <span className="block text-[11px] leading-snug text-slate-500">
+                    Un totale sopra il lancio dei dadi, e una riga nello schermo condiviso.
+                  </span>
+                </span>
+              </label>
 
-                <div className="grid grid-cols-4 gap-1.5">
-                  {CURRENCY_ICONS.map(({ id, label, Icon }) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => onCurrencyChange({ icon: id as CurrencyIcon })}
-                      aria-label={label}
-                      aria-pressed={currency.icon === id}
-                      title={label}
-                      className={`flex items-center justify-center rounded-lg border py-1.5 transition-colors duration-200 ${
-                        currency.icon === id
-                          ? 'border-theme-500/50 bg-bento-item text-theme-400'
-                          : 'border-bento-border bg-bento-panel/40 text-slate-500 hover:border-slate-600 hover:text-slate-300'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  ))}
+              {currency.enabled && (
+                <div className="space-y-2 pl-6 animate-fade-in">
+                  <input
+                    type="text"
+                    value={currency.name}
+                    onChange={(event) => onCurrencyChange({ name: event.target.value })}
+                    onBlur={() => {
+                      // Un nome vuoto non è una scelta: si torna al predefinito
+                      // invece di lasciare l'icona senza etichetta.
+                      if (!currency.name.trim()) onCurrencyChange({ name: DEFAULT_CURRENCY_NAME });
+                    }}
+                    maxLength={MAX_CURRENCY_NAME}
+                    placeholder={DEFAULT_CURRENCY_NAME}
+                    aria-label="Nome della valuta"
+                    className="w-full rounded-lg border border-bento-border bg-bento-panel px-2 py-1.5 text-xs text-slate-200 placeholder-slate-600 transition-colors duration-200 focus:border-theme-500 focus:outline-none focus:ring-1 focus:ring-theme-500/20"
+                  />
+
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {CURRENCY_ICONS.map(({ id, label, Icon }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => onCurrencyChange({ icon: id as CurrencyIcon })}
+                        aria-label={label}
+                        aria-pressed={currency.icon === id}
+                        title={label}
+                        className={`flex items-center justify-center rounded-lg border py-1.5 transition-colors duration-200 ${
+                          currency.icon === id
+                            ? 'border-theme-500/50 bg-bento-item text-theme-400'
+                            : 'border-bento-border bg-bento-panel/40 text-slate-500 hover:border-slate-600 hover:text-slate-300'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Ogni personaggio con il proprio portafoglio: alcuni tavoli
+                      dividono il bottino subito, altri lo lasciano in comune. */}
+                  <label className="flex cursor-pointer items-start gap-2.5 select-none">
+                    <input
+                      type="checkbox"
+                      checked={currency.perPlayer}
+                      onChange={(event) => onCurrencyChange({ perPlayer: event.target.checked })}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-theme-500"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-xs font-semibold text-slate-200">
+                        Oro per personaggio
+                      </span>
+                      <span className="block text-[11px] leading-snug text-slate-500">
+                        Una casella in ogni scheda, e il valore accanto al nome nell&apos;ordine
+                        di turno.
+                      </span>
+                    </span>
+                  </label>
+
+                  {currency.perPlayer && (
+                    <label className="flex cursor-pointer items-start gap-2.5 pl-6 select-none animate-fade-in">
+                      <input
+                        type="checkbox"
+                        checked={currency.sumFromPlayers}
+                        onChange={(event) =>
+                          onCurrencyChange({ sumFromPlayers: event.target.checked })
+                        }
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-theme-500"
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-semibold text-slate-200">
+                          Il totale è la somma dei personaggi
+                        </span>
+                        <span className="block text-[11px] leading-snug text-slate-500">
+                          Il tesoro del gruppo smette di essere un numero a sé e diventa quanto
+                          hanno in tasca tutti insieme.
+                        </span>
+                      </span>
+                    </label>
+                  )}
                 </div>
-
-                <p className="text-[10px] leading-snug text-slate-500">
-                  Il totale si modifica accanto ai partecipanti. Compare nello schermo condiviso
-                  solo quando è sopra lo zero.
-                </p>
-              </div>
+              )}
 
               {/* Facce del d2: se lasciate vuote il dado mostra 1 e 2. */}
               <div className="space-y-1.5">
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                  <Coins className="h-3.5 w-3.5 text-theme-500" /> Facce del d2
+                  <Dices className="h-3.5 w-3.5 text-theme-500" /> Facce del d2
                 </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[0, 1].map((index) => (

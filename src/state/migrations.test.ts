@@ -280,20 +280,57 @@ describe('quantità degli oggetti', () => {
 });
 
 describe('tesoro del gruppo', () => {
-  it('le campagne salvate prima partono a zero, con nome e icona predefiniti', () => {
+  it('le campagne salvate prima partono spente e a zero', () => {
     const currency = normalizeCampaign({ title: 'X' }).currency;
+    expect(currency.enabled).toBe(false);
     expect(currency.amount).toBe(0);
     expect(currency.icon).toBe('coins');
     expect(currency.name).toBeTruthy();
   });
 
+  /**
+   * L'interruttore è arrivato dopo il contatore: dove manca lo si deduce dal
+   * totale, altrimenti chi stava già usando l'oro se lo vedrebbe sparire al
+   * primo caricamento.
+   */
+  it('resta acceso dove un totale era già stato scritto', () => {
+    expect(normalizeCampaign({ title: 'X', currency: { amount: 500 } }).currency.enabled).toBe(
+      true,
+    );
+    expect(normalizeCampaign({ title: 'X', currency: { amount: 0 } }).currency.enabled).toBe(
+      false,
+    );
+    // Una scelta esplicita vale più della deduzione.
+    expect(
+      normalizeCampaign({ title: 'X', currency: { amount: 500, enabled: false } }).currency
+        .enabled,
+    ).toBe(false);
+  });
+
   it('conserva ciò che è stato scelto e scarta il resto', () => {
     const currency = normalizeCampaign({
       title: 'X',
-      currency: { name: 'Crediti', icon: 'gem', amount: 4200 },
+      currency: { enabled: true, name: 'Crediti', icon: 'gem', amount: 4200 },
     }).currency;
 
-    expect(currency).toEqual({ name: 'Crediti', icon: 'gem', amount: 4200 });
+    expect(currency).toEqual({
+      enabled: true,
+      name: 'Crediti',
+      icon: 'gem',
+      amount: 4200,
+      perPlayer: false,
+      sumFromPlayers: false,
+    });
+  });
+
+  /** Senza portafogli dei personaggi non c'è nulla da sommare. */
+  it('la somma non resta accesa senza l oro per personaggio', () => {
+    const currency = normalizeCampaign({
+      title: 'X',
+      currency: { enabled: true, perPlayer: false, sumFromPlayers: true },
+    }).currency;
+
+    expect(currency.sumFromPlayers).toBe(false);
   });
 
   it('non si fida di un icona inesistente né di un totale assurdo', () => {
@@ -306,6 +343,23 @@ describe('tesoro del gruppo', () => {
     expect(currency.amount).toBe(0);
     // Il nome vuoto torna al predefinito: l'icona non resta senza etichetta.
     expect(currency.name).toBeTruthy();
+  });
+});
+
+describe('oro del personaggio', () => {
+  const withGold = (gold: unknown) =>
+    normalizeCampaign({ title: 'X', players: [{ id: 'p1', name: 'Eroe', gold }] }).players[0];
+
+  it('conserva un valore valido, riportato nei limiti', () => {
+    expect(withGold(300).gold).toBe(300);
+    expect(withGold(1e12).gold).toBe(9_999_999);
+  });
+
+  /** Assente a zero, come le statistiche: chi non ha denaro non se lo porta dietro. */
+  it('resta assente a zero, sotto zero e quando non è un numero', () => {
+    for (const input of [undefined, 0, -50, 'tanto']) {
+      expect(withGold(input)).not.toHaveProperty('gold');
+    }
   });
 });
 

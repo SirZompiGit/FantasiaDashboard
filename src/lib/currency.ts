@@ -53,10 +53,38 @@ export const MAX_CURRENCY_NAME = 24;
 export const MAX_CURRENCY = 9_999_999;
 
 export interface Currency {
+  /**
+   * Interruttore generale. Spento non compare da nessuna parte: molte campagne
+   * il denaro non lo contano affatto, e un contatore a zero sempre in vista è
+   * solo ingombro.
+   */
+  enabled: boolean;
   name: string;
   icon: CurrencyIcon;
   /** Totale del gruppo. Mai negativo: un debito si annota, non si conta qui. */
   amount: number;
+  /**
+   * Ogni personaggio tiene il proprio. Alcuni tavoli dividono il bottino
+   * subito, altri lo lasciano in comune: qui si scelgono entrambe le cose.
+   */
+  perPlayer: boolean;
+  /**
+   * Il totale del gruppo è la SOMMA di quanto hanno i personaggi, invece di un
+   * numero a sé. Vale solo con `perPlayer` attivo: senza, non ci sarebbe nulla
+   * da sommare.
+   */
+  sumFromPlayers: boolean;
+}
+
+/** Oro del gruppo: la somma dei personaggi, oppure il totale scritto a mano. */
+export function groupTotal(currency: Currency, players: { gold?: number }[]): number {
+  if (!currency.perPlayer || !currency.sumFromPlayers) return currency.amount;
+  return clampCurrency(players.reduce((total, player) => total + (player.gold ?? 0), 0));
+}
+
+/** Il totale è calcolato e non si può scrivere a mano. */
+export function isComputedTotal(currency: Currency): boolean {
+  return currency.perPlayer && currency.sumFromPlayers;
 }
 
 const ICON_IDS = new Set<string>(CURRENCY_ICONS.map((definition) => definition.id));
@@ -80,7 +108,15 @@ export function clampCurrency(value: number): number {
 }
 
 export function createCurrency(): Currency {
-  return { name: DEFAULT_CURRENCY_NAME, icon: DEFAULT_CURRENCY_ICON, amount: 0 };
+  return {
+    // Spenta: si accende dalle impostazioni quando serve davvero.
+    enabled: false,
+    name: DEFAULT_CURRENCY_NAME,
+    icon: DEFAULT_CURRENCY_ICON,
+    amount: 0,
+    perPlayer: false,
+    sumFromPlayers: false,
+  };
 }
 
 /**

@@ -229,6 +229,12 @@ function applyPlayerChanges(
   if (changes.inventory) {
     next.inventory = changes.inventory.map((item) => withQuantity(item, itemQuantity(item)));
   }
+  // L'oro sparisce del tutto a zero, come le statistiche.
+  if ('gold' in changes) {
+    const gold = clampCurrency(changes.gold ?? 0);
+    if (gold > 0) next.gold = gold;
+    else delete next.gold;
+  }
   return next;
 }
 
@@ -351,26 +357,29 @@ export function campaignReducer(state: CampaignState, action: CampaignAction): C
       return { ...state, compactBars: action.enabled };
 
     case 'SET_CURRENCY': {
-      const { name, icon, amount } = action.changes;
+      const current = state.currency;
+      const { enabled, name, icon, amount, perPlayer, sumFromPlayers } = action.changes;
+
+      const nextPerPlayer = perPlayer ?? current.perPlayer;
       const next: Currency = {
+        enabled: enabled ?? current.enabled,
         // Il nome può restare vuoto MENTRE si scrive: si ripulisce solo il
         // superfluo, senza rimettere d'autorità quello predefinito a ogni tasto.
-        name: name === undefined ? state.currency.name : name.slice(0, MAX_CURRENCY_NAME),
-        icon: icon !== undefined && isCurrencyIcon(icon) ? icon : state.currency.icon,
-        amount: amount === undefined ? state.currency.amount : clampCurrency(amount),
+        name: name === undefined ? current.name : name.slice(0, MAX_CURRENCY_NAME),
+        icon: icon !== undefined && isCurrencyIcon(icon) ? icon : current.icon,
+        amount: amount === undefined ? current.amount : clampCurrency(amount),
+        perPlayer: nextPerPlayer,
+        // Spegnendo i portafogli dei personaggi non resta nulla da sommare: la
+        // somma si spegne con loro, invece di restare accesa e senza effetto.
+        sumFromPlayers: nextPerPlayer && (sumFromPlayers ?? current.sumFromPlayers),
       };
 
-      if (
-        next.name === state.currency.name &&
-        next.icon === state.currency.icon &&
-        next.amount === state.currency.amount
-      ) {
-        // Nessuna variazione: restituendo lo stesso stato la cronologia non
-        // registra un passo da annullare per un valore che non è cambiato.
-        return state;
-      }
-
-      return { ...state, currency: next };
+      const unchanged = (Object.keys(next) as (keyof Currency)[]).every(
+        (key) => next[key] === current[key],
+      );
+      // Restituire lo stesso stato non è un'ottimizzazione: è ciò che impedisce
+      // alla cronologia di registrare un passo da annullare a vuoto.
+      return unchanged ? state : { ...state, currency: next };
     }
 
 
