@@ -122,14 +122,14 @@ const PARTICLE_MERGE_WINDOW = 450;
  */
 const VERTICAL_SIZE = [
   'h-[150px] w-[60px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
-  'h-[150px] w-[76px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
-  'h-[150px] w-[92px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
-  'h-[150px] w-[108px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
-  'h-[150px] w-[124px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[82px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[104px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[126px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
+  'h-[150px] w-[148px] sm:h-[190px] lg:h-[230px] xl:h-[270px]',
 ];
 
 /** Colonna che contiene le tracce: barra principale spessa + tracce sottili. */
-const VERTICAL_COLUMN = ['w-[28px]', 'w-[44px]', 'w-[60px]', 'w-[76px]', 'w-[92px]'];
+const VERTICAL_COLUMN = ['w-[28px]', 'w-[50px]', 'w-[72px]', 'w-[94px]', 'w-[116px]'];
 
 /**
  * La barra principale, spessa, riempie ciò che resta della colonna (~28px, in
@@ -137,7 +137,8 @@ const VERTICAL_COLUMN = ['w-[28px]', 'w-[44px]', 'w-[60px]', 'w-[76px]', 'w-[92p
  * condivisione); le risorse le stanno accanto sottili e fisse.
  */
 const VERTICAL_MAIN = 'min-w-0 flex-1';
-const VERTICAL_THIN = 'w-[14px] shrink-0';
+/** 20px, non 14: sotto quella soglia le capsuline sparivano su schermi densi. */
+const VERTICAL_THIN = 'w-[20px] shrink-0';
 
 /**
  * Quante colonne sottili affiancare alla barra principale in verticale (risorse
@@ -879,7 +880,7 @@ export function HealthBarItem({
             {/* Le risorse che non entrano di fianco si riassumono qui. */}
             {hiddenResourceCount > 0 && (
               <span
-                className="flex w-[14px] shrink-0 items-center justify-center rounded bg-bento-button font-mono text-[8px] font-bold text-slate-400"
+                className="flex w-[20px] shrink-0 items-center justify-center rounded bg-bento-button font-mono text-[8px] font-bold text-slate-400"
                 title={`Altre ${hiddenResourceCount} risorse (visibili nella vista orizzontale)`}
               >
                 +{hiddenResourceCount}

@@ -2086,6 +2086,14 @@ html.theme-transitions .border-bento-border {
   display: none;
 }
 
+/* Il riempimento delle capsuline è a pillola come il loro contenitore: qui non
+   c'è nessuna onda da far combaciare, quindi lo squadrato non serve e lasciava
+   solo un blocchetto dentro una capsula. */
+.hp-track--capsula.hp-track--thin .hp-segment,
+.hp-track--pozione.hp-track--thin .hp-segment {
+  border-radius: 9999px;
+}
+
 /* --- Pozione: le bolle che salgono ------------------------------------- */
 
 /**
@@ -2175,10 +2183,10 @@ html.theme-transitions .border-bento-border {
 
 /* Orizzontale: il tracciato corre da sinistra a destra. */
 .hp-track--battito.flex-row .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L40,7%20L46,33%20L52,13%20L57,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x 0 center / 7.5rem 100%;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='40'%20viewBox='0%200%20120%2040'%3E%3Cpath%20d='M0,20%20H30%20L36,20%20L40,7%20L46,33%20L52,13%20L57,20%20H120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-x 0 center / 7.5rem 100%;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='360'%20height='40'%20viewBox='0%200%20360%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H34%20L40,20%20L45,6%20L51,34%20L57,12%20L62,20%20H118%20L124,20%20L128,14%20L133,26%20L137,20%20H196%20L202,20%20L207,9%20L213,31%20L219,15%20L224,20%20H300%20L306,20%20L310,17%20L314,23%20L318,20%20H360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-x 0 center / 18rem 100%;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='360'%20height='40'%20viewBox='0%200%20360%2040'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0,20%20H34%20L40,20%20L45,6%20L51,34%20L57,12%20L62,20%20H118%20L124,20%20L128,14%20L133,26%20L137,20%20H196%20L202,20%20L207,9%20L213,31%20L219,15%20L224,20%20H300%20L306,20%20L310,17%20L314,23%20L318,20%20H360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-x 0 center / 18rem 100%;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
     battito-scorre-x 2.4s linear infinite;
@@ -2186,10 +2194,10 @@ html.theme-transitions .border-bento-border {
 
 /* Verticale: lo stesso tracciato ruotato di 90°, i picchi sporgono ai lati. */
 .hp-track--battito.flex-col-reverse .hp-segment {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L7,40%20L33,46%20L13,52%20L20,57%20V120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-y center 0 / 100% 7.5rem;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='120'%20viewBox='0%200%2040%20120'%3E%3Cpath%20d='M20,0%20V30%20L20,36%20L7,40%20L33,46%20L13,52%20L20,57%20V120'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E")
-    repeat-y center 0 / 100% 7.5rem;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='360'%20viewBox='0%200%2040%20360'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V34%20L20,40%20L6,45%20L34,51%20L12,57%20L20,62%20V118%20L20,124%20L14,128%20L26,133%20L20,137%20V196%20L20,202%20L9,207%20L31,213%20L15,219%20L20,224%20V300%20L20,306%20L17,310%20L23,314%20L20,318%20V360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 18rem;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='360'%20viewBox='0%200%2040%20360'%20preserveAspectRatio='none'%3E%3Cpath%20d='M20,0%20V34%20L20,40%20L6,45%20L34,51%20L12,57%20L20,62%20V118%20L20,124%20L14,128%20L26,133%20L20,137%20V196%20L20,202%20L9,207%20L31,213%20L15,219%20L20,224%20V300%20L20,306%20L17,310%20L23,314%20L20,318%20V360'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'%20stroke-linecap='round'%20vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+    repeat-y center 0 / 100% 18rem;
   animation:
     battito-pulsa 1.5s ease-in-out infinite,
     battito-scorre-y 2.4s linear infinite;
@@ -2210,11 +2218,11 @@ html.theme-transitions .border-bento-border {
 }
 
 @keyframes battito-scorre-x {
-  to { -webkit-mask-position: -7.5rem center; mask-position: -7.5rem center; }
+  to { -webkit-mask-position: -18rem center; mask-position: -18rem center; }
 }
 
 @keyframes battito-scorre-y {
-  to { -webkit-mask-position: center 7.5rem; mask-position: center 7.5rem; }
+  to { -webkit-mask-position: center 18rem; mask-position: center 18rem; }
 }
 
 @keyframes battito-pulsa {
