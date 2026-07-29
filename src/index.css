@@ -2709,17 +2709,55 @@ html.theme-transitions .border-bento-border {
   }
 }
 
-/* La rotazione sta sul disegno, non sul contenitore: se fosse sul contenitore
-   girerebbe anche la traiettoria, e la sagoma descriverebbe un arco invece di
-   allontanarsi dritta. */
-.intro-object-art {
+/**
+ * L'ondeggiare, come un relitto alla deriva.
+ *
+ * Sta su un livello suo perché il `transform` non si somma: se lo mettessi
+ * insieme alla traiettoria, uno dei due movimenti sparirebbe. `alternate` fa
+ * tornare indietro l'animazione invece di riavviarla, quindi non c'è nessun
+ * punto di ricongiunzione da nascondere.
+ */
+.intro-object-float {
   width: 100%;
   height: 100%;
-  animation: intro-object-spin 9s linear infinite;
+  animation-name: intro-object-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes intro-object-float {
+  from { transform: translate(-2.5%, 3%) rotate(-4deg); }
+  to { transform: translate(2.5%, -3%) rotate(4deg); }
+}
+
+/**
+ * La rotazione su sé stessa.
+ *
+ * Un GIRO INTERO, sempre: prima ruotava di pochi gradi e poi ripartiva da zero,
+ * e quel ritorno di scatto era il sussulto che si notava. Arrivando a 360° il
+ * fotogramma finale coincide con quello iniziale, quindi il ciclo è invisibile.
+ *
+ * Sta sul disegno e non sul contenitore: se fosse sul contenitore girerebbe
+ * anche la traiettoria, e la sagoma descriverebbe un arco invece di allontanarsi
+ * dritta.
+ */
+.intro-object-spin {
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  animation-name: intro-object-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @keyframes intro-object-spin {
-  to { transform: rotate(var(--spin, 20deg)); }
+  to { transform: rotate(var(--turn, 360deg)); }
+}
+
+.intro-object-art {
+  width: 100%;
+  height: 100%;
 }
 
 /* ==== fine sagome del viaggio ============================================ */
