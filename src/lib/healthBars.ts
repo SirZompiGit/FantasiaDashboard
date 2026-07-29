@@ -4,6 +4,7 @@
  */
 
 import type { ColoredBar, HealthBar, Resource, StatusEffect } from '../types';
+import type { BarStyle } from '../theme';
 
 /**
  * Limite massimo dei punti ferita.
@@ -82,6 +83,30 @@ export function isLowHp(bar: HealthBar): boolean {
 }
 
 export const DEFAULT_HEALTH_GROUPS = ['Nemici', 'Alleati', 'PG'];
+
+/**
+ * Design con cui una barra viene davvero disegnata: il suo, se ne ha scelto
+ * uno, altrimenti quello della campagna.
+ */
+export function resolveBarStyle(bar: Pick<HealthBar, 'barStyle'>, campaign: BarStyle): BarStyle {
+  return bar.barStyle ?? campaign;
+}
+
+/**
+ * Vero solo se TUTTE le barre indicate finiscono ad anelli.
+ *
+ * Serve ai contenitori, che con gli anelli affiancano le schede invece di
+ * impilarle. Prima la decisione guardava il design della campagna: bastava
+ * impostarlo su "circolare" e la lista si stringeva anche quando ogni singola
+ * barra usava tutt'altro. Con un misto si resta impilati, che è l'unico
+ * impaginato che regge entrambe le forme.
+ */
+export function areAllCircular(
+  bars: Pick<HealthBar, 'barStyle'>[],
+  campaign: BarStyle,
+): boolean {
+  return bars.length > 0 && bars.every((bar) => resolveBarStyle(bar, campaign) === 'circolare');
+}
 
 export function clampHp(value: number, max: number): number {
   if (!Number.isFinite(value)) return 0;

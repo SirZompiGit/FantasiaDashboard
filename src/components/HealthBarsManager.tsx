@@ -37,7 +37,7 @@ import { IconButton } from './ui/IconButton';
 import { FIELD_SM } from './ui/fields';
 import { useToasts } from '../hooks/useToasts';
 import { usePersistentSet } from '../hooks/usePersistentState';
-import { groupBars } from '../lib/healthBars';
+import { areAllCircular, groupBars } from '../lib/healthBars';
 
 interface HealthBarsManagerProps {
   healthBars: HealthBar[];
@@ -397,10 +397,12 @@ export function HealthBarsManager({
                 {!isCollapsed && (
                   // Le barre ad anello sono larghe quanto il loro contenuto:
                   // si affiancano e vanno a capo, invece di lasciare mezza riga
-                  // vuota ciascuna. Le lineari restano impilate.
+                  // vuota ciascuna. Si guarda il design EFFETTIVO delle barre,
+                  // non quello della campagna: quest'ultimo è solo il valore di
+                  // partenza e non deve cambiare l'impaginato da solo.
                   <div
                     className={
-                      barStyle === 'circolare'
+                      areAllCircular(group.bars, barStyle)
                         ? 'flex flex-wrap items-start gap-3'
                         : 'space-y-3'
                     }

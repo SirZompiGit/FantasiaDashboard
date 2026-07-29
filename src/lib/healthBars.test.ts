@@ -13,6 +13,8 @@ import {
   groupBars,
   healthRatio,
   isLowHp,
+  resolveBarStyle,
+  areAllCircular,
 } from './healthBars';
 import type { StatusEffect } from '../types';
 
@@ -229,5 +231,30 @@ describe('groupBars', () => {
     expect(groups.map((g) => g.name)).toEqual(['Nemici', 'Alleati']);
     // Chi ha un gruppo che non esiste piu finisce fra le non raggruppate.
     expect(ungrouped).toHaveLength(2);
+  });
+});
+
+describe('design effettivo delle barre', () => {
+  const bar = (barStyle?: string) => ({ barStyle }) as Pick<HealthBar, 'barStyle'>;
+
+  it('la barra usa il proprio design, altrimenti quello della campagna', () => {
+    expect(resolveBarStyle(bar('battito'), 'circolare')).toBe('battito');
+    expect(resolveBarStyle(bar(), 'circolare')).toBe('circolare');
+  });
+
+  /**
+   * Il design della campagna è solo il valore di partenza: da solo non deve
+   * cambiare l'impaginato. Con una barra su "battito" la lista resta impilata
+   * anche se la campagna è su "circolare" — prima si stringeva comunque.
+   */
+  it('conta solo il design con cui le barre vengono davvero disegnate', () => {
+    expect(areAllCircular([bar('battito')], 'circolare')).toBe(false);
+    expect(areAllCircular([bar(), bar()], 'circolare')).toBe(true);
+    expect(areAllCircular([bar('circolare'), bar()], 'classico')).toBe(false);
+    expect(areAllCircular([bar('circolare')], 'classico')).toBe(true);
+  });
+
+  it('senza barre non impagina ad anelli', () => {
+    expect(areAllCircular([], 'circolare')).toBe(false);
   });
 });

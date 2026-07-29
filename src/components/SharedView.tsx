@@ -37,7 +37,7 @@ import { CRITICAL_COLOR, DiceShape, FUMBLE_COLOR } from './DiceShape';
 import { CritSparkles } from './CritSparkles';
 import { Modal } from './ui/Modal';
 import { IconButton } from './ui/IconButton';
-import { groupBars } from '../lib/healthBars';
+import { areAllCircular, groupBars } from '../lib/healthBars';
 import { d2FaceText, isCritical, isFumble } from '../lib/dice';
 import { decodeRollLabel, resolveRollerName } from '../lib/participantRolls';
 import { getThemeAccent } from '../theme';
@@ -282,7 +282,13 @@ export function SharedView({
    * più larghi.
    */
   const isNarrow = useMediaQuery(NARROW_SCREEN);
-  const isCircularBars = state.barStyle === 'circolare';
+  // Conta il design EFFETTIVO delle barre mostrate, non quello della campagna:
+  // quest'ultimo è solo il valore di partenza per chi non ne ha uno proprio, e
+  // da solo non deve toccare l'impaginato.
+  const isCircularBars = areAllCircular(
+    healthBars.filter((bar) => !bar.hidden),
+    state.barStyle,
+  );
   const effectiveLayout: HealthLayout = isNarrow ? 'horizontal' : healthLayout;
 
   const collapsed = usePersistentSet(COLLAPSED_KEY);
