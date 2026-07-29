@@ -2655,6 +2655,75 @@ html.theme-transitions .border-bento-border {
   100% { transform: rotate(var(--a)) translateY(105vmin) scaleY(1.5); opacity: 0; }
 }
 
+/* ==== Sagome del viaggio (accessorio) ======================================
+   Tre sagome che emergono dal fondo e ti superano di lato. Sono un accessorio:
+   questo intero blocco e il file IntroObjects.tsx si possono cancellare senza
+   toccare nient'altro dell'introduzione.
+
+   Crescono con la stessa legge del cielo — progressione geometrica, cioè
+   velocità percepita costante — e si spengono prima della frenata.
+   ========================================================================= */
+
+.intro-object {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26vmin;
+  height: 26vmin;
+  margin: -13vmin 0 0 -13vmin;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: intro-object-pass;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+/* La sagoma nasce quasi al centro, minuscola, e scivola verso il proprio
+   angolo mentre ingrandisce: le tappe seguono la stessa progressione
+   geometrica del campo stellare, così non sembra rallentare. */
+@keyframes intro-object-pass {
+  0% {
+    transform: translate(calc(var(--dx) * 1vmin), calc(var(--dy) * 1vmin)) scale(0.07);
+    opacity: 0;
+  }
+  18% {
+    transform: translate(calc(var(--dx) * 7vmin), calc(var(--dy) * 7vmin)) scale(0.16);
+    opacity: 0.55;
+  }
+  40% {
+    transform: translate(calc(var(--dx) * 19vmin), calc(var(--dy) * 19vmin)) scale(0.4);
+    opacity: 0.9;
+  }
+  62% {
+    transform: translate(calc(var(--dx) * 40vmin), calc(var(--dy) * 40vmin)) scale(0.95);
+    opacity: 0.9;
+  }
+  82% {
+    transform: translate(calc(var(--dx) * 72vmin), calc(var(--dy) * 72vmin)) scale(2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(calc(var(--dx) * 115vmin), calc(var(--dy) * 115vmin)) scale(3.6);
+    opacity: 0;
+  }
+}
+
+/* La rotazione sta sul disegno, non sul contenitore: se fosse sul contenitore
+   girerebbe anche la traiettoria, e la sagoma descriverebbe un arco invece di
+   allontanarsi dritta. */
+.intro-object-art {
+  width: 100%;
+  height: 100%;
+  animation: intro-object-spin 9s linear infinite;
+}
+
+@keyframes intro-object-spin {
+  to { transform: rotate(var(--spin, 20deg)); }
+}
+
+/* ==== fine sagome del viaggio ============================================ */
+
 /* --- L'alone dell'accensione ---------------------------------------------
    Sta dietro il marchio e cresce insieme a lui: al picco è un bagliore d'oro
    ampio, poi si riduce a un chiarore appena percettibile. ------------------ */
@@ -2767,7 +2836,8 @@ html.theme-transitions .border-bento-border {
    avanzamento fra le stelle, solo il marchio che appare al momento giusto. */
 @media (prefers-reduced-motion: reduce) {
   .intro-streak,
-  .intro-cycle {
+  .intro-cycle,
+  .intro-object {
     display: none;
   }
 
