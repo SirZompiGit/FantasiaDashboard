@@ -22,7 +22,7 @@
  * Le durate qui e i keyframes `intro-*` in index.css devono restare allineati.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getMuted } from '../utils/audio';
 
 /**
@@ -42,6 +42,36 @@ const SAFETY_MARGIN = 400;
 
 /** Dissolvenza d'uscita, uguale alla transizione di `.intro-scene`. */
 const FADE_OUT = 500;
+
+/** Quante scie attraversano il campo stellare. Poche: sono un accento. */
+const STREAK_COUNT = 14;
+
+/**
+ * Le scie del viaggio.
+ *
+ * Poche e sparse, giusto per dare il senso della corsa. Partono già in moto
+ * (ritardi negativi) e l'ultima si esaurisce PRIMA che il cielo cominci a
+ * rallentare, al settimo secondo: vedere scie sfrecciare mentre tutto frena
+ * sarebbe una contraddizione.
+ *
+ * Gli angoli avanzano di 137,5° — l'angolo aureo — così non si allineano mai
+ * fra loro e non si riconosce alcun motivo che si ripete.
+ */
+function buildStreaks(durationMs: number) {
+  const total = durationMs / 1000;
+  /** Le partenze si fermano al 45%: l'ultima scia finisce con la corsa. */
+  const window = total * 0.45;
+
+  return Array.from({ length: STREAK_COUNT }, (_, index) => {
+    const progress = index / STREAK_COUNT;
+    return {
+      angle: (index * 137.5) % 360,
+      delay: -1.8 + window * progress,
+      duration: 1.9 - progress * 0.5,
+      length: 7 + ((index * 5) % 9),
+    };
+  });
+}
 
 /** Passo della dissolvenza del volume, quando si salta a musica avviata. */
 const VOLUME_FADE_STEP = 40;
@@ -115,6 +145,9 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
     schedule(finish, duration + SAFETY_MARGIN);
   }, [duration, finish, phase, schedule]);
 
+  /** Ricalcolate solo se cambia la durata del brano. */
+  const streaks = useMemo(() => buildStreaks(duration), [duration]);
+
   /**
    * Durata reale del brano, letta dai metadati. Arriva prima del clic (il file
    * è in `preload`), quindi l'animazione parte già con il tempo giusto e non
@@ -175,6 +208,27 @@ export function IntroSequence({ onFinish }: IntroSequenceProps) {
           <div className="intro-stars intro-stars--near" />
           <div className="intro-stars intro-stars--rush" />
           <div className="intro-stars intro-stars--blur" />
+
+          {/* Piani che ciclano: riportano stelle nuove al centro mentre gli
+              altri si allargano e svuotano l'inquadratura. */}
+          <div className="intro-cycle"><div className="intro-cycle-inner" /></div>
+          <div className="intro-cycle intro-cycle--b"><div className="intro-cycle-inner" /></div>
+          <div className="intro-cycle intro-cycle--c"><div className="intro-cycle-inner" /></div>
+
+          {streaks.map((streak, index) => (
+            <span
+              key={index}
+              className="intro-streak"
+              style={
+                {
+                  '--a': `${streak.angle}deg`,
+                  '--len': `${streak.length}vmin`,
+                  animationDelay: `${streak.delay}s`,
+                  animationDuration: `${streak.duration}s`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
 
           {/* L'alone che accompagna l'accensione del marchio. */}
           <div className="intro-glow" />

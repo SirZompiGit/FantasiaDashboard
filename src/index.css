@@ -2471,6 +2471,42 @@ html.theme-transitions .border-bento-border {
     opacity: 0.9;
     animation-timing-function: linear;
   }
+  /**
+   * Le quattro tappe qui sotto NON sono un rallentamento: servono a evitarlo.
+   *
+   * Una scala che cresce di quantità costanti sembra frenare da sola, perché
+   * l'occhio legge la velocità dalla crescita RELATIVA: passare da 1 a 2 è un
+   * raddoppio, passare da 5 a 6 quasi non si nota. Con un'unica interpolazione
+   * lineare da 0 a 7 secondi il cielo pareva perdere colpi già a metà strada.
+   *
+   * Questi valori seguono invece una progressione GEOMETRICA — ogni tappa
+   * moltiplica per lo stesso fattore, circa 1,5 — che a occhio è velocità
+   * costante. Le percentuali sono i pesi corrispondenti sul cammino totale.
+   */
+  10% {
+    transform: scale(
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.066)
+    );
+    animation-timing-function: linear;
+  }
+  20% {
+    transform: scale(
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.166)
+    );
+    animation-timing-function: linear;
+  }
+  30% {
+    transform: scale(
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.314)
+    );
+    animation-timing-function: linear;
+  }
+  40% {
+    transform: scale(
+      calc(var(--sky-from, 1.3) + (var(--sky-to, 2.6) - var(--sky-from, 1.3)) * 0.539)
+    );
+    animation-timing-function: linear;
+  }
   /* Settimo secondo: comincia a rallentare, ma sta ancora correndo. */
   50% {
     transform: scale(
@@ -2485,6 +2521,105 @@ html.theme-transitions .border-bento-border {
   100% { transform: scale(var(--sky-to, 2.6)); opacity: 0.95; }
 }
 
+
+/* --- Stelle che si rinnovano ------------------------------------------------
+   I piani qui sopra fanno UNA passata sola: si allargano e finiscono per uscire
+   dai bordi, lasciando il centro sempre più vuoto proprio mentre si corre.
+
+   Questi tre piani invece CICLANO: partono piccoli, si allargano, sfumano e
+   ricominciano, sfasati fra loro così il flusso non si interrompe mai. È da qui
+   che arrivano le stelle "nuove" al centro dello schermo.
+
+   Il ciclo sta sull'elemento interno; il contenitore controlla per quanto il
+   piano resta in scena — e lo spegne durante la frenata, perché stelle che
+   continuano a sfrecciare mentre tutto si ferma sarebbero una contraddizione.
+   -------------------------------------------------------------------------- */
+
+.intro-cycle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: intro-cycle-life var(--intro-duration, 14s) linear both;
+}
+
+@keyframes intro-cycle-life {
+  0% { opacity: 1; }
+  /* Settimo secondo: comincia la frenata, il ricambio si esaurisce. */
+  50% { opacity: 1; }
+  64% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.intro-cycle-inner {
+  position: absolute;
+  inset: -30%;
+  background-image:
+    radial-gradient(1.3px 1.3px at 24% 31%, rgb(255 255 255 / 0.85), transparent),
+    radial-gradient(1.1px 1.1px at 63% 18%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.4px 1.4px at 41% 72%, rgb(255 255 255 / 0.82), transparent),
+    radial-gradient(1.1px 1.1px at 86% 57%, rgb(255 255 255 / 0.78), transparent),
+    radial-gradient(1.2px 1.2px at 11% 88%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.3px 1.3px at 72% 92%, rgb(255 255 255 / 0.76), transparent);
+  background-size: 22% 22%;
+  /* Sette secondi per moltiplicare la scala per otto: lo stesso ritmo dei piani
+     principali (circa ×1,5 ogni secondo e mezzo). */
+  animation: intro-cycle-run 7s linear infinite;
+}
+
+/* Sfasati di un terzo di ciclo l'uno dall'altro: il ricambio è continuo. */
+.intro-cycle--b .intro-cycle-inner {
+  animation-delay: -4.7s;
+  background-size: 17% 17%;
+  opacity: 0.85;
+}
+
+.intro-cycle--c .intro-cycle-inner {
+  animation-delay: -2.3s;
+  background-size: 28% 28%;
+  opacity: 0.7;
+}
+
+/* Entra in dissolvenza da piccola ed esce sfumando: non compare né sparisce
+   mai di colpo, così il ricambio non si nota. */
+@keyframes intro-cycle-run {
+  0% { transform: scale(0.55); opacity: 0; }
+  14% { opacity: 0.9; }
+  72% { opacity: 0.85; }
+  100% { transform: scale(4.4); opacity: 0; }
+}
+
+/* --- Le scie ---------------------------------------------------------------
+   Poche, per dare il senso della corsa senza affollare il cielo. Nascono a
+   una certa DISTANZA dal centro — come se lì ci fosse un disco vuoto — perché
+   partendo dal punto esatto restavano un istante immobili al centro dello
+   schermo e si leggevano come una riga ferma.
+   -------------------------------------------------------------------------- */
+
+.intro-streak {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: var(--len, 10vmin);
+  margin-left: -0.75px;
+  border-radius: 9999px;
+  transform-origin: 50% 0%;
+  background: linear-gradient(to bottom, transparent 0%, rgb(255 255 255 / 0.9) 100%);
+  /* Invisibile finché la sua animazione non comincia: senza, le scie in attesa
+     resterebbero disegnate tutte impilate al centro. */
+  opacity: 0;
+  animation-name: intro-streak-fly;
+  animation-timing-function: linear;
+  /* `both`, non `forwards`: vale anche PRIMA di partire, non solo dopo. */
+  animation-fill-mode: both;
+}
+
+@keyframes intro-streak-fly {
+  0% { transform: rotate(var(--a)) translateY(16vmin) scaleY(0.5); opacity: 0; }
+  12% { opacity: 0.85; }
+  75% { opacity: 0.7; }
+  100% { transform: rotate(var(--a)) translateY(105vmin) scaleY(1.5); opacity: 0; }
+}
 
 /* --- L'alone dell'accensione ---------------------------------------------
    Sta dietro il marchio e cresce insieme a lui: al picco è un bagliore d'oro
@@ -2597,6 +2732,11 @@ html.theme-transitions .border-bento-border {
 /* Chi ha chiesto meno movimento vede la stessa scena, ma ferma: nessun
    avanzamento fra le stelle, solo il marchio che appare al momento giusto. */
 @media (prefers-reduced-motion: reduce) {
+  .intro-streak,
+  .intro-cycle {
+    display: none;
+  }
+
   .intro-stars {
     animation: none;
     opacity: 0.85;
