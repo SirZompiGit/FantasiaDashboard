@@ -59,15 +59,30 @@ const STREAK_COUNT = 14;
  */
 function buildStreaks(durationMs: number) {
   const total = durationMs / 1000;
-  /** Le partenze si fermano al 45%: l'ultima scia finisce con la corsa. */
-  const window = total * 0.45;
+  /** Settimo secondo: da qui il cielo comincia a frenare. */
+  const brakeAt = total * 0.5;
+  /** Di quanto la prima scia è già in viaggio quando la scena appare. */
+  const headStart = 1.8;
 
   return Array.from({ length: STREAK_COUNT }, (_, index) => {
-    const progress = index / STREAK_COUNT;
+    // Su STREAK_COUNT - 1 e non su STREAK_COUNT: così l'ultima scia ha davvero
+    // progresso 1 e cade sul punto calcolato, invece di fermarsi un passo prima.
+    const progress = index / (STREAK_COUNT - 1);
+    const duration = 1.9 - progress * 0.5;
+
+    /**
+     * L'ultima scia deve ESAURIRSI al settimo secondo, non partire allora: il
+     * suo ritardo si calcola quindi a ritroso dalla propria durata. Prima le
+     * partenze si fermavano al 45% del brano e con la corsa della scia il tutto
+     * finiva già intorno al quinto secondo, lasciando due secondi di cielo
+     * immobile prima della frenata.
+     */
+    const lastDelay = brakeAt - duration;
+
     return {
       angle: (index * 137.5) % 360,
-      delay: -1.8 + window * progress,
-      duration: 1.9 - progress * 0.5,
+      delay: -headStart + (lastDelay + headStart) * progress,
+      duration,
       length: 7 + ((index * 5) % 9),
     };
   });
