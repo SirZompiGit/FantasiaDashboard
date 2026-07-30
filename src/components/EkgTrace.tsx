@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { HALO_FACTOR, buildTrace, sweepDash, sweepRange, sweepSeconds } from '../lib/ekg';
+import { buildSweep, buildTrace, sweepSeconds } from '../lib/ekg';
 
 interface EkgTraceProps {
   value: number;
@@ -70,10 +70,7 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
   const flat = value <= 0;
 
   const speed = sweepSeconds(ratio);
-  const dash = sweepDash(trace.length);
-  const halo = dash * HALO_FACTOR;
-  const coreRange = sweepRange(trace.length, dash);
-  const haloRange = sweepRange(trace.length, dash, true);
+  const sweep = useMemo(() => buildSweep(trace.length), [trace.length]);
 
   return (
     <div ref={boxRef} className="relative h-full w-full">
@@ -109,62 +106,42 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
             />
           ) : (
             /**
-             * La luce, in due strati sovrapposti.
+             * La scia. Più tratti sovrapposti che condividono la punta e si
+             * allungano all'indietro: vicino alla punta si sommano — luminosa e
+             * spessa — e in coda ne resta uno solo, sottile e quasi spento.
              *
-             * L'alone è lungo il doppio del nucleo e centrato su di esso: sporge
-             * davanti e dietro, ed è ciò che fa sfumare le estremità del lampo
-             * invece di troncarle di netto. Un solo strato con i capi arrotondati
-             * finiva e cominciava troppo secco.
-             *
-             * Le due animazioni hanno la stessa durata e partono insieme, quindi
-             * restano allineate per tutta la sessione.
+             * Il neon sta solo sulla punta: è lei il punto luminoso, la scia è
+             * ciò che si lascia dietro.
              */
-            <>
+            sweep.map((layer, index) => (
               <polyline
+                key={index}
                 points={trace.points}
                 fill="none"
                 stroke={color}
-                strokeWidth={3.5}
-                strokeOpacity={0.22}
+                strokeWidth={layer.width}
+                strokeOpacity={layer.opacity}
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 className="ekg-light"
                 style={
                   {
-                    strokeDasharray: `${halo} ${trace.length}`,
-                    filter: `blur(2.5px)`,
-                    '--ekg-from': `${haloRange[0]}px`,
-                    '--ekg-to': `${haloRange[1]}px`,
-                    '--ekg-speed': `${speed}s`,
-                  } as React.CSSProperties
-                }
-              />
-
-              <polyline
-                points={trace.points}
-                fill="none"
-                stroke={color}
-                strokeWidth={2}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                className="ekg-light"
-                style={
-                  {
-                    strokeDasharray: `${dash} ${trace.length}`,
+                    strokeDasharray: `${layer.dash} ${trace.length}`,
                     /**
-                     * Neon: un nucleo netto più due bagliori sempre più larghi e
-                     * tenui. Un'unica ombra diffusa fa una macchia; è la somma
-                     * di nucleo e alone a leggersi come tubo al neon. Restano
-                     * contenuti — è un dettaglio, non un faro.
+                     * Tre aloni sempre più larghi e tenui, non uno solo: un'unica
+                     * ombra diffusa fa una macchia, è la somma di un nucleo netto
+                     * e di un bagliore ampio a leggersi come neon.
                      */
-                    filter: `drop-shadow(0 0 1.5px ${color}) drop-shadow(0 0 5px ${color}a0) drop-shadow(0 0 11px ${color}4d)`,
-                    '--ekg-from': `${coreRange[0]}px`,
-                    '--ekg-to': `${coreRange[1]}px`,
+                    filter: layer.head
+                      ? `drop-shadow(0 0 1.5px ${color}) drop-shadow(0 0 5px ${color}b0) drop-shadow(0 0 12px ${color}55)`
+                      : undefined,
+                    '--ekg-from': `${layer.from}px`,
+                    '--ekg-to': `${layer.to}px`,
                     '--ekg-speed': `${speed}s`,
                   } as React.CSSProperties
                 }
               />
-            </>
+            ))
           )}
         </svg>
       )}

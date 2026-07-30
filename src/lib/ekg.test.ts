@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
   BEAT_PIXELS,
+  HEAD_DASH,
   MAX_AMPLITUDE,
   MIN_AMPLITUDE,
+  MIN_TRAIL,
   SWEEP_FAST,
   SWEEP_SLOW,
+  TRAIL_LAYERS,
+  buildSweep,
   buildTrace,
-  sweepDash,
   sweepSeconds,
+  trailLength,
 } from './ekg';
 
 /** Coppie di numeri dalla stringa `points` di una polilinea. */
@@ -155,9 +159,59 @@ describe('ritmo della luce', () => {
     expect(durations.size).toBeLessThanOrEqual(9);
   });
 
-  it('il lampo resta visibile anche su una traccia corta', () => {
-    expect(sweepDash(60)).toBeGreaterThanOrEqual(18);
-    // Su una traccia lunga cresce con lei, invece di restare un puntino.
-    expect(sweepDash(1000)).toBeGreaterThan(sweepDash(400));
+  it('la scia resta leggibile anche su una traccia corta', () => {
+    expect(trailLength(60)).toBeGreaterThanOrEqual(MIN_TRAIL);
+    // Su una traccia lunga cresce con lei, invece di restare un trattino.
+    expect(trailLength(1000)).toBeGreaterThan(trailLength(400));
+  });
+});
+
+describe('scia della luce', () => {
+  const sweep = buildSweep(600);
+
+  it('è fatta di più strati, con la punta disegnata per ultima', () => {
+    expect(sweep).toHaveLength(TRAIL_LAYERS);
+    expect(sweep.filter((layer) => layer.head)).toHaveLength(1);
+    // In SVG chi disegna per ultimo sta davanti: la punta è l'ultima.
+    expect(sweep.at(-1)?.head).toBe(true);
+  });
+
+  /**
+   * La rastremazione e la dissolvenza nascono dalla sovrapposizione: gli strati
+   * condividono la punta e si allungano all'indietro, sempre più sottili e
+   * spenti. Invertito l'ordine, la scia sarebbe un trattino con una coda spessa.
+   */
+  it('si assottiglia e si spegne verso la coda', () => {
+    const head = sweep.at(-1)!;
+    const tail = sweep[0];
+
+    expect(head.dash).toBe(HEAD_DASH);
+    expect(tail.dash).toBe(trailLength(600));
+    expect(head.width).toBeGreaterThan(tail.width);
+    expect(head.opacity).toBeGreaterThan(tail.opacity);
+  });
+
+  /**
+   * Tutti gli strati devono percorrere la stessa distanza nello stesso tempo:
+   * con corse diverse la scia si sfilaccerebbe dopo pochi giri, e sarebbe un
+   * difetto lentissimo da notare.
+   */
+  it('tutti gli strati corrono la stessa distanza', () => {
+    const distances = new Set(sweep.map((layer) => layer.from - layer.to));
+    expect(distances.size).toBe(1);
+  });
+
+  it('parte da fuori: nessuno strato è già in scena al primo fotogramma', () => {
+    for (const layer of sweep) {
+      // Con offset pari alla propria lunghezza il tratto sta tutto prima
+      // dell'inizio della traccia, quindi invisibile.
+      expect(layer.from).toBe(layer.dash);
+      expect(layer.to).toBeLessThan(0);
+    }
+  });
+
+  it('senza traccia non produce strati, invece di dividere per zero', () => {
+    expect(buildSweep(0)).toEqual([]);
+    expect(buildSweep(-5)).toEqual([]);
   });
 });

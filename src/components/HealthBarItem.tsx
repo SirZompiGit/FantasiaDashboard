@@ -294,13 +294,16 @@ function BarTrack({
   // Due densità per la barra della vita: Compatta (24px, il default) e
   // Ultra-compatta (16px, col toggle). La vecchia barra piena da 32px non c'è
   // più: l'app parte già stretta.
-  const trackSize = vertical
-    ? 'h-full w-full'
-    : thin
-      ? 'h-2.5 w-full'
-      : compact
-        ? 'h-4 w-full'
-        : 'h-6 w-full';
+  const trackSize =
+    vertical || wholeTrack
+      ? // Il tracciato prende l'altezza che gli dà il contenitore: è un monitor,
+        // e quanto sia spesso lo decide l'impaginato della scheda.
+        'h-full w-full'
+      : thin
+        ? 'h-2.5 w-full'
+        : compact
+          ? 'h-4 w-full'
+          : 'h-6 w-full';
   const trackRounding = thin ? 'rounded-md' : 'rounded-lg';
   const trackPadding = thin ? 'p-px' : 'p-[3px]';
   const segmentGap = thin ? 'gap-px' : max > 30 ? 'gap-[1px]' : 'gap-[2px]';
@@ -649,6 +652,12 @@ export function HealthBarItem({
 
   const isVertical = layout === 'vertical';
   /**
+   * Monitor: il tracciato non è una barra ma uno schermo. Occupa un terzo della
+   * scheda, spesso e rettangolare, e lascia il resto della riga a risorse ed
+   * effetti — che accanto a uno schermo si leggono meglio che sotto.
+   */
+  const isMonitor = (bar.barStyle ?? barStyle) === 'tracciato' && layout !== 'vertical';
+  /**
    * Il design della SINGOLA barra vince su quello della campagna: così una
    * fiala di veleno e un tracciato cardiaco possono stare nello stesso tavolo.
    * Assente sulla barra = eredita, ed è il caso di tutte quelle già create.
@@ -699,7 +708,15 @@ export function HealthBarItem({
       label={`Punti ferita di ${bar.name}`}
       alert={inAlert}
       design={style}
-      className={isVertical ? VERTICAL_MAIN : 'w-full'}
+      className={
+        isVertical
+          ? VERTICAL_MAIN
+          : isMonitor
+            ? // Spesso: dentro ci corre un tracciato, e su una striscia da
+              // ventiquattro pixel i picchi non avrebbero dove salire.
+              `w-full ${compact ? 'h-14' : 'h-[4.5rem]'}`
+            : 'w-full'
+      }
       trackClassName={flashRing}
     />
   );
@@ -722,6 +739,34 @@ export function HealthBarItem({
       design={style}
       className={className}
     />
+  );
+
+  /**
+   * Risorse in righe: nome, traccia, valori. Estratte perché servono in due
+   * posti — sotto la barra nell'impaginato normale, nella colonna di destra in
+   * quello a monitor — e duplicarle avrebbe voluto dire tenerle allineate a mano.
+   */
+  const resourceRows = resources.length > 0 && (
+    <div className="space-y-0.5">
+      {resources.map((resource) => (
+        <div key={resource.id} className="flex items-center gap-2">
+          <span
+            className="w-14 shrink-0 truncate font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:w-20"
+            title={resource.name}
+          >
+            {resource.name}
+          </span>
+
+          {resourceTrack(resource, 'min-w-0 flex-1')}
+
+          <span className="shrink-0 font-mono text-[10px] tabular-nums text-slate-500">
+            <span className="font-bold text-slate-300">{resource.currentValue}</span>
+            <span className="mx-px text-slate-600">/</span>
+            {resource.maxValue}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 
   // Targhette col nome esteso, per la scheda larga.
@@ -1179,6 +1224,41 @@ export function HealthBarItem({
             </div>
           )}
         </div>
+      ) : isMonitor ? (
+        /**
+         * Monitor: lo schermo a sinistra, un terzo della riga, e accanto tutto
+         * il resto. Prima il tracciato correva per tutta la larghezza e le
+         * risorse gli stavano sotto: uno schermo lungo un metro e mezzo non
+         * somiglia a un monitor, e la scheda diventava altissima.
+         */
+        <div className="flex items-start gap-3 pt-0.5">
+          <div className="relative w-1/3 min-w-[8rem] shrink-0">
+            {mainTrack}
+            {particleNodes}
+          </div>
+
+          <div className="min-w-0 flex-1 space-y-1.5">
+            {statusEffects.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1">
+                {statusEffects.map((effect) => (
+                  <span
+                    key={effect.id}
+                    title={effect.name}
+                    className="inline-flex max-w-[8rem] items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                    style={{
+                      color: effect.color,
+                      borderColor: `${effect.color}66`,
+                      backgroundColor: `${effect.color}1f`,
+                    }}
+                  >
+                    <span className="truncate">{effect.name}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+            {resourceRows}
+          </div>
+        </div>
       ) : (
         <div className="relative">
           {mainTrack}
@@ -1186,7 +1266,7 @@ export function HealthBarItem({
         </div>
       )}
 
-      {effectPills}
+      {!isMonitor && effectPills}
 
       {/* Fiala: le risorse sono bolle tonde in fila, non righe. */}
       {(style === 'capsula' || style === 'pozione') && resources.length > 0 && (
@@ -1205,28 +1285,13 @@ export function HealthBarItem({
         </div>
       )}
 
-      {!isCircular && style !== 'capsula' && style !== 'pozione' && resources.length > 0 && (
-        <div className="mt-1.5 space-y-0.5">
-          {resources.map((resource) => (
-            <div key={resource.id} className="flex items-center gap-2">
-              <span
-                className="w-14 shrink-0 truncate font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:w-20"
-                title={resource.name}
-              >
-                {resource.name}
-              </span>
-
-              {resourceTrack(resource, 'min-w-0 flex-1')}
-
-              <span className="shrink-0 font-mono text-[10px] tabular-nums text-slate-500">
-                <span className="font-bold text-slate-300">{resource.currentValue}</span>
-                <span className="mx-px text-slate-600">/</span>
-                {resource.maxValue}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Nell'impaginato a monitor le risorse stanno già nella colonna di
+          destra, accanto allo schermo. */}
+      {!isCircular &&
+        !isMonitor &&
+        style !== 'capsula' &&
+        style !== 'pozione' &&
+        resources.length > 0 && <div className="mt-1.5">{resourceRows}</div>}
     </div>
   );
 }

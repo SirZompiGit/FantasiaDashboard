@@ -23,9 +23,18 @@
  */
 export const BEAT_PIXELS = 130;
 
-/** Ampiezza minima e massima del picco, in pixel. */
+/**
+ * Ampiezza minima e massima del picco, in pixel.
+ *
+ * Il tetto è tarato sullo schermo del design a monitor, alto una settantina di
+ * pixel: fermo a undici, il tracciato ci restava in mezzo come un nastrino con
+ * due fasce vuote sopra e sotto.
+ */
 export const MIN_AMPLITUDE = 3;
-export const MAX_AMPLITUDE = 11;
+export const MAX_AMPLITUDE = 22;
+
+/** Margine fra il picco e il bordo dello schermo. */
+const MARGIN = 3;
 
 /** Durata di una passata della luce: a pieni punti ferita e in agonia. */
 export const SWEEP_FAST = 0.9;
@@ -132,7 +141,7 @@ export function buildTrace(along: number, across: number, vertical = false): Tra
   const beats = Math.max(1, Math.round(along / BEAT_PIXELS));
   const span = along / beats;
   const baseline = across / 2;
-  const amplitude = Math.max(MIN_AMPLITUDE, Math.min(across / 2 - 1.5, MAX_AMPLITUDE));
+  const amplitude = Math.max(MIN_AMPLITUDE, Math.min(across / 2 - MARGIN, MAX_AMPLITUDE));
 
   // Capo iniziale sulla linea di base: qualunque battito parta più avanti, la
   // traccia comincia comunque dal bordo.
@@ -198,39 +207,74 @@ export function sweepSeconds(ratio: number, steps = 8): number {
   return round(SWEEP_FAST + (1 - quantized) ** 1.5 * (SWEEP_SLOW - SWEEP_FAST));
 }
 
-/**
- * Lunghezza minima del lampo, in pixel.
- *
- * Sotto questa misura, su una barra stretta, la luce non rivela un battito ma un
- * frammento di battito: il tracciato non si legge più.
- */
-export const MIN_DASH = 40;
+/** Quanti strati compongono la scia. */
+export const TRAIL_LAYERS = 6;
 
-/**
- * Lunghezza del nucleo luminoso, in pixel: circa un battito, così a ogni
- * istante si vede una forma intera e non un pezzo di linea.
- */
-export function sweepDash(length: number): number {
-  return Math.max(MIN_DASH, round(length * 0.2));
+/** Lunghezza della sola punta luminosa, in pixel. */
+export const HEAD_DASH = 7;
+
+/** Lunghezza minima della scia: sotto, non si legge come scia ma come trattino. */
+export const MIN_TRAIL = 56;
+
+export interface SweepLayer {
+  /** Lunghezza del tratto acceso, in pixel. */
+  dash: number;
+  width: number;
+  opacity: number;
+  /** Estremi dell'animazione del tratteggio, in pixel. */
+  from: number;
+  to: number;
+  /** La punta: è l'unica che porta l'alone al neon. */
+  head: boolean;
+}
+
+/** Quanto è lunga la scia dietro alla punta. */
+export function trailLength(length: number): number {
+  return Math.max(MIN_TRAIL, round(length * 0.26));
 }
 
 /**
- * Quanto è più lungo l'alone rispetto al nucleo.
+ * Gli strati della scia, già nell'ordine in cui vanno disegnati.
  *
- * L'alone è la stessa luce, più larga e più tenue, centrata sul nucleo: sporge
- * davanti e dietro, ed è ciò che fa sfumare le due estremità del lampo invece di
- * troncarle di netto.
+ * Un tratteggio solo non è una scia: ha la stessa intensità e lo stesso spessore
+ * dall'inizio alla fine, e i suoi due capi sono tagliati di netto. Qui la scia è
+ * fatta di più tratti sovrapposti che condividono la PUNTA e si allungano
+ * all'indietro: vicino alla punta si sommano tutti — luminosa e spessa — mentre
+ * in coda ne resta uno solo, sottile e quasi spento. È da lì che vengono
+ * insieme la rastremazione e la dissolvenza.
+ *
+ * Tutti gli strati percorrono la stessa distanza nello stesso tempo: se le corse
+ * fossero diverse la scia si sfilaccerebbe dopo pochi giri.
+ *
+ * L'ordine è dal più lungo (in fondo) alla punta (sopra a tutti), perché in SVG
+ * a disegnare per ultimo si sta davanti.
  */
-export const HALO_FACTOR = 2;
+export function buildSweep(length: number): SweepLayer[] {
+  if (!(length > 0)) return [];
 
-/**
- * Estremi dell'animazione del tratteggio, in pixel.
- *
- * Il lampo entra da fuori e esce dall'altro capo — il giro si chiude senza che
- * appaia già a metà strada — e l'alone è spostato di mezza differenza, così
- * resta centrato sul nucleo per tutta la corsa invece di seguirlo.
- */
-export function sweepRange(length: number, dash: number, centered = false): [number, number] {
-  const shift = centered ? (dash * HALO_FACTOR - dash) / 2 : 0;
-  return [round(dash + shift), round(-length + shift)];
+  const trail = trailLength(length);
+  // La punta entra da fuori e esce dall'altro capo: il giro si chiude senza che
+  // la scia compaia già a metà strada.
+  const travel = round(length + trail);
+
+  return Array.from({ length: TRAIL_LAYERS }, (_, index) => {
+    const t = 1 - index / (TRAIL_LAYERS - 1);
+    /**
+     * Le lunghezze crescono più che linearmente: gli strati si affollano vicino
+     * alla punta, dove la scia dev'essere densa, e si diradano in coda, dove
+     * deve sfumare.
+     */
+    const dash = round(HEAD_DASH + (trail - HEAD_DASH) * t ** 1.7);
+
+    return {
+      dash,
+      // Dalla punta spessa alla coda sottile: è la rastremazione.
+      width: round(2.6 - 2 * t),
+      // La punta è piena; la scia si somma da sé, strato su strato.
+      opacity: t === 0 ? 1 : round(0.36 - 0.14 * t),
+      from: dash,
+      to: round(dash - travel),
+      head: t === 0,
+    };
+  });
 }
