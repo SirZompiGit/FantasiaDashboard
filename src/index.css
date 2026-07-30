@@ -2230,6 +2230,76 @@ html.theme-transitions .border-bento-border {
   45% { filter: brightness(1.7); }
 }
 
+/* === TRACCIATO ===========================================================
+   La versione alternativa di Battito, rovesciata nel principio: là il tracciato
+   È il riempimento e si accorcia; qui la linea resta sempre intera e a cambiare
+   è la velocità della luce che la percorre.
+
+   La geometria non sta qui ma in `lib/ekg.ts`: dipende dai pixel reali del
+   contenitore, e un tracciato disegnato in coordinate stirate faceva percorrere
+   alla luce solo una frazione della strada.
+   ========================================================================= */
+
+.hp-track--tracciato {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Doppia classe, non una: `p-[3px]` della traccia ha la stessa specificità di un
+   selettore singolo, e a pari punteggio deciderebbe l'ordine nel CSS generato.
+   Quasi nessun margine interno serve perché su una barra ultra-compatta i tre
+   pixel consueti lasciano al tracciato un'altezza in cui non ci sta. */
+.hp-track.hp-track--tracciato {
+  padding: 1px;
+}
+
+.ekg-light {
+  animation: ekg-sweep var(--ekg-speed, 2s) linear infinite;
+}
+
+@keyframes ekg-sweep {
+  from { stroke-dashoffset: var(--ekg-from); }
+  to { stroke-dashoffset: var(--ekg-to); }
+}
+
+/* La levetta. Sottile e alta quanto la traccia: deve dire dove sta il valore
+   senza diventare l'elemento principale del disegno.
+
+   La corsa è calcolata su `100% - 4px`, la sua larghezza: così agli estremi
+   resta interamente dentro la traccia invece di sporgere e farsi tagliare. */
+.ekg-knob {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--ekg-pos, 0) * (100% - 4px));
+  width: 4px;
+  border-radius: 9999px;
+  background-color: var(--hp-color, currentColor);
+  box-shadow: 0 0 6px var(--hp-color, currentColor);
+  transition: left 200ms ease-out;
+  pointer-events: none;
+}
+
+.ekg-knob--vertical {
+  top: auto;
+  right: 0;
+  bottom: calc(var(--ekg-pos, 0) * (100% - 4px));
+  left: 0;
+  width: auto;
+  height: 4px;
+  transition: bottom 200ms ease-out;
+}
+
+/* Chi ha chiesto meno movimento vede la traccia ferma: la luce si posa
+   all'inizio della linea — offset a zero, dove il tratto è visibile — e la
+   levetta resta l'unica cosa che si muove. */
+@media (prefers-reduced-motion: reduce) {
+  .ekg-light {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 0.45; }
   50% { opacity: 0.85; }

@@ -176,7 +176,8 @@ export type BarStyle =
   | 'capsula'
   | 'pozione'
   | 'gemme'
-  | 'battito';
+  | 'battito'
+  | 'tracciato';
 
 export const DEFAULT_BAR_STYLE: BarStyle = 'classico';
 
@@ -187,6 +188,11 @@ export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
   { id: 'pozione', label: 'Pozione', hint: 'Come Capsula, ma con le bolle che salgono' },
   { id: 'gemme', label: 'Gemme', hint: 'Cristalli incastonati che si spengono uno a uno' },
   { id: 'battito', label: 'Battito', hint: 'Tracciato cardiaco che scorre e pulsa' },
+  {
+    id: 'tracciato',
+    label: 'Tracciato',
+    hint: 'Linea intera: la luce la percorre, la velocità dice la salute',
+  },
 ];
 
 /**
@@ -199,6 +205,18 @@ export const BAR_STYLES: { id: BarStyle; label: string; hint: string }[] = [
  */
 export function usesSizedFill(style: BarStyle): boolean {
   return style === 'capsula' || style === 'pozione' || style === 'battito';
+}
+
+/**
+ * Design in cui la traccia NON rappresenta il livello con un riempimento.
+ *
+ * «Tracciato» disegna una linea sempre intera — un elettrocardiogramma non si
+ * accorcia quando il paziente peggiora — e il valore si legge dalla velocità
+ * della luce che la percorre e dalla levetta che ci scorre sopra. Chi disegna la
+ * traccia deve quindi saltare del tutto sia i segmenti sia il riempimento.
+ */
+export function usesWholeTrack(style: BarStyle): boolean {
+  return style === 'tracciato';
 }
 
 const BAR_STYLE_IDS = new Set<string>(BAR_STYLES.map((b) => b.id));

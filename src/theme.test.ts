@@ -16,6 +16,7 @@ import {
   normalizeStyle,
   normalizeTheme,
   usesSizedFill,
+  usesWholeTrack,
 } from './theme';
 
 describe('temi di colore', () => {
@@ -155,6 +156,7 @@ describe('aspetto delle barre', () => {
       'pozione',
       'gemme',
       'battito',
+      'tracciato',
     ]);
     expect(DEFAULT_BAR_STYLE).toBe('classico');
   });
@@ -213,6 +215,20 @@ describe('riempimento dimensionato', () => {
   it('non tocca i design che non ne hanno bisogno', () => {
     for (const style of ['classico', 'circolare', 'gemme'] as const) {
       expect(usesSizedFill(style)).toBe(false);
+    }
+  });
+
+  /**
+   * Tracciato non ha un riempimento affatto: la linea è sempre intera. Fosse
+   * elencato fra i riempimenti dimensionati, la traccia si troverebbe sotto un
+   * blocco colorato largo quanto i punti ferita.
+   */
+  it('tracciato non ha riempimento, nemmeno dimensionato', () => {
+    expect(usesSizedFill('tracciato')).toBe(false);
+    expect(usesWholeTrack('tracciato')).toBe(true);
+
+    for (const style of ['classico', 'circolare', 'capsula', 'battito'] as const) {
+      expect(usesWholeTrack(style)).toBe(false);
     }
   });
 });

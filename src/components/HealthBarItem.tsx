@@ -24,7 +24,8 @@
 
 import { type PointerEvent as ReactPointerEvent, useEffect, useRef, useState } from 'react';
 import type { HealthBar, Resource } from '../types';
-import { usesSizedFill, type BarStyle } from '../theme';
+import { usesSizedFill, usesWholeTrack, type BarStyle } from '../theme';
+import { EkgTrace } from './EkgTrace';
 import {
   ChevronDown,
   ChevronUp,
@@ -221,7 +222,14 @@ function BarTrack({
    * faceva sparire quando il contenitore non aveva un'altezza propria.
    */
   const sizedFill = usesSizedFill(design) && !thin;
-  const useSegments = max <= segmentThreshold && !sizedFill && !usesSizedFill(design);
+  /**
+   * Tracciato: la linea resta intera e il livello si legge dal ritmo della luce.
+   * Sulle risorse no — dieci pixel d'altezza non contengono un tracciato — e lì
+   * si ricade sulla traccia piena come fanno gli altri design.
+   */
+  const wholeTrack = usesWholeTrack(design) && !thin;
+  const useSegments =
+    max <= segmentThreshold && !sizedFill && !wholeTrack && !usesSizedFill(design);
 
   const commit = (next: number) => {
     if (!onChange) return;
@@ -344,7 +352,9 @@ function BarTrack({
           vertical ? 'flex-col-reverse' : 'flex-row'
         } ${alert ? 'is-alert' : ''} ${trackClassName}`}
       >
-        {useSegments ? (
+        {wholeTrack ? (
+          <EkgTrace value={value} max={max} color={color} vertical={vertical} />
+        ) : useSegments ? (
           Array.from({ length: max }, (_, index) => {
             const active = index < value;
             return (
