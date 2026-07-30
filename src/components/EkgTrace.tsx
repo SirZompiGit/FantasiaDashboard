@@ -19,8 +19,8 @@
  * pezzo di strada e ricominciava a metà.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { buildSweep, buildTrace, sweepSeconds } from '../lib/ekg';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { buildSweep, buildTrace, sweepRate } from '../lib/ekg';
 
 interface EkgTraceProps {
   value: number;
@@ -32,6 +32,7 @@ interface EkgTraceProps {
 
 export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
   const boxRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
 
   useEffect(() => {
@@ -69,13 +70,36 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
   /** A zero non c'è più niente da misurare: la linea diventa piatta. */
   const flat = value <= 0;
 
-  const speed = sweepSeconds(ratio);
   const sweep = useMemo(() => buildSweep(trace.length), [trace.length]);
+
+  /**
+   * La velocità si regola cambiando il PASSO dell'animazione, non la sua durata.
+   *
+   * Cambiare `animation-duration` a un'animazione in corso non la fa ripartire,
+   * ma ne sposta il fotogramma: il tempo trascorso resta lo stesso e viene
+   * riletto su una durata diversa, quindi la scia saltava avanti o indietro a
+   * ogni punto ferita tolto. Il passo (`playbackRate`) conserva il punto esatto
+   * in cui l'animazione si trova e cambia solo quanto in fretta prosegue.
+   *
+   * Un effetto di layout, non un normale effetto: si applica prima che il
+   * fotogramma venga disegnato, quindi non si vede un istante alla velocità
+   * sbagliata. Va rieseguito anche quando gli strati vengono ricreati, perché
+   * ogni animazione nuova nasce a passo uno.
+   */
+  useLayoutEffect(() => {
+    const element = svgRef.current;
+    if (!element) return;
+    const rate = sweepRate(ratio);
+    for (const animation of element.getAnimations({ subtree: true })) {
+      animation.playbackRate = rate;
+    }
+  }, [ratio, sweep, flat]);
 
   return (
     <div ref={boxRef} className="relative h-full w-full">
       {trace.length > 0 && (
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${width} ${height}`}
           width={width}
           height={height}
@@ -137,7 +161,6 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
                       : undefined,
                     '--ekg-from': `${layer.from}px`,
                     '--ekg-to': `${layer.to}px`,
-                    '--ekg-speed': `${speed}s`,
                   } as React.CSSProperties
                 }
               />

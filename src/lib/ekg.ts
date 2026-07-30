@@ -36,9 +36,24 @@ export const MAX_AMPLITUDE = 22;
 /** Margine fra il picco e il bordo dello schermo. */
 const MARGIN = 3;
 
-/** Durata di una passata della luce: a pieni punti ferita e in agonia. */
-export const SWEEP_FAST = 0.9;
-export const SWEEP_SLOW = 5.4;
+/**
+ * Durata di una passata della luce: a pieni punti ferita e in agonia.
+ *
+ * L'intervallo è stretto apposta. Con una passata da cinque secchi e mezzo la
+ * barra sotto soglia sembrava ferma invece che affaticata: il rallentamento si
+ * deve leggere come un ritmo che cala, non come un'animazione che si è
+ * inceppata.
+ */
+export const SWEEP_FAST = 0.85;
+export const SWEEP_SLOW = 2.8;
+
+/**
+ * Durata scritta nel CSS. La velocità reale si ottiene cambiando il PASSO
+ * dell'animazione, non la sua durata: cambiare la durata a un'animazione già in
+ * corso ne sposta il fotogramma, e a ogni punto ferita tolto la scia faceva un
+ * salto. Il passo invece conserva il punto esatto in cui si trova.
+ */
+export const SWEEP_BASE = 2;
 
 /**
  * I battiti, in coordinate normalizzate: `t` va da 0 a 1 dentro lo spazio del
@@ -202,9 +217,17 @@ export function buildTrace(along: number, across: number, vertical = false): Tra
  */
 export function sweepSeconds(ratio: number, steps = 8): number {
   const quantized = Math.round(clamp01(ratio) * steps) / steps;
-  // Esponente sopra 1: la differenza si sente soprattutto quando la barra è
-  // bassa, dove serve accorgersene.
-  return round(SWEEP_FAST + (1 - quantized) ** 1.5 * (SWEEP_SLOW - SWEEP_FAST));
+  // Esponente appena sopra 1: la differenza si sente soprattutto quando la barra
+  // è bassa, ma senza inchiodare la scia nella metà inferiore.
+  return round(SWEEP_FAST + (1 - quantized) ** 1.3 * (SWEEP_SLOW - SWEEP_FAST));
+}
+
+/**
+ * Passo dell'animazione: quante volte più veloce della durata scritta nel CSS.
+ * È ciò che si cambia a caldo, perché conserva il fotogramma corrente.
+ */
+export function sweepRate(ratio: number): number {
+  return round(SWEEP_BASE / sweepSeconds(ratio));
 }
 
 /** Quanti strati compongono la scia. */

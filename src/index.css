@@ -2254,8 +2254,12 @@ html.theme-transitions .border-bento-border {
   box-shadow: inset 0 0 14px rgb(0 0 0 / 0.55);
 }
 
+/* Durata FISSA: la velocità reale la decide il passo dell'animazione, regolato
+   dal componente. Cambiare la durata a caldo sposterebbe il fotogramma, e a ogni
+   punto ferita tolto la scia farebbe un salto. Deve restare allineata a
+   `SWEEP_BASE` in `lib/ekg.ts`. */
 .ekg-light {
-  animation: ekg-sweep var(--ekg-speed, 2s) linear infinite;
+  animation: ekg-sweep 2s linear infinite;
 }
 
 @keyframes ekg-sweep {

@@ -7,9 +7,11 @@ import {
   MIN_TRAIL,
   SWEEP_FAST,
   SWEEP_SLOW,
+  SWEEP_BASE,
   TRAIL_LAYERS,
   buildSweep,
   buildTrace,
+  sweepRate,
   sweepSeconds,
   trailLength,
 } from './ekg';
@@ -157,6 +159,28 @@ describe('ritmo della luce', () => {
     for (let value = 0; value <= 100; value++) durations.add(sweepSeconds(value / 100));
     // Nove valori possibili con otto gradini, non centouno.
     expect(durations.size).toBeLessThanOrEqual(9);
+  });
+
+  /**
+   * La durata nel CSS è fissa: a cambiare è il passo. Cambiare la durata a
+   * un'animazione in corso ne sposta il fotogramma, e la scia saltava a ogni
+   * punto ferita tolto.
+   */
+  it('il passo corrisponde alla durata voluta', () => {
+    for (const ratio of [0, 0.25, 0.5, 1]) {
+      expect(sweepRate(ratio) * sweepSeconds(ratio)).toBeCloseTo(SWEEP_BASE, 1);
+    }
+    // A piena vita corre più che in agonia.
+    expect(sweepRate(1)).toBeGreaterThan(sweepRate(0));
+  });
+
+  /**
+   * Il rallentamento deve leggersi come un ritmo che cala, non come
+   * un'animazione inceppata: sotto soglia la passata resta di pochi secondi.
+   */
+  it('non rallenta fino a sembrare ferma', () => {
+    expect(sweepSeconds(0)).toBeLessThanOrEqual(3);
+    expect(sweepSeconds(0.25)).toBeLessThan(2.5);
   });
 
   it('la scia resta leggibile anche su una traccia corta', () => {

@@ -425,8 +425,12 @@ function BarTrack({
        * oggetto luminoso a contendere l'attenzione alla scia; qui dice dov'è il
        * livello senza sporcare la proiezione. Porta il colore del tema, non
        * quello della barra: è un comando dell'interfaccia, non un dato.
+       *
+       * Solo dove si può trascinare: nello schermo condiviso non c'è niente da
+       * afferrare, e una maniglia che non si muove è un invito a un gesto che
+       * non funziona.
        */}
-      {wholeTrack && (
+      {wholeTrack && interactive && (
         <span
           aria-hidden
           className={`ekg-arrow ${vertical ? 'ekg-arrow--vertical' : ''}`}

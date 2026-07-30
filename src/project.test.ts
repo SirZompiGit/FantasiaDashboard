@@ -9,6 +9,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { SWEEP_BASE } from './lib/ekg';
 
 // Vitest esegue dalla radice del progetto.
 const root = process.cwd();
@@ -293,6 +294,22 @@ describe('manifest della web app', () => {
     const worker = read('public/sw.js');
     expect(worker).toContain('self.location.origin');
     expect(worker).not.toMatch(/firebase(io|database)/i);
+  });
+});
+
+/**
+ * Il design «Tracciato» tiene la durata dell'animazione nel CSS e la velocità
+ * reale nel codice, che la ottiene cambiando il passo. Se i due numeri si
+ * scollassero, ogni barra andrebbe a una velocità sbagliata di un fattore
+ * costante — e senza alcun errore che lo segnali.
+ */
+describe('tracciato', () => {
+  it('la durata nel CSS coincide con quella da cui si calcola il passo', () => {
+    const css = read('src/index.css');
+    const declared = css.match(/\.ekg-light\s*\{[^}]*animation:\s*ekg-sweep\s+([\d.]+)s/);
+
+    expect(declared).toBeTruthy();
+    expect(Number(declared![1])).toBe(SWEEP_BASE);
   });
 });
 
