@@ -284,9 +284,6 @@ describe('manifest della web app', () => {
     }
   });
 
-  it('la barra della dashboard mostra la stessa icona della scheda', () => {
-    expect(read('src/components/DashboardHeader.tsx')).toContain('src="/icon-192.png"');
-  });
 
   /**
    * Il service worker non deve mettersi in mezzo fra l'app e il database: lo

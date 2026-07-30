@@ -295,19 +295,18 @@ export function DashboardHeader({
     <header className="relative z-30 mx-auto mb-6 flex w-full max-w-7xl flex-col gap-3 border-b border-bento-border pb-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          {/* L'icona vera dell'app, la stessa della scheda del browser e della
-              versione installata: al suo posto c'era una bacchetta generica.
-              Riusa `/icon-192.png`, che il browser ha già scaricato come
-              favicon — nessuna richiesta in più. */}
-          <img
-            src="/icon-192.png"
-            alt=""
-            aria-hidden
-            draggable={false}
-            className="h-10 w-10 shrink-0 rounded-xl border border-bento-border shadow-panel"
-          />
-          {/* Senza l'indicatore sotto, il marchio si prende tutta l'altezza. */}
+          {/* Solo il marchio: prima c'era un riquadro con un'icona accanto —
+              una bacchetta generica, poi l'icona dell'app — e in entrambi i casi
+              rubava attenzione al nome senza aggiungere nulla. */}
           <Wordmark style={style} variant={logoVariant} className="h-7 sm:h-9" />
+
+          {/* Dice dove ci si trova: è la plancia del master, non lo schermo dei
+              giocatori né la vista di chi si collega. */}
+          <span aria-hidden className="hidden h-5 w-px shrink-0 bg-bento-border sm:block" />
+          <span className="hidden shrink-0 font-mono text-xs font-bold uppercase tracking-widest text-slate-500 sm:block">
+            Dashboard
+          </span>
+
           {saveIndicator}
         </div>
 
