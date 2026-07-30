@@ -210,6 +210,26 @@ describe('scia della luce', () => {
     }
   });
 
+  /**
+   * Il tratteggio si ripete ogni `dash + gap`: se quel passo non coincide con la
+   * corsa dell'animazione, all'ultimo fotogramma il disegno non combacia con il
+   * primo e a ogni giro la scia fa uno scatto all'indietro. È il difetto che si
+   * vedeva come «reset» a un certo punto dell'animazione.
+   */
+  it('il passo del tratteggio coincide con la corsa: il giro si chiude senza salto', () => {
+    for (const layer of sweep) {
+      expect(layer.dash + layer.gap).toBeCloseTo(layer.from - layer.to, 5);
+    }
+  });
+
+  /**
+   * Con uno spazio più corto della traccia si vedrebbero due scie insieme, una
+   * che entra mentre l'altra non è ancora uscita.
+   */
+  it('non lascia mai due scie in scena insieme', () => {
+    for (const layer of sweep) expect(layer.gap).toBeGreaterThanOrEqual(600);
+  });
+
   it('senza traccia non produce strati, invece di dividere per zero', () => {
     expect(buildSweep(0)).toEqual([]);
     expect(buildSweep(-5)).toEqual([]);

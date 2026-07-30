@@ -2293,29 +2293,34 @@ html.theme-transitions .border-bento-border {
 
    La corsa è calcolata su `100% - 4px`, la sua larghezza: così agli estremi
    resta interamente dentro la traccia invece di sporgere e farsi tagliare. */
-.ekg-knob {
+/* La levetta: una freccina fuori dallo schermo, appoggiata al bordo inferiore e
+   puntata verso l'alto. Piccola apposta — dice dov'è il livello, non compete con
+   la scia — e nel colore del tema, perché è un comando dell'interfaccia e non un
+   dato della barra.
+
+   La corsa è calcolata su `100% - 8px`, la sua larghezza: agli estremi resta
+   sotto lo schermo invece di sporgere di lato. */
+.ekg-arrow {
   position: absolute;
-  top: 50%;
-  left: calc(var(--ekg-pos, 0) * (100% - 3px));
-  width: 3px;
-  /* Non a tutta altezza: su uno schermo spesso una lineetta da un capo all'altro
-     smetteva di essere una levetta e diventava un divisorio. */
-  height: 62%;
-  transform: translateY(-50%);
-  border-radius: 9999px;
-  background-color: var(--hp-color, currentColor);
-  box-shadow: 0 0 6px var(--hp-color, currentColor);
+  bottom: -5px;
+  left: calc(var(--ekg-pos, 0) * (100% - 8px));
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-bottom: 5px solid var(--theme-500);
+  border-left: 4px solid transparent;
   transition: left 200ms ease-out;
   pointer-events: none;
 }
 
-.ekg-knob--vertical {
-  top: auto;
-  bottom: calc(var(--ekg-pos, 0) * (100% - 3px));
-  left: 50%;
-  width: 62%;
-  height: 3px;
-  transform: translateX(-50%);
+/* In verticale la freccia sta sul fianco sinistro e punta verso la traccia. */
+.ekg-arrow--vertical {
+  bottom: calc(var(--ekg-pos, 0) * (100% - 8px));
+  left: -5px;
+  border-top: 4px solid transparent;
+  border-right: 5px solid var(--theme-500);
+  border-bottom: 4px solid transparent;
+  border-left: 0;
   transition: bottom 200ms ease-out;
 }
 

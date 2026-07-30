@@ -418,6 +418,21 @@ function BarTrack({
           </div>
         )}
       </div>
+
+      {/**
+       * La levetta del tracciato: una freccina FUORI dallo schermo, appoggiata
+       * al bordo inferiore e puntata verso l'alto. Dentro sarebbe un secondo
+       * oggetto luminoso a contendere l'attenzione alla scia; qui dice dov'è il
+       * livello senza sporcare la proiezione. Porta il colore del tema, non
+       * quello della barra: è un comando dell'interfaccia, non un dato.
+       */}
+      {wholeTrack && (
+        <span
+          aria-hidden
+          className={`ekg-arrow ${vertical ? 'ekg-arrow--vertical' : ''}`}
+          style={{ '--ekg-pos': percentage / 100 } as React.CSSProperties}
+        />
+      )}
     </div>
   );
 }
@@ -1232,7 +1247,9 @@ export function HealthBarItem({
          * somiglia a un monitor, e la scheda diventava altissima.
          */
         <div className="flex items-start gap-3 pt-0.5">
-          <div className="relative w-1/3 min-w-[8rem] shrink-0">
+          {/* Poco più di un quarto della riga: un terzo pieno faceva ancora una
+              striscia lunga, e questo è uno schermo. */}
+          <div className="relative w-[27%] min-w-[7rem] shrink-0">
             {mainTrack}
             {particleNodes}
           </div>

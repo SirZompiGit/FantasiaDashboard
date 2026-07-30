@@ -126,7 +126,7 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
                 className="ekg-light"
                 style={
                   {
-                    strokeDasharray: `${layer.dash} ${trace.length}`,
+                    strokeDasharray: `${layer.dash} ${layer.gap}`,
                     /**
                      * Tre aloni sempre più larghi e tenui, non uno solo: un'unica
                      * ombra diffusa fa una macchia, è la somma di un nucleo netto
@@ -146,14 +146,9 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
         </svg>
       )}
 
-      {/* La levetta: il valore esatto, per chi lo vuole leggere invece di
-          dedurlo dal ritmo. È anche l'appiglio visivo del trascinamento, che
-          resta gestito da tutta la traccia. */}
-      <span
-        aria-hidden
-        className={`ekg-knob ${vertical ? 'ekg-knob--vertical' : ''}`}
-        style={{ '--ekg-pos': ratio } as React.CSSProperties}
-      />
+      {/* La levetta NON sta qui: è una freccina fuori dallo schermo, sul bordo,
+          disegnata da chi contiene la traccia. Dentro sarebbe un secondo oggetto
+          luminoso a contendere l'attenzione alla scia. */}
     </div>
   );
 }

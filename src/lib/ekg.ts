@@ -219,6 +219,16 @@ export const MIN_TRAIL = 56;
 export interface SweepLayer {
   /** Lunghezza del tratto acceso, in pixel. */
   dash: number;
+  /**
+   * Spazio spento fino al tratto successivo.
+   *
+   * NON è un valore libero: `dash + gap` deve fare esattamente la corsa
+   * dell'animazione. Il tratteggio si ripete con quel passo, quindi solo così
+   * l'istante finale disegna esattamente come l'istante iniziale e il ciclo si
+   * richiude senza salto. Con uno spazio qualsiasi — per esempio pari alla sola
+   * traccia — a ogni giro la scia faceva uno scatto all'indietro.
+   */
+  gap: number;
   width: number;
   opacity: number;
   /** Estremi dell'animazione del tratteggio, in pixel. */
@@ -268,6 +278,8 @@ export function buildSweep(length: number): SweepLayer[] {
 
     return {
       dash,
+      // Il passo del tratteggio è la corsa: è ciò che chiude il giro senza salto.
+      gap: round(travel - dash),
       // Dalla punta spessa alla coda sottile: è la rastremazione.
       width: round(2.6 - 2 * t),
       // La punta è piena; la scia si somma da sé, strato su strato.
