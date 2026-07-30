@@ -32,14 +32,15 @@ export const SWEEP_FAST = 0.9;
 export const SWEEP_SLOW = 5.4;
 
 /**
- * Un battito, in coordinate normalizzate: `t` va da 0 a 1 lungo la traccia,
- * `a` è l'ampiezza da −1 (sotto la linea di base) a +1 (il picco).
+ * I battiti, in coordinate normalizzate: `t` va da 0 a 1 dentro lo spazio del
+ * battito, `a` è l'ampiezza da −1 (sotto la linea di base) a +1 (il picco).
  *
- * È la forma canonica di un elettrocardiogramma: una gobba bassa (P), il tuffo
- * prima del picco (Q), il picco alto e stretto (R), il contraccolpo sotto la
- * linea (S) e la gobba larga finale (T).
+ * Tre forme e non una: la stessa sagoma ripetuta a stampino si riconosceva come
+ * un motivo grafico, non come un tracciato. Restano tutte della stessa famiglia
+ * — gobba bassa (P), tuffo (Q), picco stretto (R), contraccolpo (S), gobba larga
+ * finale (T) — ma un battito è pieno, uno più ampio e uno debole.
  */
-const BEAT: readonly (readonly [number, number])[] = [
+const NORMALE: readonly (readonly [number, number])[] = [
   [0, 0],
   [0.16, 0],
   [0.22, 0.2], // P
@@ -54,6 +55,51 @@ const BEAT: readonly (readonly [number, number])[] = [
   [0.79, 0],
   [1, 0],
 ];
+
+/** Battito ampio: tuffo più profondo e gobba finale larga. */
+const AMPIO: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [0.14, 0],
+  [0.2, 0.26],
+  [0.27, 0],
+  [0.33, 0],
+  [0.37, -0.34],
+  [0.43, 1],
+  [0.49, -0.78],
+  [0.56, 0],
+  [0.66, 0],
+  [0.75, 0.42],
+  [0.86, 0],
+  [1, 0],
+];
+
+/** Battito debole: nessuna gobba iniziale e picco a metà altezza. */
+const DEBOLE: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [0.3, 0],
+  [0.36, -0.16],
+  [0.42, 0.52],
+  [0.47, -0.34],
+  [0.53, 0],
+  [0.63, 0],
+  [0.69, 0.18],
+  [0.76, 0],
+  [1, 0],
+];
+
+const SHAPES = [NORMALE, AMPIO, NORMALE, DEBOLE, AMPIO, NORMALE] as const;
+
+/**
+ * Rumore ripetibile fra 0 e 1.
+ *
+ * Deve essere deterministico: con `Math.random` la traccia cambierebbe forma a
+ * ogni ridisegno — quindi a ogni punto ferita tolto — e il tracciato sembrerebbe
+ * riscritto invece che percorso.
+ */
+function noise(index: number, salt: number): number {
+  const value = Math.sin(index * 127.1 + salt * 311.7) * 43758.5453;
+  return value - Math.floor(value);
+}
 
 export interface Trace {
   /** Punti pronti per l'attributo `points` di una polilinea SVG. */
@@ -88,14 +134,35 @@ export function buildTrace(along: number, across: number, vertical = false): Tra
   const baseline = across / 2;
   const amplitude = Math.max(MIN_AMPLITUDE, Math.min(across / 2 - 1.5, MAX_AMPLITUDE));
 
-  const points: [number, number][] = [];
+  // Capo iniziale sulla linea di base: qualunque battito parta più avanti, la
+  // traccia comincia comunque dal bordo.
+  const points: [number, number][] = [[0, baseline]];
+
   for (let beat = 0; beat < beats; beat++) {
-    for (const [t, a] of BEAT) {
-      // Il primo punto di un battito coincide con l'ultimo del precedente.
-      if (beat > 0 && t === 0) continue;
-      points.push([beat * span + t * span, baseline - a * amplitude]);
+    const shape = SHAPES[Math.floor(noise(beat, 1) * SHAPES.length) % SHAPES.length];
+    /**
+     * Forza del battito. Mai sopra 1: l'ampiezza disponibile è calcolata sul
+     * picco pieno, e un guadagno maggiore lo farebbe sporgere dalla traccia.
+     */
+    const gain = 0.72 + noise(beat, 2) * 0.28;
+    /**
+     * Ritardo dentro il proprio spazio, compresso e non traslato: i picchi non
+     * cadono più a intervalli esatti — un cuore non è un metronomo — ma il
+     * battito resta dentro i suoi confini.
+     */
+    const delay = noise(beat, 3) * 0.12;
+
+    for (const [t, a] of shape) {
+      const position = (beat + delay + t * (1 - delay)) * span;
+      // Sulla linea di base un filo di tremolio, come su un tracciato vero:
+      // perfettamente piatta si riconosceva come un disegno.
+      const value =
+        a === 0 ? (noise(beat * 37 + t * 100, 4) - 0.5) * 0.08 : a * gain;
+      points.push([position, baseline - value * amplitude]);
     }
   }
+
+  points.push([along, baseline]);
 
   // In verticale la traccia sale dal basso, quindi l'asse di marcia è invertito
   // e l'ampiezza sporge ai lati.
@@ -132,9 +199,38 @@ export function sweepSeconds(ratio: number, steps = 8): number {
 }
 
 /**
- * Lunghezza del lampo di luce, in pixel: una frazione della traccia, mai così
- * corta da diventare un puntino su una barra larga.
+ * Lunghezza minima del lampo, in pixel.
+ *
+ * Sotto questa misura, su una barra stretta, la luce non rivela un battito ma un
+ * frammento di battito: il tracciato non si legge più.
+ */
+export const MIN_DASH = 40;
+
+/**
+ * Lunghezza del nucleo luminoso, in pixel: circa un battito, così a ogni
+ * istante si vede una forma intera e non un pezzo di linea.
  */
 export function sweepDash(length: number): number {
-  return Math.max(18, round(length * 0.14));
+  return Math.max(MIN_DASH, round(length * 0.2));
+}
+
+/**
+ * Quanto è più lungo l'alone rispetto al nucleo.
+ *
+ * L'alone è la stessa luce, più larga e più tenue, centrata sul nucleo: sporge
+ * davanti e dietro, ed è ciò che fa sfumare le due estremità del lampo invece di
+ * troncarle di netto.
+ */
+export const HALO_FACTOR = 2;
+
+/**
+ * Estremi dell'animazione del tratteggio, in pixel.
+ *
+ * Il lampo entra da fuori e esce dall'altro capo — il giro si chiude senza che
+ * appaia già a metà strada — e l'alone è spostato di mezza differenza, così
+ * resta centrato sul nucleo per tutta la corsa invece di seguirlo.
+ */
+export function sweepRange(length: number, dash: number, centered = false): [number, number] {
+  const shift = centered ? (dash * HALO_FACTOR - dash) / 2 : 0;
+  return [round(dash + shift), round(-length + shift)];
 }

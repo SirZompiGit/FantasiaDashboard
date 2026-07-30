@@ -2,9 +2,9 @@
  * Design «Tracciato»: la linea resta intera, la luce la percorre.
  *
  * È la versione alternativa di Battito. Là il tracciato è il riempimento e si
- * accorcia con i punti ferita; qui il grafico non si tocca — resta disegnato per
- * intero da un capo all'altro, appena accennato — e il livello si legge da due
- * cose sole:
+ * accorcia con i punti ferita; qui il grafico non si tocca — resta intero da un
+ * capo all'altro, ma NON è disegnato: lo si vede solo dove passa la luce, che ne
+ * rivela un pezzo per volta. Il livello si legge da due cose sole:
  *
  *  - la VELOCITÀ della luce che lo attraversa: svelta a piena vita, sempre più
  *    lenta mentre scende;
@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { buildTrace, sweepDash, sweepSeconds } from '../lib/ekg';
+import { HALO_FACTOR, buildTrace, sweepDash, sweepRange, sweepSeconds } from '../lib/ekg';
 
 interface EkgTraceProps {
   value: number;
@@ -68,7 +68,12 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
   const ratio = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   /** A zero non c'è più niente da misurare: la linea diventa piatta. */
   const flat = value <= 0;
+
+  const speed = sweepSeconds(ratio);
   const dash = sweepDash(trace.length);
+  const halo = dash * HALO_FACTOR;
+  const coreRange = sweepRange(trace.length, dash);
+  const haloRange = sweepRange(trace.length, dash, true);
 
   return (
     <div ref={boxRef} className="relative h-full w-full">
@@ -78,59 +83,89 @@ export function EkgTrace({ value, max, color, vertical }: EkgTraceProps) {
           width={width}
           height={height}
           aria-hidden
-          className="absolute inset-0 overflow-visible"
+          // La dissolvenza ai due capi: il lampo non compare e non sparisce di
+          // netto contro il bordo, ci entra e ne esce.
+          className={`ekg-fade absolute inset-0 overflow-visible ${
+            vertical ? 'ekg-fade--vertical' : ''
+          }`}
         >
-          {/**
-           * Lo schiacciamento agisce sul gruppo, non sui punti: `transform-box`
-           * predefinito degli elementi SVG è il `viewBox`, quindi «centro»
-           * coincide con la linea di base e `scale` a zero la appiattisce
-           * esattamente lì, con una transizione invece di uno scatto.
-           */}
-          <g
-            style={{
-              transform: vertical ? `scaleX(${flat ? 0 : 1})` : `scaleY(${flat ? 0 : 1})`,
-              transformOrigin: 'center',
-              transition: 'transform 500ms ease-out',
-            }}
-          >
-            {/* La traccia: appena accennata, quel tanto che basta a leggere la
-                forma anche quando la luce è altrove. */}
-            <polyline
-              points={trace.points}
-              fill="none"
+          {flat ? (
+            /**
+             * Niente più da misurare: resta la linea piatta, l'unica cosa che si
+             * vede quando la luce non passa. È anche il motivo per cui la
+             * traccia spenta non è disegnata — la si vede solo quando la
+             * percorre la luce, o quando non c'è più nulla da percorrere.
+             */
+            <line
+              x1={vertical ? width / 2 : 0}
+              y1={vertical ? 0 : height / 2}
+              x2={vertical ? width / 2 : width}
+              y2={vertical ? height : height / 2}
               stroke={color}
               strokeWidth={1.5}
-              strokeOpacity={0.16}
-              strokeLinejoin="round"
               strokeLinecap="round"
+              className="ekg-flatline"
+              style={{ filter: `drop-shadow(0 0 3px ${color})` }}
             />
-
-            {/* La luce. Un solo tratto acceso lungo tutta la traccia: lo spazio
-                del tratteggio è lungo quanto la traccia, quindi non se ne vede
-                mai più di uno per volta. */}
-            {!flat && (
+          ) : (
+            /**
+             * La luce, in due strati sovrapposti.
+             *
+             * L'alone è lungo il doppio del nucleo e centrato su di esso: sporge
+             * davanti e dietro, ed è ciò che fa sfumare le estremità del lampo
+             * invece di troncarle di netto. Un solo strato con i capi arrotondati
+             * finiva e cominciava troppo secco.
+             *
+             * Le due animazioni hanno la stessa durata e partono insieme, quindi
+             * restano allineate per tutta la sessione.
+             */
+            <>
               <polyline
                 points={trace.points}
                 fill="none"
                 stroke={color}
-                strokeWidth={2.25}
+                strokeWidth={3.5}
+                strokeOpacity={0.22}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                className="ekg-light"
+                style={
+                  {
+                    strokeDasharray: `${halo} ${trace.length}`,
+                    filter: `blur(2.5px)`,
+                    '--ekg-from': `${haloRange[0]}px`,
+                    '--ekg-to': `${haloRange[1]}px`,
+                    '--ekg-speed': `${speed}s`,
+                  } as React.CSSProperties
+                }
+              />
+
+              <polyline
+                points={trace.points}
+                fill="none"
+                stroke={color}
+                strokeWidth={2}
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 className="ekg-light"
                 style={
                   {
                     strokeDasharray: `${dash} ${trace.length}`,
-                    filter: `drop-shadow(0 0 3px ${color}) drop-shadow(0 0 7px ${color}80)`,
-                    // Entra da fuori e esce dall'altro capo: il giro si chiude
-                    // senza che il lampo appaia già a metà strada.
-                    '--ekg-from': `${dash}px`,
-                    '--ekg-to': `-${trace.length}px`,
-                    '--ekg-speed': `${sweepSeconds(ratio)}s`,
+                    /**
+                     * Neon: un nucleo netto più due bagliori sempre più larghi e
+                     * tenui. Un'unica ombra diffusa fa una macchia; è la somma
+                     * di nucleo e alone a leggersi come tubo al neon. Restano
+                     * contenuti — è un dettaglio, non un faro.
+                     */
+                    filter: `drop-shadow(0 0 1.5px ${color}) drop-shadow(0 0 5px ${color}a0) drop-shadow(0 0 11px ${color}4d)`,
+                    '--ekg-from': `${coreRange[0]}px`,
+                    '--ekg-to': `${coreRange[1]}px`,
+                    '--ekg-speed': `${speed}s`,
                   } as React.CSSProperties
                 }
               />
-            )}
-          </g>
+            </>
+          )}
         </svg>
       )}
 

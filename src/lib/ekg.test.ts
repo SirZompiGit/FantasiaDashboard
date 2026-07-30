@@ -37,6 +37,40 @@ describe('geometria del tracciato', () => {
     expect(buildTrace(20, 24).beats).toBe(1);
   });
 
+  /**
+   * La stessa sagoma ripetuta a stampino si riconosceva come un motivo grafico,
+   * non come un tracciato: i battiti devono essere diversi fra loro.
+   */
+  it('non ripete lo stesso battito', () => {
+    const along = BEAT_PIXELS * 8;
+    const trace = buildTrace(along, 24);
+    const span = along / trace.beats;
+    const points = parse(trace.points);
+
+    // Punto più alto di ogni battito (in SVG la y cresce verso il basso).
+    const peaks = trace.beats
+      ? Array.from({ length: trace.beats }, (_, beat) => {
+          const ys = points
+            .filter(([x]) => x >= beat * span && x < (beat + 1) * span)
+            .map(([, y]) => y);
+          return Math.round(Math.min(...ys));
+        })
+      : [];
+
+    expect(peaks).toHaveLength(8);
+    expect(new Set(peaks).size).toBeGreaterThan(2);
+  });
+
+  /**
+   * La varietà è pseudo-casuale ma RIPETIBILE: con un rumore vero la traccia
+   * cambierebbe forma a ogni ridisegno — quindi a ogni punto ferita tolto — e
+   * sembrerebbe riscritta invece che percorsa.
+   */
+  it('si ridisegna sempre identica', () => {
+    expect(buildTrace(520, 24).points).toBe(buildTrace(520, 24).points);
+    expect(buildTrace(520, 24, true).points).toBe(buildTrace(520, 24, true).points);
+  });
+
   it('sta dentro l altezza che ha, senza sporgere', () => {
     for (const across of [10, 14, 24, 40]) {
       const ys = parse(buildTrace(300, across).points).map(([, y]) => y);

@@ -2262,6 +2262,31 @@ html.theme-transitions .border-bento-border {
   to { stroke-dashoffset: var(--ekg-to); }
 }
 
+/* Dissolvenza ai due capi della traccia.
+   Leggera — un quindicesimo per lato — quel tanto che basta perché il lampo entri
+   in scena invece di comparire di colpo attaccato al bordo. Le estremità del
+   lampo sfumano già da sé, grazie all'alone che sporge oltre il nucleo. */
+.ekg-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+.ekg-fade--vertical {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+}
+
+/* La linea piatta: compare a zero, dove non c'è più niente da percorrere.
+   Entra con una dissolvenza, così la fine dei battiti non è uno scatto. */
+.ekg-flatline {
+  animation: ekg-flat-in 450ms ease-out both;
+}
+
+@keyframes ekg-flat-in {
+  from { stroke-opacity: 0; }
+  to { stroke-opacity: 0.6; }
+}
+
 /* La levetta. Sottile e alta quanto la traccia: deve dire dove sta il valore
    senza diventare l'elemento principale del disegno.
 
