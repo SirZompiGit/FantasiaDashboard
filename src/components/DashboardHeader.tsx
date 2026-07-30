@@ -295,9 +295,17 @@ export function DashboardHeader({
     <header className="relative z-30 mx-auto mb-6 flex w-full max-w-7xl flex-col gap-3 border-b border-bento-border pb-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-bento-border bg-bento-panel shadow-panel">
-            <Wand2 className="h-5 w-5 stroke-[2] text-theme-500" />
-          </span>
+          {/* L'icona vera dell'app, la stessa della scheda del browser e della
+              versione installata: al suo posto c'era una bacchetta generica.
+              Riusa `/icon-192.png`, che il browser ha già scaricato come
+              favicon — nessuna richiesta in più. */}
+          <img
+            src="/icon-192.png"
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="h-10 w-10 shrink-0 rounded-xl border border-bento-border shadow-panel"
+          />
           {/* Senza l'indicatore sotto, il marchio si prende tutta l'altezza. */}
           <Wordmark style={style} variant={logoVariant} className="h-7 sm:h-9" />
           {saveIndicator}

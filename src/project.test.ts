@@ -268,6 +268,27 @@ describe('manifest della web app', () => {
   });
 
   /**
+   * Un `href` che punta a un file inesistente non rompe nulla in modo visibile:
+   * il browser mostra la sua icona grigia predefinita e non lo dice a nessuno.
+   * Lo stesso vale per l'elenco precaricato dal service worker.
+   */
+  it('ogni icona citata da pagina e service worker esiste su disco', () => {
+    const referenced = [
+      ...read('index.html').matchAll(/href="\/([^"]+\.png)"/g),
+      ...read('public/sw.js').matchAll(/'\/([^']+\.png)'/g),
+    ].map((match) => match[1]);
+
+    expect(referenced.length).toBeGreaterThan(0);
+    for (const file of referenced) {
+      expect(fs.existsSync(path.join(root, 'public', file)), file).toBe(true);
+    }
+  });
+
+  it('la barra della dashboard mostra la stessa icona della scheda', () => {
+    expect(read('src/components/DashboardHeader.tsx')).toContain('src="/icon-192.png"');
+  });
+
+  /**
    * Il service worker non deve mettersi in mezzo fra l'app e il database: lo
    * stato della campagna arriva da Firebase, mai da una copia salvata.
    */
